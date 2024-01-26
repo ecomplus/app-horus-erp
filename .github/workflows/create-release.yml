@@ -1,0 +1,25 @@
+name: Create GitHub release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Release tag
+        id: release_tag
+        uses: Akryum/release-tag@8eeb62bcf949a368763f4057c34e7eb834467122
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          preset: angular
