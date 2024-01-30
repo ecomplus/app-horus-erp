@@ -232,7 +232,7 @@ const app = {
     exportation: {
       schema: {
         title: 'Exportação manual',
-        description: 'Fila a exportar para o erp, serão removidos automaticamente após exportação',
+        description: 'Fila a exportar para o erp',
         type: 'object',
         properties: {
           orders: {
