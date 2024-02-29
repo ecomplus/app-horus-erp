@@ -1,7 +1,7 @@
 {
-  "app_id": 9000,
-  "title": "My Awesome E-Com Plus App",
-  "slug": "my-awesome-ecom-plus-app",
+  "app_id": 112106,
+  "title": "Horus ERP",
+  "slug": "horus-erp",
   "type": "external",
   "state": "active",
   "authentication": true,
@@ -13,19 +13,162 @@
     "procedures": [
       "POST"
     ],
-    "products": [],
-    "brands": [],
-    "categories": [],
-    "customers": [],
-    "orders": [],
+    "products": [
+      "GET",
+      "POST",
+      "PATCH"
+    ],
+    "brands": [
+      "GET",
+      "POST",
+      "PATCH"
+    ],
+    "categories": [
+      "GET",
+      "POST",
+      "PATCH"
+    ],
+    "customers": [
+      "GET",
+      "POST",
+      "PATCH"
+    ],
+    "orders": [
+      "GET",
+      "POST",
+      "PATCH"
+    ],
     "carts": [],
-    "orders/fulfillments": [],
-    "orders/payments_history": [],
-    "products/quantity": [],
-    "products/variations/quantity": [],
-    "products/price": [],
-    "products/variations/price": []
+    "orders/fulfillments": [
+      "GET",
+      "POST"
+    ],
+    "orders/payments_history": [
+      "GET",
+      "POST"
+    ],
+    "products/quantity": [
+      "PUT"
+    ],
+    "products/variations/quantity": [
+      "PUT"
+    ],
+    "products/price": [
+      "PUT"
+    ],
+    "products/variations/price": [
+      "PUT"
+    ]
   },
-  "auth_callback_uri": "https://us-central1-ecom-app-boilerplate.cloudfunctions.net/app/ecom/auth-callback",
+  "admin_settings": {
+    "base_url": {
+      "schema": {
+        "type": "string",
+        "maxLength": 255,
+        "format": "uri",
+        "title": "Url base para endpoint de conexão (seu local)",
+        "description": "Solicite ao suporte do erp por base url"
+      },
+      "hide": true
+    },
+    "username": {
+      "schema": {
+        "type": "string",
+        "maxLength": 255,
+        "title": "Usuário",
+        "description": "Usuário para acesso a API"
+      }
+    },
+    "password": {
+      "schema": {
+        "type": "string",
+        "maxLength": 255,
+        "title": "Senha",
+        "description": "Senha para acesso a API"
+      },
+      "hide": true
+    },
+    "new_orders": {
+      "schema": {
+        "type": "boolean",
+        "default": true,
+        "title": "Exportar novos pedidos",
+        "description": "Criar novos pedidos automaticamente"
+      }
+    },
+    "approved_order_only": {
+      "schema": {
+        "type": "boolean",
+        "default": false,
+        "title": "Apenas pedidos aprovados",
+        "description": "Criar pedidos após aprovação"
+      }
+    },
+    "update_quantity": {
+      "schema": {
+        "type": "boolean",
+        "defaut": false,
+        "title": "Atualização de estoque",
+        "description": "Atualizar estoque automaticamente na E-com"
+      },
+      "hide": true
+    },
+    "update_product": {
+      "schema": {
+        "type": "boolean",
+        "default": false,
+        "title": "Sobrescrever produto",
+        "description": "Atualizar cadastro (não apenas estoque) de produtos importados já existentes na plataforma"
+      },
+      "hide": true
+    },
+    "update_price": {
+      "schema": {
+        "type": "boolean",
+        "default": false,
+        "title": "Atualização de preço",
+        "description": "Atualizar preço automaticamente na E-com"
+      }
+    },
+    "importation": {
+      "schema": {
+        "title": "Importação manual",
+        "description": "Fila a importar do erp, serão removidos automaticamente após importação",
+        "type": "object",
+        "properties": {
+          "products": {
+            "title": "Produtos a importar",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "title": "ID do produto no erp",
+              "description": "ID do produto no erp que você deseja importar para a E-com"
+            }
+          }
+        }
+      },
+      "hide": false
+    },
+    "exportation": {
+      "schema": {
+        "title": "Exportação manual",
+        "description": "Fila a exportar para o erp",
+        "type": "object",
+        "properties": {
+          "orders": {
+            "title": "Pedidos a exportar",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$",
+              "title": "ID do pedido"
+            }
+          }
+        }
+      },
+      "hide": false
+    }
+  },
+  "auth_callback_uri": "https://us-central1-horus-book-erp.cloudfunctions.net/app/ecom/auth-callback",
   "version": "1.0.0"
 }
