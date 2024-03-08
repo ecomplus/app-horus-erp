@@ -16,9 +16,13 @@ exports.all = async ({ appSdk }, req, res) => {
     // try to debug request error
     const errCode = 'PROXY_HORUS_ERR'
     let { message } = error
+    let statusCode = 409
     const err = new Error(`${errCode} => ${message}`)
     if (error.response) {
       const { status, data } = error.response
+      if (statusCode) {
+        statusCode = status
+      }
       if (status !== 401 && status !== 403) {
         err.url = urlRequest
         err.body = JSON.stringify(body)
@@ -33,7 +37,7 @@ exports.all = async ({ appSdk }, req, res) => {
       }
     }
     console.error(err)
-    res.status(409)
+    res.status(statusCode)
     res.send({
       error: errCode,
       message
