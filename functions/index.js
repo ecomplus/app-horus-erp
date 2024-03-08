@@ -132,7 +132,9 @@ recursiveReadDir(routesDir).filter(filepath => filepath.endsWith('.js')).forEach
 
 server.use(router)
 
-exports[functionName] = functions.https.onRequest(server)
+exports[functionName] = functions.runWith({
+  vpcConnector: 'serverless-horus-connect'
+}).https.onRequest(server)
 console.log(`-- Starting '${app.title}' E-Com Plus app with Function '${functionName}'`)
 
 // schedule update tokens job
@@ -143,3 +145,5 @@ exports.updateTokens = functions.pubsub.schedule(cron).onRun(() => {
   })
 })
 console.log(`-- Sheduled update E-Com Plus tokens '${cron}'`)
+
+// TODO: cron to check products daily
