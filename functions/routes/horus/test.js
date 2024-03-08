@@ -2,7 +2,7 @@ const axios = require('axios')
 
 exports.get = async ({ appSdk }, req, res) => {
   const url = 'https://us-central1-horus-book-erp.cloudfunctions.net/app/horus/test'
-  const resp = await axios.get(url)
+  const resp = await axios.post(url)
   res.send(resp)
 }
 
