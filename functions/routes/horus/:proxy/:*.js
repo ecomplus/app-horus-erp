@@ -1,9 +1,9 @@
 // const axios = require('axios')
 
 exports.all = async ({ appSdk }, req, res) => {
-  const { method, proxy } = req
+  const { method, params, url } = req
   try {
-    res.send({ method, proxy })
+    res.send({ method, params, url })
   } catch (e) {
     console.error(e)
     throw e
