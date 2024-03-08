@@ -1,8 +1,8 @@
 const axios = require('axios')
 
 exports.get = async ({ appSdk }, req, res) => {
-  const url = 'https://us-central1-horus-book-erp.cloudfunctions.net/app/horus/test'
-  const resp = await axios.post(url)
+  const url = 'https://webhook.site/08e6678c-cec8-4dde-a48d-6d1c0e61ae38'
+  const resp = await axios.get(url)
   res.send(resp)
 }
 
