@@ -1,15 +1,22 @@
 'use strict'
 const axios = require('axios')
 
+// http://seu_local/Horus/api/TServerB2B/
+
 class Horus {
-  constructor(baseURL, username, password) {
+  constructor (baseURL, username, password) {
     if (!username && !password) {
       throw new Error('Missing username or password')
-    } else if (!baseURL) {
-      throw new Error('Missing or invalid Base url')
     }
-    this.request = axios.create({
-      baseURL,
+
+    if (!baseURL) {
+      this._baseURL = 'http://datacenter.fmz.com.br:8060/Horus/api/TServerB2B'
+    } else {
+      this._baseURL = `${baseURL}/Horus/api/TServerB2B`
+    }
+
+    this._request = axios.create({
+      baseURL: this._baseURL,
       auth: {
         username,
         password
@@ -17,33 +24,33 @@ class Horus {
     })
   }
 
-  get ({ path }) {
-    return this.request({
+  get (url) {
+    return this._request({
       method: 'get',
-      url: path
+      url
     })
   }
 
-  post ({ path, data }) {
-    return this.request({
+  post (url, data) {
+    return this._request({
       method: 'post',
-      url: path,
+      url,
       data
     })
   }
 
-  patch ({ path, data }) {
-    return this.request({
+  patch (url, data) {
+    return this._request({
       method: 'patch',
-      url: path,
+      url,
       data
     })
   }
 
-  delete ({ path }) {
-    return this.request({
+  delete (url) {
+    return this._request({
       method: 'delete',
-      url: path
+      url
     })
   }
 }
