@@ -141,23 +141,24 @@ const app = {
     /**
      * JSON schema based fields to be configured by merchant and saved to app `data` / `hidden_data`, such as:
 **/
-     base_url: {
-       schema: {
-         type: 'string',
-         maxLength: 255,
-         format: 'uri',
-         title: 'Url base para endpoint de conexão (seu local)',
-         description: 'Solicite ao suporte do erp por base url'
-       },
-       hide: true
-     },
-     username: {
+    base_url: {
+      schema: {
+        type: 'string',
+        maxLength: 255,
+        format: 'uri',
+        title: 'Url base para endpoint de conexão (seu local)',
+        description: 'Solicite ao suporte do erp por base url'
+      },
+      hide: true
+    },
+    username: {
       schema: {
         type: 'string',
         maxLength: 255,
         title: 'Usuário',
         description: 'Usuário para acesso a API'
-      }
+      },
+      hide: true
     },
     password: {
       schema: {
@@ -270,13 +271,6 @@ procedures.push({
     // Receive notifications when new order is created:
     {
       resource: 'orders',
-      action: 'create',
-    },
-
-    // Receive notifications when order financial/fulfillment status are set or changed:
-    // Obs.: you probably SHOULD NOT enable the orders triggers below and the one above (create) together.
-    {
-      resource: 'orders',
       field: 'financial_status',
     },
     {
@@ -284,22 +278,22 @@ procedures.push({
       field: 'fulfillment_status',
     },
 
-    // Receive notifications when products/variations stock quantity changes:
-    /* {
+    // Receive notifications when products/variations prices changes:
+    {
       resource: 'products',
-      field: 'quantity',
+      field: 'price',
     },
     {
       resource: 'products',
       subresource: 'variations',
-      field: 'quantity'
-    }, */
+      field: 'price',
+    },
 
-    // Receive notifications when cart is edited:
-    /* {
-      resource: 'carts',
-      action: 'change',
-    }, */
+    // Receive notifications when new product is created:
+    {
+      resource: 'products',
+      action: 'create',
+    },
 
     // Receive notifications when customer is deleted:
     {

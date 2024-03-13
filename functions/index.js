@@ -146,4 +146,15 @@ exports.updateTokens = functions.pubsub.schedule(cron).onRun(() => {
 })
 console.log(`-- Sheduled update E-Com Plus tokens '${cron}'`)
 
-// TODO: cron to check products daily
+// topics pub/sub
+const { topicUpdateProducts } = require('./lib/utils-variables')
+const handleProductEvent = require('./lib/pub-sub/products-update')
+exports.onBlingEvents = require('./lib/pub-sub/utils')
+  .createEventsFunction(topicUpdateProducts, handleProductEvent)
+
+// cron jobs
+const handleCrons = require('./lib/cron-events-horus')
+const eventsCron = '*/1 * * * *'
+exports.subscriptionsSync = functions.pubsub.schedule(eventsCron)
+  .onRun(() => handleCrons())
+console.log(`-- Check Events in Horus ERP'${eventsCron}'`)

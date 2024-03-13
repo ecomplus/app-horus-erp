@@ -21,6 +21,9 @@ exports.post = ({ appSdk }, req, res) => {
         })
 
          */
+
+        // TODO:
+        // Frist routine import products
         return true
       }
 

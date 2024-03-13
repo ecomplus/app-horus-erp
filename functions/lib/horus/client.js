@@ -4,7 +4,7 @@ const axios = require('axios')
 // http://seu_local/Horus/api/TServerB2B/
 
 class Horus {
-  constructor (baseURL, username, password) {
+  constructor (username, password, baseURL) {
     if (!username && !password) {
       throw new Error('Missing username or password')
     }
