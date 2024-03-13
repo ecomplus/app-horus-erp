@@ -34,6 +34,9 @@ exports.all = async ({ appSdk }, req, res) => {
         }
       } else if (data && Array.isArray(data.errors) && data.errors[0] && data.errors[0].message) {
         message = data.errors[0].message
+      } else if (data) {
+        console.error('Error Response Data: ', JSON.stringify(data))
+        message = data
       }
     }
     console.error(err)
