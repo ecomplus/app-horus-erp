@@ -77,7 +77,8 @@
         "maxLength": 255,
         "title": "Usuário",
         "description": "Usuário para acesso a API"
-      }
+      },
+      "hide": true
     },
     "password": {
       "schema": {
