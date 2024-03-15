@@ -12,7 +12,7 @@ exports.all = async ({ appSdk }, req, res) => {
     console.log(' ', data, ' ', status) // TODO
     res.send(data)
   } catch (error) {
-    console.error(error.response)
+    console.error('Error response ', error.response)
     // try to debug request error
     const errCode = 'PROXY_HORUS_ERR'
     let { message } = error
@@ -38,8 +38,10 @@ exports.all = async ({ appSdk }, req, res) => {
         console.error('Error Response Data: ', JSON.stringify(data))
         message = data
       }
+      console.error('err: ', err)
+    } else {
+      console.error(error)
     }
-    console.error(err)
     res.status(statusCode)
     res.send({
       error: errCode,
