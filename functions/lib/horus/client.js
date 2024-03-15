@@ -17,9 +17,9 @@ class Horus {
 
     this._request = axios.create({
       baseURL: this._baseURL,
-      auth: {
-        username,
-        password
+      headers: {
+        Authorization: 'Basic ' +
+          Buffer.from(`${username}:${password}`, 'utf8').toString('base64')
       }
     })
   }
