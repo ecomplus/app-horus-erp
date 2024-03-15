@@ -6,7 +6,7 @@ exports.all = async ({ appSdk }, req, res) => {
   try {
     const authorization = req.headers.authorization
     const [user, pass] = Buffer.from(authorization.replace('Basic ', ''), 'base64').toString('utf-8').split(':')
-    const horus = new Horus(null, user, pass)
+    const horus = new Horus(user, pass)
 
     const { data, status } = await horus[method.toLowerCase()](urlRequest, body)
     console.log(' ', data, ' ', status) // TODO
