@@ -1,5 +1,7 @@
 // const getAppData = require('../../store-api/get-app-data')
 // const Horus = require('../horus/client')
+const importCategories = require('./categories-to-ecom')
+const importBrands = require('./brands-to-ecom')
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
   const {
@@ -9,29 +11,29 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     // COD_ISBN_ITEM,
     // COD_ISSN_ITEM,
     NOM_ITEM,
-    // COD_EDITORA,
-    // NOM_EDITORA,
+    COD_EDITORA,
+    NOM_EDITORA,
     // SELO,
     // COD_GRUPO_ITEM,
     // NOM_GRUPO_ITEM,
     // COD_UNIDADE,
     // NOM_UNIDADE,
     // TIPO,
-    // COD_GENERO,
-    // GENERO_NIVEL_1,
-    // COD_GENERO_NIVEL2,
-    // GENERO_NIVEL_2,
-    // COD_GENERO_NIVEL3,
-    // GENERO_NIVEL_3,
+    COD_GENERO,
+    GENERO_NIVEL_1,
+    COD_GENERO_NIVEL2,
+    GENERO_NIVEL_2,
+    COD_GENERO_NIVEL3,
+    GENERO_NIVEL_3,
     SUBTITULO,
-    // DESC_SINOPSE,
-    // OBS_ESPECIAIS,
-    // INFO_COMP_ITEM,
-    // PESO_ITEM,
-    // LARGURA_ITEM,
-    // COMPRIMENTO_ITEM,
-    // ALTURA_ITEM,
-    // QTD_PAGINAS,
+    DESC_SINOPSE,
+    OBS_ESPECIAIS,
+    INFO_COMP_ITEM,
+    PESO_ITEM,
+    LARGURA_ITEM,
+    COMPRIMENTO_ITEM,
+    ALTURA_ITEM,
+    QTD_PAGINAS,
     SALDO_DISPONIVEL,
     // EBOOK,
     // FORMATO_EBOOK,
@@ -39,11 +41,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     VLR_CAPA,
     // DAT_CADASTRO,
     // DAT_ULT_ATL,
-    STATUS_ITEM
+    STATUS_ITEM,
     // SITUACAO_ITEM,
     // SITUACAO_ITEM_DESC,
     // DAT_EXP_LANCTO,
-    // PALAVRAS_CHAVE,
+    PALAVRAS_CHAVE
     // KIT,
     // COD_ORIGEM_EDITORA,
     // POD,
@@ -83,17 +85,119 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
       name: NOM_ITEM,
       price,
       status: STATUS_ITEM,
-      quantity: SALDO_DISPONIVEL || 0
+      quantity: SALDO_DISPONIVEL || 0,
+      dimensions: {
+
+        width: {
+          value: LARGURA_ITEM || 0,
+          unit: 'cm'
+        },
+        height: {
+          value: ALTURA_ITEM || 0,
+          unit: 'cm'
+        },
+        length: {
+          value: COMPRIMENTO_ITEM || 0,
+          unit: 'cm'
+        }
+      },
+      weight: {
+        value: PESO_ITEM || 0,
+        unit: 'mg'
+      }
+
     }
 
     if (SUBTITULO) {
       body.subtitle = SUBTITULO
     }
 
-    // todo:  find categories
-    // if not found create category and add in product
+    const promisesCategories = []
+    const promisesBrands = []
 
-    // todo: check kit
+    if (COD_GENERO) {
+      promisesCategories.push(
+        importCategories({ appSdk, storeId, auth },
+          {
+            codGenero: COD_GENERO,
+            nomeGenero: GENERO_NIVEL_1
+          }
+        )
+      )
+    }
+    if (COD_GENERO_NIVEL2) {
+      promisesCategories.push(
+        importCategories({ appSdk, storeId, auth },
+          {
+            codGenero: COD_GENERO_NIVEL2,
+            nomeGenero: GENERO_NIVEL_2
+          }
+        )
+      )
+    }
+    if (COD_GENERO_NIVEL3) {
+      promisesCategories.push(
+        importCategories({ appSdk, storeId, auth },
+          {
+            codGenero: COD_GENERO_NIVEL3,
+            nomeGenero: GENERO_NIVEL_3
+          }
+        )
+      )
+    }
+
+    if (COD_EDITORA) {
+      promisesBrands.push(
+        importBrands({ appSdk, storeId, auth },
+          {
+            codEditora: COD_EDITORA,
+            nomeEditora: NOM_EDITORA
+          }
+        )
+      )
+    }
+
+    const categories = await Promise.all(promisesCategories)
+    const brands = await Promise.all(promisesBrands)
+
+    categories.forEach((category) => {
+      if (category) {
+        if (!Array.isArray(body.categories)) {
+          body.categories = []
+        }
+        body.categories.push({ _id: category._id, name: category.name })
+      }
+    })
+
+    brands.forEach((brand) => {
+      if (brand) {
+        if (!Array.isArray(body.brands)) {
+          body.brands = []
+        }
+        body.brands.push({ _id: brand._id, name: brand.name })
+      }
+    })
+
+    if (PALAVRAS_CHAVE) {
+      body.keywords = PALAVRAS_CHAVE.split(',')
+    }
+
+    if (DESC_SINOPSE) {
+      body.short_description = DESC_SINOPSE.substring(0, 255)
+    }
+
+    if (
+      OBS_ESPECIAIS ||
+      INFO_COMP_ITEM ||
+      QTD_PAGINAS
+    ) {
+      body.body_text = OBS_ESPECIAIS || ''
+      body.body_text += INFO_COMP_ITEM ? ` ${INFO_COMP_ITEM}` : ''
+      body.body_text += QTD_PAGINAS ? ` Quantidade de páginas: ${QTD_PAGINAS}` : ''
+    }
+
+    // TODO: Actor Names create brands ?
+    // TODO: check kit
 
     const endpoint = '/products.json'
     return appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)

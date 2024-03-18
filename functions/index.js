@@ -148,8 +148,8 @@ console.log(`-- Sheduled update E-Com Plus tokens '${cron}'`)
 
 // topics pub/sub
 const { topicUpdateProducts } = require('./lib/utils-variables')
-const handleProductEvent = require('./lib/pub-sub/products-update')
-exports.onBlingEvents = require('./lib/pub-sub/utils')
+const handleProductEvent = require('./lib/pub-sub/events/products-update')
+exports.onProductUpdateEvent = require('./lib/pub-sub/utils')
   .createEventsFunction(topicUpdateProducts, handleProductEvent)
 
 // cron jobs

@@ -1,7 +1,7 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
-const { collectionUpdateProdcts } = require('../utils-variables')
-const importProductToEcom = require('../integration/imports/products-to-ecom')
+const { collectionUpdateProdcts } = require('../../utils-variables')
+const importProductToEcom = require('../../integration/imports/products-to-ecom')
 
 const getAppSdk = () => {
   return new Promise(resolve => {
