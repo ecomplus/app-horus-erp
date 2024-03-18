@@ -2,7 +2,7 @@
 const collectionUpdateProdcts = 'productsUpdates'
 
 // Events Names
-const topicUpdateProducts = 'products-update'
+const topicUpdateProducts = 'products_update'
 
 module.exports = {
   collectionUpdateProdcts,
