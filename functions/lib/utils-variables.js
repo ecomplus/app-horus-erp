@@ -1,10 +1,10 @@
 // Firestore collections names
-const collectionUpdateProdctsPrice = 'productsUpdates'
+const collectionUpdateProdcts = 'productsUpdates'
 
 // Events Names
-const topicUpdateProductsPrice = 'products-price-update'
+const topicUpdateProducts = 'products-update'
 
 module.exports = {
-  collectionUpdateProdctsPrice,
-  topicUpdateProductsPrice
+  collectionUpdateProdcts,
+  topicUpdateProducts
 }

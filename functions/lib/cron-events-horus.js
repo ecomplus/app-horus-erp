@@ -1,7 +1,7 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 const getAppData = require('./store-api/get-app-data')
-const { collectionUpdateProdcts, topicUpdateProductsPrice } = require('./utils-variables')
+const { collectionUpdateProdcts, topicUpdateProducts } = require('./utils-variables')
 const parseDate = require('./parsers/date')
 const Horus = require('./horus/client')
 const { sendMessageTopic } = require('./pub-sub/utils')
@@ -44,7 +44,7 @@ const productsUpdateEvents = async (appData, storeId) => {
   console.log('>> Query ', query)
   const { data: listProducts } = await horus.get(`/Busca_Acervo${query}`)
   listProducts.forEach((productHorus) => {
-    sendMessageTopic(topicUpdateProductsPrice, { storeId, productHorus })
+    sendMessageTopic(topicUpdateProducts, { storeId, productHorus })
   })
 }
 
