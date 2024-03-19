@@ -14,7 +14,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
     .then(({ response }) => response.data)
     .catch((err) => {
       console.error(err)
-      if (err.response?.status === 404) {
+      if (err.response?.status === 404 || err.message === 'not found') {
         return null
       }
       throw err

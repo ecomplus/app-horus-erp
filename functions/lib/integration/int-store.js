@@ -1,7 +1,7 @@
 const getAppData = require('./../store-api/get-app-data')
 const Horus = require('../horus/client')
 const { sendMessageTopic } = require('./pub-sub/utils')
-const { topicUpdateProducts } = require('./utils-variables')
+const { topicProductsHorus } = require('../utils-variables')
 
 module.exports = async ({ appSdk, storeId, auth }) => {
   const appData = await getAppData({ appSdk, storeId, auth })
@@ -11,6 +11,6 @@ module.exports = async ({ appSdk, storeId, auth }) => {
   // create Object Horus to request api Horus
   const { data: listProducts } = await horus.get('/Busca_Acervo')
   listProducts.forEach((productHorus) => {
-    sendMessageTopic(topicUpdateProducts, { storeId, productHorus })
+    sendMessageTopic(topicProductsHorus, { storeId, productHorus })
   })
 }

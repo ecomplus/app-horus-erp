@@ -147,10 +147,18 @@ exports.updateTokens = functions.pubsub.schedule(cron).onRun(() => {
 console.log(`-- Sheduled update E-Com Plus tokens '${cron}'`)
 
 // topics pub/sub
-const { topicUpdateProducts } = require('./lib/utils-variables')
-const handleProductEvent = require('./lib/pub-sub/events/products-update')
-exports.onProductUpdateEvent = require('./lib/pub-sub/utils')
-  .createEventsFunction(topicUpdateProducts, handleProductEvent)
+const {
+  topicProductsHorus,
+  topicCustomerHorus
+} = require('./lib/utils-variables')
+const handleProductHorusEvent = require('./lib/pub-sub/events/products')
+const handleCustomerHorusEvent = require('./lib/pub-sub/events/customers')
+
+exports.onProductHorusEvent = require('./lib/pub-sub/utils')
+  .createEventsFunction(topicProductsHorus, handleProductHorusEvent)
+
+exports.onCustomerHorusEvent = require('./lib/pub-sub/utils')
+  .createEventsFunction(topicCustomerHorus, handleCustomerHorusEvent)
 
 // cron jobs
 const handleCrons = require('./lib/cron-events-horus')

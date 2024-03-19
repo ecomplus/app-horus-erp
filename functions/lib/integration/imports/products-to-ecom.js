@@ -1,5 +1,3 @@
-// const getAppData = require('../../store-api/get-app-data')
-// const Horus = require('../horus/client')
 const importCategories = require('./categories-to-ecom')
 const importBrands = require('./brands-to-ecom')
 
@@ -58,13 +56,16 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
   const product = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
     .then(({ response }) => response.data)
     .then(({ result }) => {
-      const endpoint = `/products/${result[0]._id}.json`
-      return appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
-        .then(async ({ response }) => response.data)
+      if (result.length) {
+        const endpoint = `/products/${result[0]._id}.json`
+        return appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
+          .then(async ({ response }) => response.data)
+      }
+      throw new Error('not found')
     })
     .catch((err) => {
       console.error(err)
-      if (err.response?.status === 404) {
+      if (err.response?.status === 404 || err.message === 'not found') {
         return null
       }
       throw err

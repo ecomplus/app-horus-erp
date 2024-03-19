@@ -1,6 +1,6 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
-const { collectionUpdateProdcts } = require('../../utils-variables')
+const { collectionHorusEvents } = require('../../utils-variables')
 const importProductToEcom = require('../../integration/imports/products-to-ecom')
 
 const getAppSdk = () => {
@@ -20,7 +20,7 @@ module.exports = async (
   const { eventId } = context
   const { DAT_ULT_ATL: lastUpdateProduct } = productHorus
   const logId = `${eventId}-s${storeId}`
-  const docRef = firestore().doc(`${collectionUpdateProdcts}/${storeId}`)
+  const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}/products`)
   console.log('>> Exec Event #', logId)
   const appSdk = await getAppSdk()
 

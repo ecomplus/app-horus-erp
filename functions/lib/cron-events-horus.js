@@ -1,7 +1,11 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 const getAppData = require('./store-api/get-app-data')
-const { collectionUpdateProdcts, topicUpdateProducts } = require('./utils-variables')
+const {
+  collectionHorusEvents,
+  topicProductsHorus,
+  topicCustomerHorus
+} = require('./utils-variables')
 const parseDate = require('./parsers/date')
 const Horus = require('./horus/client')
 const { sendMessageTopic } = require('./pub-sub/utils')
@@ -26,13 +30,13 @@ const listStoreIds = async () => {
   return storeIds
 }
 
-const productsUpdateEvents = async (appData, storeId) => {
+const productsEvents = async (appData, storeId) => {
   const { username, password, baseURL } = appData
   const horus = new Horus(username, password, baseURL)
   let dateInit = parseDate(new Date(1), true)
   const dateEnd = parseDate(new Date(), true)
   const docRef = firestore()
-    .doc(`${collectionUpdateProdcts}/${storeId}`)
+    .doc(`${collectionHorusEvents}/${storeId}/products`)
 
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
@@ -44,7 +48,29 @@ const productsUpdateEvents = async (appData, storeId) => {
   console.log('>> Query ', query)
   const { data: listProducts } = await horus.get(`/Busca_Acervo${query}`)
   listProducts.forEach((productHorus) => {
-    sendMessageTopic(topicUpdateProducts, { storeId, productHorus })
+    sendMessageTopic(topicProductsHorus, { storeId, productHorus })
+  })
+}
+
+const customerEvents = async (appData, storeId) => {
+  const { username, password, baseURL } = appData
+  const horus = new Horus(username, password, baseURL)
+  let dateInit = parseDate(new Date(1), true)
+  const dateEnd = parseDate(new Date(), true)
+  const docRef = firestore()
+    .doc(`${collectionHorusEvents}/${storeId}/customers`)
+
+  const docSnapshot = await docRef.get()
+  if (docSnapshot.exists) {
+    const { lastUpdateCustomer } = docSnapshot.data()
+    dateInit = parseDate(new Date(lastUpdateCustomer), true)
+  }
+
+  const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}`
+  console.log('>> Query ', query)
+  const { data: listCustomers } = await horus.get(`/Busca_Cliente${query}`)
+  listCustomers.forEach((customersHorus) => {
+    sendMessageTopic(topicCustomerHorus, { storeId, customersHorus })
   })
 }
 
@@ -52,13 +78,17 @@ module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     const storeIds = await listStoreIds()
     const promises = []
+    const now = new Date()
     const runEvent = async (storeId) => {
       await appSdk.getAuth(storeId)
         .then((auth) => {
           return getAppData({ appSdk, storeId, auth }, true)
         })
         .then((appData) => {
-          productsUpdateEvents(appData, storeId)
+          productsEvents(appData, storeId)
+          if (now.getMinutes() % 5 === 0) {
+            customerEvents(appData, storeId)
+          }
         })
     }
     console.log('>>Check Events ', storeIds.length, ' <')
