@@ -1,3 +1,5 @@
+const ecomUtils = require('@ecomplus/utils')
+
 module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
   // metafields.namespace='horus-erp'
   // metafields.field='COD_EDITORA' || autor
@@ -39,9 +41,10 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
     }
 
     const body = {
-      name: codEditora || nomeAutor,
+      name: codEditora ? nomeEditora : nomeAutor,
       metafields: [
         {
+          _id: ecomUtils.randomObjectId(),
           namespace: 'horus-erp',
           field: codEditora ? 'COD_EDITORA' : 'NOME_AUTOR',
           value: codEditora || nomeAutor
