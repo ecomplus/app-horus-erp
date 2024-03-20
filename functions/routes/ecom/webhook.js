@@ -42,20 +42,42 @@ exports.post = ({ appSdk }, req, res) => {
         throw err
       }
       console.log(`> Webhook #${storeId} ${resourceId} [${trigger.resource}]`)
-      // let integrationConfig
-      const actionsQueue = []
+      let integrationConfig
+      // const actionsQueue = []
 
       if (trigger.resource === 'applications') {
-        actionsQueue.push(...Object.keys(trigger.body))
-        // integrationConfig = appData
+        // actionsQueue.push(...Object.keys(trigger.body))
+        integrationConfig = appData
         // canCreateNew = true
       }
-
-      if (actionsQueue.length) {
-        actionsQueue.forEach((action, i) => {
-          console.log('', i, ' ', action)
+      if (integrationConfig) {
+        const actions = Object.keys(integrationHandlers)
+        actions.forEach(action => {
+          for (let i = 1; i <= 3; i++) {
+            actions.push(`${('_'.repeat(i))}${action}`)
+          }
         })
+        for (let i = 0; i < actions.length; i++) {
+          const action = actions[i]
+          const actionQueues = integrationConfig[action]
+          console.log('>> ', action, ' ', actionQueues)
+          if (typeof actionQueues === 'object' && actionQueues) {
+            Object.keys(actionQueues).forEach((queue) => {
+              const ids = actionQueues[queue]
+              console.log('>> queue: ', queue, ' ', ids)
+              if (Array.isArray(ids) && ids.length) {
+                const isHiddenQueue = action.charAt(0) === '_'
+                const mustUpdateAppQueue = trigger.resource === 'applications'
+                const handlerName = action.replace(/^_+/, '')
+                // const handler = integrationHandlers[handlerName][queue.toLowerCase()]
+                const nextId = ids[0]
+                console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId)
+              }
+            })
+          }
+        }
       }
+
       res.send(ECHO_SUCCESS)
     })
 
