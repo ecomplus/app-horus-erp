@@ -51,29 +51,29 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     // NCM
   } = productHorus
   const price = parseFloat(VLR_CAPA)
-  const endpoint = `/products.json?sku=COD_ITEM${COD_ITEM}&limit=1`
+  const endpoint = `products.json?sku=COD_ITEM${COD_ITEM}&limit=1`
 
   const product = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
     .then(({ response }) => response.data)
     .then(({ result }) => {
       if (result.length) {
-        const endpoint = `/products/${result[0]._id}.json`
+        const endpoint = `products/${result[0]._id}.json`
         return appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
           .then(async ({ response }) => response.data)
       }
       throw new Error('not found')
     })
     .catch((err) => {
-      console.error(err)
       if (err.response?.status === 404 || err.message === 'not found') {
         return null
       }
+      console.error(err)
       throw err
     })
 
   if (product) {
     if (price !== product.price) {
-      const endpoint = `/products/${product._id}.json`
+      const endpoint = `products/${product._id}.json`
       const body = {
         price
       }
@@ -200,7 +200,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     // TODO: Actor Names create brands ?
     // TODO: check kit
 
-    const endpoint = '/products.json'
+    const endpoint = 'products.json'
     return appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
   }
 }
