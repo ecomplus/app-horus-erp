@@ -9,8 +9,11 @@ class Horus {
       throw new Error('Missing username or password')
     }
 
+    console.log('>> cosntrutor ', baseURL)
     if (!baseURL) {
-      this._baseURL = 'http://datacenter.fmz.com.br:8060/Horus/api/TServerB2B'
+      this._baseURL = 'http://laphorus.dalla.srv.br:8065/Horus/api/TServerB2B'
+      // http://waphorus.dalla.srv.br:8065/Horus/api/TServerB2B/
+      // 'http://datacenter.fmz.com.br:8060/Horus/api/TServerB2B'
     } else {
       this._baseURL = `${baseURL}/Horus/api/TServerB2B`
     }
