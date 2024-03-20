@@ -9,7 +9,7 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
     nomeAutor
   } = brandHorus
 
-  let endpoint = '/brands.json?metafields.namespace=horus-erp'
+  let endpoint = 'brands.json?metafields.namespace=horus-erp'
   if (codEditora) {
     endpoint += `&metafields.field=COD_EDITORA&metafields.value=${nomeEditora}`
   } else if (nomeAutor) {
@@ -49,7 +49,7 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
       ]
     }
 
-    endpoint = '/brands.json'
+    endpoint = 'brands.json'
     data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
       .then(({ response }) => response.data)
       .catch((err) => {

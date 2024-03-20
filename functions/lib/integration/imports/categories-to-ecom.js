@@ -7,7 +7,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
     nomeGenero
   } = categoriesHorus
 
-  let endpoint = '/categories.json?metafields.namespace=horus-erp' +
+  let endpoint = 'categories.json?metafields.namespace=horus-erp' +
     `&metafields.field=COD_GENERO&metafields.value=${codGenero}&limit=1`
 
   const category = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
@@ -41,7 +41,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
 
   }
 
-  endpoint = '/categories.json'
+  endpoint = 'categories.json'
   const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
     .then(({ response }) => response.data)
     .catch((err) => {
