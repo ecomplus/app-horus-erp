@@ -1,12 +1,13 @@
 const getAppData = require('./../store-api/get-app-data')
+const updateAppData = require('../store-api/update-app-data')
 const Horus = require('../horus/client')
 const { sendMessageTopic } = require('../pub-sub/utils')
 const { topicProductsHorus } = require('../utils-variables')
 
-module.exports = async ({ appSdk, storeId, auth }) => {
-  const appData = await getAppData({ appSdk, storeId, auth })
+module.exports = async ({ appSdk, storeId, auth }, appData) => {
+  const _appData = appData || await getAppData({ appSdk, storeId, auth })
   console.log('>> ', appData)
-  const { username, password, baseURL, cod_item_end: codEnd } = appData
+  const { username, password, baseURL, init_store: { cod_item_end: codEnd } } = _appData
   const horus = new Horus(username, password, baseURL)
   const query = `?COD_ITEM_INI=1&COD_ITEM_FIM=${codEnd}`
   console.log('>> Query ', query)
@@ -29,6 +30,7 @@ module.exports = async ({ appSdk, storeId, auth }) => {
     offset += limit
   }
 
+  await updateAppData({ appSdk, storeId, auth }, { init_store: { cod_item_end: undefined } })
   await Promise.all(promises)
   listProducts.forEach((productHorus) => {
     sendMessageTopic(topicProductsHorus, { storeId, productHorus })

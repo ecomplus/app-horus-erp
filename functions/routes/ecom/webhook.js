@@ -29,56 +29,82 @@ exports.post = ({ appSdk }, req, res) => {
   const resourceId = trigger.resource_id || trigger.inserted_id
 
   // get app configured options
-  getAppData({ appSdk, storeId })
+  appSdk.getAuth(storeId)
+    .then((auth) => {
+      return getAppData({ appSdk, storeId, auth })
 
-    .then(appData => {
-      if (
-        Array.isArray(appData.ignore_triggers) &&
-        appData.ignore_triggers.indexOf(trigger.resource) > -1
-      ) {
-        // ignore current trigger
-        const err = new Error()
-        err.name = SKIP_TRIGGER_NAME
-        throw err
-      }
-      console.log(`> Webhook #${storeId} ${resourceId} [${trigger.resource}]`)
-      let integrationConfig
-      // const actionsQueue = []
-
-      if (trigger.resource === 'applications') {
-        // actionsQueue.push(...Object.keys(trigger.body))
-        integrationConfig = appData
-        // canCreateNew = true
-      }
-      if (integrationConfig) {
-        const actions = Object.keys(integrationHandlers)
-        actions.forEach(action => {
-          for (let i = 1; i <= 3; i++) {
-            actions.push(`${('_'.repeat(i))}${action}`)
+        .then(appData => {
+          if (
+            Array.isArray(appData.ignore_triggers) &&
+            appData.ignore_triggers.indexOf(trigger.resource) > -1
+          ) {
+            // ignore current trigger
+            const err = new Error()
+            err.name = SKIP_TRIGGER_NAME
+            throw err
           }
-        })
-        for (let i = 0; i < actions.length; i++) {
-          const action = actions[i]
-          const actionQueues = integrationConfig[action]
-          console.log('>> ', action, ' ', actionQueues)
-          if (typeof actionQueues === 'object' && actionQueues) {
-            Object.keys(actionQueues).forEach((queue) => {
-              const ids = actionQueues[queue]
-              console.log('>> queue: ', queue, ' ', ids)
-              if (Array.isArray(ids) && ids.length) {
-                const isHiddenQueue = action.charAt(0) === '_'
-                const mustUpdateAppQueue = trigger.resource === 'applications'
-                const handlerName = action.replace(/^_+/, '')
-                // const handler = integrationHandlers[handlerName][queue.toLowerCase()]
-                const nextId = ids[0]
-                console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId)
+          console.log(`> Webhook #${storeId} ${resourceId} [${trigger.resource}]`)
+          let integrationConfig
+          // const actionsQueue = []
+
+          if (trigger.resource === 'applications') {
+            // actionsQueue.push(...Object.keys(trigger.body))
+            integrationConfig = appData
+            // canCreateNew = true
+          }
+          if (integrationConfig) {
+            const actions = Object.keys(integrationHandlers)
+            actions.forEach(action => {
+              for (let i = 1; i <= 3; i++) {
+                actions.push(`${('_'.repeat(i))}${action}`)
               }
             })
+            for (let i = 0; i < actions.length; i++) {
+              const action = actions[i]
+              const actionQueues = integrationConfig[action]
+              console.log('>> ', action, ' ', actionQueues)
+              if (typeof actionQueues === 'object' && actionQueues) {
+                Object.keys(actionQueues).forEach((queue) => {
+                  const ids = actionQueues[queue]
+                  const handlerName = action.replace(/^_+/, '')
+                  if (action !== 'init_store') {
+                    console.log('>> queue: ', queue, ' ', ids)
+                    if (Array.isArray(ids) && ids.length) {
+                      const isHiddenQueue = action.charAt(0) === '_'
+                      const mustUpdateAppQueue = trigger.resource === 'applications'
+                      // const handler = integrationHandlers[handlerName][queue.toLowerCase()]
+                      const nextId = ids[0]
+                      console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId)
+                    }
+                  } else if (ids) {
+                    const handler = integrationHandlers[handlerName]
+                    return handler({ appSdk, storeId, auth }, appData)
+                      .then(() => ({ appData, action, queue }))
+                  }
+                })
+                //
+              }
+              //
+            }
+            //
           }
-        }
-      }
+          // nothing to do
+          return {}
+        })
+    })
 
-      res.send(ECHO_SUCCESS)
+    .then(({ appData, action, queue }) => {
+      // removeFromQueue(resourceId)
+      if (appData) {
+        if (appData[action] && Array.isArray(appData[action][queue])) {
+          res.status(202)
+        } else {
+          res.status(201)
+        }
+        return res.send(`> Processed \`${action}.${queue}\``)
+      } else {
+        return res.send(ECHO_SUCCESS)
+      }
     })
 
     .catch(err => {
