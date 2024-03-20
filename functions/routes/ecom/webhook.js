@@ -48,6 +48,7 @@ exports.post = ({ appSdk }, req, res) => {
             actions.push(`${('_'.repeat(i))}${action}`)
           }
         })
+        console.log('>> ', actions)
       }
       res.send(ECHO_SUCCESS)
     })
