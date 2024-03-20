@@ -200,6 +200,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     // TODO: Actor Names create brands ?
     // TODO: check kit
 
+    console.log('>> body ', JSON.stringify(body))
     const endpoint = 'products.json'
     return appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
   }

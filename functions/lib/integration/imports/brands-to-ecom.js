@@ -13,7 +13,7 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
 
   let endpoint = 'brands.json?metafields.namespace=horus-erp'
   if (codEditora) {
-    endpoint += `&metafields.field=COD_EDITORA&metafields.value=${nomeEditora}`
+    endpoint += `&metafields.field=COD_EDITORA&metafields.value=${codEditora}`
   } else if (nomeAutor) {
     endpoint += `&metafields.field=NOME_AUTOR&metafields.value=${nomeAutor}`
   }

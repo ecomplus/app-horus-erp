@@ -9,7 +9,6 @@ class Horus {
       throw new Error('Missing username or password')
     }
 
-    console.log('>> constructor ', baseURL)
     this._baseURL = baseURL || 'http://waphorus.dalla.srv.br:8065/Horus/api/TServerB2B'
 
     this._request = axios.create({
