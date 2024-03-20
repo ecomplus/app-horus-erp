@@ -29,10 +29,10 @@ exports.post = ({ appSdk }, req, res) => {
         err.name = SKIP_TRIGGER_NAME
         throw err
       }
-
-      /* DO YOUR CUSTOM STUFF HERE */
-
-      // all done
+      if (trigger.resource === 'applications') {
+        console.log('s: ', storeId, '> Edit Application')
+        console.log('>> trigger: ', JSON.stringify(trigger))
+      }
       res.send(ECHO_SUCCESS)
     })
 

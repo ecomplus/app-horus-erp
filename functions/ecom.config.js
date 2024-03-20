@@ -248,7 +248,21 @@ const app = {
         }
       },
       hide: false
-    }
+    },
+    init_store: {
+      schema: {
+        title: 'Setup inicial',
+        description: 'Primeira importação do ERP',
+        type: 'object',
+        properties: {
+          cod_item_end: {
+            title: 'Código do último produto cadatrado no ERP',
+            type: 'number',
+          }
+        }
+      },
+      hide: false
+    },
   }
 }
 
