@@ -1,6 +1,6 @@
 const getAppData = require('./../store-api/get-app-data')
 const Horus = require('../horus/client')
-const { sendMessageTopic } = require('./pub-sub/utils')
+const { sendMessageTopic } = require('../pub-sub/utils')
 const { topicProductsHorus } = require('../utils-variables')
 
 module.exports = async ({ appSdk, storeId, auth }) => {
