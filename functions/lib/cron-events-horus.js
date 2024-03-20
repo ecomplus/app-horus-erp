@@ -36,7 +36,7 @@ const productsEvents = async (appData, storeId) => {
   let dateInit = parseDate(new Date(1), true)
   const dateEnd = parseDate(new Date(), true)
   const docRef = firestore()
-    .doc(`${collectionHorusEvents}/${storeId}/products`)
+    .doc(`${collectionHorusEvents}/${storeId}_products`)
 
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {

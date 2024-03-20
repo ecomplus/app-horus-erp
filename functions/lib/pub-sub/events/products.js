@@ -20,7 +20,7 @@ module.exports = async (
   const { eventId } = context
   const { DAT_ULT_ATL: lastUpdateProduct } = productHorus
   const logId = `${eventId}-s${storeId}`
-  const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}/products`)
+  const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_products`)
   console.log('>> Exec Event #', logId)
   const appSdk = await getAppSdk()
 
