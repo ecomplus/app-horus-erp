@@ -38,7 +38,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
         _id: ecomUtils.randomObjectId(),
         namespace: 'horus-erp',
         field: 'COD_GENERO',
-        value: codGenero
+        value: `${codGenero}`
       }
     ]
 
