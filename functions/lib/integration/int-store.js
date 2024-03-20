@@ -6,7 +6,7 @@ const { topicProductsHorus } = require('../utils-variables')
 
 module.exports = async ({ appSdk, storeId, auth }, appData) => {
   const _appData = appData || await getAppData({ appSdk, storeId, auth })
-  console.log('>> ', appData)
+  console.log('>> init_store', appData)
   const { username, password, baseURL, init_store: { cod_item_end: codEnd } } = _appData
   const horus = new Horus(username, password, baseURL)
   const query = `?COD_ITEM_INI=1&COD_ITEM_FIM=${codEnd}`
@@ -15,7 +15,7 @@ module.exports = async ({ appSdk, storeId, auth }, appData) => {
   const limit = 10
   const promises = []
   const listProducts = []
-  while ((offset + limit) < codEnd) {
+  while ((offset + limit) <= codEnd) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
     console.log('>> endpoint ', endpoint)
