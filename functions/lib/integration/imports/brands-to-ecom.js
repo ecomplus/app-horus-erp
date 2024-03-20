@@ -21,9 +21,13 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
     let data = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
       .then(({ response }) => response.data)
       .catch((err) => {
-        console.error(err)
         if (err.response?.status === 404 || err.message === 'not found') {
           return null
+        }
+        if (err.response) {
+          console.warn(JSON.stringify(err.response))
+        } else {
+          console.error(err)
         }
         throw err
       })

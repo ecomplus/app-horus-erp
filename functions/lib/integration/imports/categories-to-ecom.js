@@ -10,19 +10,23 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   let endpoint = '/categories.json?metafields.namespace=horus-erp' +
     `&metafields.field=COD_GENERO&metafields.value=${codGenero}&limit=1`
 
-  let data = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
+  const category = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
     .then(({ response }) => response.data)
     .catch((err) => {
-      console.error(err)
       if (err.response?.status === 404 || err.message === 'not found') {
         return null
+      }
+      if (err.response) {
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
       }
       throw err
     })
 
-  if (data) {
-    if (data.result && data.result.length) {
-      return data.result[0]
+  if (category) {
+    if (category.result && category.result.length) {
+      return category.result[0]
     }
   }
   const body = {
@@ -38,7 +42,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   }
 
   endpoint = '/categories.json'
-  data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
+  const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
     .then(({ response }) => response.data)
     .catch((err) => {
       console.error(err)
