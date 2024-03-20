@@ -6,7 +6,15 @@ const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
 const integrationHandlers = {
-  init_store: require('../../lib/integration/int-store')
+  init_store: require('../../lib/integration/int-store'),
+  exportation: {
+    // product_ids: require('./../../lib/integration/export-product'),
+    // order_ids: require('./../../lib/integration/export-order')
+  },
+  importation: {
+    // skus: require('./../../lib/integration/import-product'),
+    // order_numbers: require('./../../lib/integration/import-order')
+  }
 }
 
 exports.post = ({ appSdk }, req, res) => {
@@ -34,21 +42,19 @@ exports.post = ({ appSdk }, req, res) => {
         throw err
       }
       console.log(`> Webhook #${storeId} ${resourceId} [${trigger.resource}]`)
-      let integrationConfig
+      // let integrationConfig
+      const actionsQueue = []
 
       if (trigger.resource === 'applications') {
-        integrationConfig = appData
+        actionsQueue.push(...Object.keys(trigger.body))
+        // integrationConfig = appData
         // canCreateNew = true
       }
-      //
-      if (integrationConfig) {
-        const actions = Object.keys(integrationHandlers)
-        actions.forEach(action => {
-          for (let i = 1; i <= 3; i++) {
-            actions.push(`${('_'.repeat(i))}${action}`)
-          }
+
+      if (actionsQueue.length) {
+        actionsQueue.forEach((action, i) => {
+          console.log('', i, ' ', action)
         })
-        console.log('>> ', actions)
       }
       res.send(ECHO_SUCCESS)
     })
