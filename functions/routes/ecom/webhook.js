@@ -62,19 +62,19 @@ exports.post = ({ appSdk }, req, res) => {
             for (let i = 0; i < actions.length; i++) {
               const action = actions[i]
               const actionQueues = integrationConfig[action]
-              console.log('>> ', action, ' ', actionQueues)
+              // console.log('>> ', action, ' ', actionQueues)
               if (typeof actionQueues === 'object' && actionQueues) {
                 Object.keys(actionQueues).forEach((queue) => {
                   const ids = actionQueues[queue]
                   const handlerName = action.replace(/^_+/, '')
                   if (action !== 'init_store') {
-                    console.log('>> queue: ', queue, ' ', ids)
+                    // console.log('>> queue: ', queue, ' ', ids)
                     if (Array.isArray(ids) && ids.length) {
-                      const isHiddenQueue = action.charAt(0) === '_'
-                      const mustUpdateAppQueue = trigger.resource === 'applications'
+                      // const isHiddenQueue = action.charAt(0) === '_'
+                      // const mustUpdateAppQueue = trigger.resource === 'applications'
                       // const handler = integrationHandlers[handlerName][queue.toLowerCase()]
-                      const nextId = ids[0]
-                      console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId)
+                      // const nextId = ids[0]
+                      // console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId)
                     }
                   } else if (ids) {
                     const handler = integrationHandlers[handlerName]
