@@ -5,6 +5,9 @@ const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
+const integrationHandlers = {
+  init_store: require('../../lib/integration/int-store')
+}
 
 exports.post = ({ appSdk }, req, res) => {
   // receiving notification from Store API
@@ -15,6 +18,7 @@ exports.post = ({ appSdk }, req, res) => {
    * Ref.: https://developers.e-com.plus/docs/api/#/store/triggers/
    */
   const trigger = req.body
+  const resourceId = trigger.resource_id || trigger.inserted_id
 
   // get app configured options
   getAppData({ appSdk, storeId })
@@ -29,9 +33,21 @@ exports.post = ({ appSdk }, req, res) => {
         err.name = SKIP_TRIGGER_NAME
         throw err
       }
+      console.log(`> Webhook #${storeId} ${resourceId} [${trigger.resource}]`)
+      let integrationConfig
+
       if (trigger.resource === 'applications') {
-        console.log('s: ', storeId, '> Edit Application')
-        console.log('>> trigger: ', JSON.stringify(trigger))
+        integrationConfig = appData
+        // canCreateNew = true
+      }
+      //
+      if (integrationConfig) {
+        const actions = Object.keys(integrationHandlers)
+        actions.forEach(action => {
+          for (let i = 1; i <= 3; i++) {
+            actions.push(`${('_'.repeat(i))}${action}`)
+          }
+        })
       }
       res.send(ECHO_SUCCESS)
     })
