@@ -3,8 +3,8 @@ const { setup } = require('@ecomplus/application-sdk')
 const getAppData = require('./store-api/get-app-data')
 const {
   collectionHorusEvents,
-  topicProductsHorus,
-  topicCustomerHorus
+  topicProductsHorus
+  // topicCustomerHorus
 } = require('./utils-variables')
 const parseDate = require('./parsers/date')
 const Horus = require('./horus/client')
@@ -45,13 +45,42 @@ const productsEvents = async (appData, storeId) => {
   }
 
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}`
-  console.log('>> Query ', query)
-  const { data: listProducts } = await horus.get(`/Busca_Acervo${query}`)
-  listProducts.forEach((productHorus) => {
-    sendMessageTopic(topicProductsHorus, { storeId, productHorus })
-  })
+
+  let reply = true
+  let offset = 0
+  const limit = 100
+  let i = 0
+
+  while (reply) {
+    // create Object Horus to request api Horus
+    const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
+    console.log('>>cron index ', i, ' ', endpoint)
+    const products = await horus.get(endpoint)
+      .then(({ data }) => {
+        if (data.length) {
+          return data
+        }
+        return null
+      })
+      .catch((err) => {
+        console.error(err)
+        return null
+      })
+
+    if (products && Array.isArray(products)) {
+      products.forEach((productHorus) => {
+        sendMessageTopic(topicProductsHorus, { storeId, productHorus })
+      })
+    } else {
+      reply = false
+    }
+
+    i += 1
+    offset += limit
+  }
 }
 
+/*
 const customerEvents = async (appData, storeId) => {
   const { username, password, baseURL } = appData
   const horus = new Horus(username, password, baseURL)
@@ -73,12 +102,13 @@ const customerEvents = async (appData, storeId) => {
     sendMessageTopic(topicCustomerHorus, { storeId, customersHorus })
   })
 }
+*/
 
 module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     const storeIds = await listStoreIds()
     const promises = []
-    const now = new Date()
+    // const now = new Date()
     const runEvent = async (storeId) => {
       await appSdk.getAuth(storeId)
         .then((auth) => {
@@ -86,9 +116,9 @@ module.exports = context => setup(null, true, firestore())
         })
         .then((appData) => {
           productsEvents(appData, storeId)
-          if (now.getMinutes() % 5 === 0) {
-            customerEvents(appData, storeId)
-          }
+          // if (now.getMinutes() % 5 === 0) {
+          //   customerEvents(appData, storeId)
+          // }
         })
     }
     console.log('>>Check Events ', storeIds.length, ' <')

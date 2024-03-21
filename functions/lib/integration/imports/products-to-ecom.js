@@ -26,13 +26,13 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     GENERO_NIVEL_3,
     SUBTITULO,
     DESC_SINOPSE,
-    // OBS_ESPECIAIS,
-    // INFO_COMP_ITEM,
+    OBS_ESPECIAIS,
+    INFO_COMP_ITEM,
     PESO_ITEM,
     LARGURA_ITEM,
     COMPRIMENTO_ITEM,
     ALTURA_ITEM,
-    // QTD_PAGINAS,
+    QTD_PAGINAS,
     SALDO_DISPONIVEL,
     // EBOOK,
     // FORMATO_EBOOK,
@@ -187,19 +187,18 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     }
 
     if (DESC_SINOPSE) {
-      // body.short_description = DESC_SINOPSE.substring(0, 255)
       body.body_html = DESC_SINOPSE
     }
 
-    // if (
-    //   OBS_ESPECIAIS ||
-    //   INFO_COMP_ITEM ||
-    //   QTD_PAGINAS
-    // ) {
-    //   body.body_text = OBS_ESPECIAIS || ''
-    //   body.body_text += INFO_COMP_ITEM ? ` ${INFO_COMP_ITEM}` : ''
-    //   body.body_text += QTD_PAGINAS ? ` Quantidade de páginas: ${QTD_PAGINAS}` : ''
-    // }
+    if (
+      OBS_ESPECIAIS ||
+      INFO_COMP_ITEM ||
+      QTD_PAGINAS
+    ) {
+      body.body_html = `${OBS_ESPECIAIS}<br/>` || ''
+      body.body_html += INFO_COMP_ITEM ? `${INFO_COMP_ITEM}<br/>` : ''
+      body.body_html += QTD_PAGINAS ? ` Quantidade de páginas: ${QTD_PAGINAS} <br/>` : ''
+    }
 
     // TODO: Actor Names create brands ?
     // TODO: check kit
