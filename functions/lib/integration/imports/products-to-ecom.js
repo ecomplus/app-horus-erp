@@ -51,6 +51,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     // DISPONIBILIDADE_MERCADO,
     // NCM
   } = productHorus
+  if (!COD_ITEM) {
+    throw new Error(productHorus.Mensagem)
+  }
   console.log('> product ', JSON.stringify(productHorus))
   const price = parseFloat(VLR_CAPA)
   const endpoint = `products.json?sku=COD_ITEM${COD_ITEM}&limit=1`

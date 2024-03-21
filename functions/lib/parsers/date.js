@@ -1,5 +1,10 @@
 const parseDate = (date = new Date(), isComplete) => {
-  let format = `${date.getDay()}/${date.getMonth() + 1}/${date.getFullYear()}`
+  const day = date.getDay()
+  const month = date.getMonth() + 1
+  const year = date.getFullYear()
+  let format = `${day < 10 ? `0${day}` : day}`
+  format += `/${month < 10 ? `0${month}` : month}/${year}`
+
   if (isComplete) {
     const hours = date.getHours()
     const minutes = date.getMinutes()
