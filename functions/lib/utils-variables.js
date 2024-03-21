@@ -5,12 +5,12 @@ const collectionHorusEvents = 'horusEvents'
 const topicProductsHorus = 'products_update'
 const topicCustomerHorus = 'customers'
 
-const removeAccents = str => str.replace(/áàãâÁÀÃÂ/g, 'a')
-  .replace(/éêÉÊ/g, 'e')
-  .replace(/óõôÓÕÔ/g, 'o')
-  .replace(/íÍ/g, 'e')
-  .replace(/úÚ/g, 'u')
-  .replace(/çÇ/g, 'c')
+const removeAccents = str => str.replace(/[áàãâÁÀÃÂ]/gi, 'a')
+  .replace(/[éêÉÊ]/gi, 'e')
+  .replace(/[óõôÓÕÔ]/gi, 'o')
+  .replace(/[íÍ]/gi, 'e')
+  .replace(/[úÚ]/gi, 'u')
+  .replace(/[çÇ]/gi, 'c')
 
 module.exports = {
   removeAccents,
