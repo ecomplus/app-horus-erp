@@ -1,5 +1,6 @@
 const importCategories = require('./categories-to-ecom')
 const importBrands = require('./brands-to-ecom')
+const { removeAccents } = require('../../utils-variables')
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
   const {
@@ -84,8 +85,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     const body = {
       sku: `COD_ITEM${COD_ITEM}`,
       name: NOM_ITEM,
-      slug: NOM_ITEM
-        .toLowerCase()
+      slug: removeAccents(NOM_ITEM.toLowerCase())
         .replace(/[^a-z0-9-_./]/gi, '_'),
       price,
       status: STATUS_ITEM,

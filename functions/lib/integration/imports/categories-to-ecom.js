@@ -1,4 +1,5 @@
 const ecomUtils = require('@ecomplus/utils')
+const { removeAccents } = require('../../utils-variables')
 
 module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   // metafields.namespace='horus-erp'
@@ -33,8 +34,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   }
   const body = {
     name: nomeGenero,
-    slug: nomeGenero
-      .toLowerCase()
+    slug: removeAccents(nomeGenero.toLowerCase())
       .replace(/[^a-z0-9-_./]/gi, '_'),
     metafields: [
       {
