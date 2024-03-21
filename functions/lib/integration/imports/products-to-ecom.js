@@ -84,6 +84,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     const body = {
       sku: `COD_ITEM${COD_ITEM}`,
       name: NOM_ITEM,
+      slug: NOM_ITEM
+        .toLowerCase()
+        .replace(' ', '_')
+        .replace(',', '_'),
       price,
       status: STATUS_ITEM,
       quantity: SALDO_DISPONIVEL || 0,
@@ -184,7 +188,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     }
 
     if (DESC_SINOPSE) {
-      body.short_description = DESC_SINOPSE.substring(0, 255)
+      // body.short_description = DESC_SINOPSE.substring(0, 255)
       body.body_html = DESC_SINOPSE
     }
 
