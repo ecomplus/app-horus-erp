@@ -10,6 +10,21 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
     nomeGenero
   } = categoriesHorus
 
+  const body = {
+    name: nomeGenero,
+    slug: removeAccents(nomeGenero.toLowerCase())
+      .replace(/[^a-z0-9-_./]/gi, '_'),
+    metafields: [
+      {
+        _id: ecomUtils.randomObjectId(),
+        namespace: 'horus-erp',
+        field: 'COD_GENERO',
+        value: `${codGenero}`
+      }
+    ]
+
+  }
+
   let endpoint = 'categories.json?metafields.namespace=horus-erp' +
     `&metafields.field=COD_GENERO&metafields.value=${codGenero}&limit=1`
 
@@ -32,21 +47,6 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
       return category.result[0]
     }
   }
-  const body = {
-    name: nomeGenero,
-    slug: removeAccents(nomeGenero.toLowerCase())
-      .replace(/[^a-z0-9-_./]/gi, '_'),
-    metafields: [
-      {
-        _id: ecomUtils.randomObjectId(),
-        namespace: 'horus-erp',
-        field: 'COD_GENERO',
-        value: `${codGenero}`
-      }
-    ]
-
-  }
-
   endpoint = 'categories.json'
   const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
     .then(({ response }) => response.data)

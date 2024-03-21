@@ -20,6 +20,20 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
   }
   endpoint += '&limit=1'
 
+  const body = {
+    name: codEditora ? nomeEditora : nomeAutor,
+    slug: removeAccents((codEditora ? nomeEditora : nomeAutor).toLowerCase())
+      .replace(/[^a-z0-9-_./]/gi, '_'),
+    metafields: [
+      {
+        _id: ecomUtils.randomObjectId(),
+        namespace: 'horus-erp',
+        field: codEditora ? 'COD_EDITORA' : 'NOME_AUTOR',
+        value: codEditora ? `${codEditora}` : nomeAutor
+      }
+    ]
+  }
+
   if (codEditora || nomeAutor) {
     const brands = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
       .then(({ response }) => response.data)
@@ -39,20 +53,6 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
       if (brands.result && brands.result.length) {
         return brands.result[0]
       }
-    }
-
-    const body = {
-      name: codEditora ? nomeEditora : nomeAutor,
-      slug: removeAccents((codEditora ? nomeEditora : nomeAutor).toLowerCase())
-        .replace(/[^a-z0-9-_./]/gi, '_'),
-      metafields: [
-        {
-          _id: ecomUtils.randomObjectId(),
-          namespace: 'horus-erp',
-          field: codEditora ? 'COD_EDITORA' : 'NOME_AUTOR',
-          value: codEditora ? `${codEditora}` : nomeAutor
-        }
-      ]
     }
 
     endpoint = 'brands.json'

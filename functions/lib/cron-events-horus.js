@@ -41,9 +41,7 @@ const productsEvents = async (appData, storeId) => {
 
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
-    console.log('>> aqui ')
     const { lastUpdateProduct } = docSnapshot.data()
-    console.log('>> aqui ', lastUpdateProduct)
     dateInit = parseDate(new Date(lastUpdateProduct), true)
   }
 
@@ -52,12 +50,11 @@ const productsEvents = async (appData, storeId) => {
   let reply = true
   let offset = 0
   const limit = 100
-  let i = 0
 
+  console.log('>>Cron s:', storeId, ' ', dateInit, ' ', dateEnd, ' <')
   while (reply) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
-    console.log('>>cron index ', i, ' ', endpoint)
     const products = await horus.get(endpoint)
       .then(({ data }) => {
         if (data && data.length && !data[0].Mensagem) {
@@ -78,7 +75,6 @@ const productsEvents = async (appData, storeId) => {
       reply = false
     }
 
-    i += 1
     offset += limit
   }
 }
