@@ -47,6 +47,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
       return category.result[0]
     }
   }
+
   endpoint = 'categories.json'
   const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
     .then(({ response }) => response.data)
