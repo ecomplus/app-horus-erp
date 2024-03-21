@@ -41,7 +41,9 @@ const productsEvents = async (appData, storeId) => {
 
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
+    console.log('>> aqui ')
     const { lastUpdateProduct } = docSnapshot.data()
+    console.log('>> aqui ', lastUpdateProduct)
     dateInit = parseDate(new Date(lastUpdateProduct), true)
   }
 

@@ -1,5 +1,5 @@
 const parseDate = (date = new Date(), isComplete) => {
-  const day = date.getDay()
+  const day = date.getDate()
   const month = date.getMonth() + 1
   const year = date.getFullYear()
   let format = `${day < 10 ? `0${day}` : day}`
