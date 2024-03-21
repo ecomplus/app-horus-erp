@@ -20,7 +20,7 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
   endpoint += '&limit=1'
 
   if (codEditora || nomeAutor) {
-    let data = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
+    const brands = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
       .then(({ response }) => response.data)
       .catch((err) => {
         if (err.response?.status === 404 || err.message === 'not found') {
@@ -34,9 +34,9 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
         throw err
       })
 
-    if (data) {
-      if (data.result && data.result.length) {
-        return data.result[0]
+    if (brands) {
+      if (brands.result && brands.result.length) {
+        return brands.result[0]
       }
     }
 
@@ -53,14 +53,14 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
     }
 
     endpoint = 'brands.json'
-    data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
+    const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
       .then(({ response }) => response.data)
       .catch((err) => {
         console.error(err)
         return null
       })
 
-    return data ? { _id: data._id, name: codEditora || nomeAutor } : data
+    return data ? { _id: data._id, name: codEditora ? nomeEditora : nomeAutor } : data
   }
   return null
 }

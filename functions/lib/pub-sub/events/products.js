@@ -18,7 +18,7 @@ module.exports = async (
   context
 ) => {
   const { eventId } = context
-  const { DAT_ULT_ATL: lastUpdateProduct } = productHorus
+  const { DAT_ULT_ATL: lastUpdate } = productHorus
   const logId = `${eventId}-s${storeId}`
   const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_products`)
   console.log('>> Exec Event #', logId)
@@ -29,21 +29,33 @@ module.exports = async (
       const appClient = { appSdk, storeId, auth }
       return importProductToEcom(appClient, productHorus)
         .then(async () => {
+          const date = new Date(lastUpdate)
+          const now = new Date()
+          const lastUpdateProduct = now.getTime() > date.getTime()
+            ? now.toISOString()
+            : date.toISOString()
+
           await docRef.set({
-            lastUpdateProduct: new Date().toISOString()
+            lastUpdateProduct
           }, { merge: true })
             .catch(console.error)
 
           return null
         })
     })
-    .catch((err) => {
+    .catch(async (err) => {
       console.error('Error in #', logId)
       if (err.appWithoutAuth) {
         console.error(err)
       } else {
-        if (lastUpdateProduct) {
-          docRef.set({ lastUpdateProduct }, { merge: true })
+        if (lastUpdate) {
+          const date = new Date(lastUpdate)
+          const now = new Date()
+          const lastUpdateProduct = now.getTime() < date.getTime()
+            ? now.toISOString()
+            : date.toISOString()
+
+          await docRef.set({ lastUpdateProduct }, { merge: true })
             .catch(console.error)
         }
         throw err
