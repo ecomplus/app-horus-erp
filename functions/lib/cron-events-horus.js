@@ -13,7 +13,7 @@ const { sendMessageTopic } = require('./pub-sub/utils')
 const listStoreIds = async () => {
   const storeIds = []
   const date = new Date()
-  date.setHours(date.getHours() - 24)
+  date.setHours(date.getHours() - 28)
 
   console.log('>> ', date.toISOString(), ' <<')
   const querySnapshot = await firestore()
