@@ -15,6 +15,7 @@ const listStoreIds = async () => {
   const date = new Date()
   date.setHours(date.getHours() - 24)
 
+  console.log('>> ', date.toISOString(), ' <<')
   const querySnapshot = await firestore()
     .collection('ecomplus_app_auth')
     .where('updated_at', '>', firestore.Timestamp.fromDate(date))
