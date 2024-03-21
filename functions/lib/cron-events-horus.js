@@ -70,7 +70,7 @@ const productsEvents = async (appData, storeId) => {
     if (products && Array.isArray(products)) {
       products.forEach((productHorus, index) => {
         setTimeout(
-          sendMessageTopic(topicProductsHorus, { storeId, productHorus }),
+          () => sendMessageTopic(topicProductsHorus, { storeId, productHorus }),
           index + 1 % 2 === 0 ? 2 : 3
         )
       })
