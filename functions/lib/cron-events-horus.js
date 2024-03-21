@@ -58,7 +58,7 @@ const productsEvents = async (appData, storeId) => {
     console.log('>>cron index ', i, ' ', endpoint)
     const products = await horus.get(endpoint)
       .then(({ data }) => {
-        if (data.length) {
+        if (data && data.length && !data[0].Mensagem) {
           return data
         }
         return null
