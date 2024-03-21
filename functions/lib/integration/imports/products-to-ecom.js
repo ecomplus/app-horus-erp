@@ -86,8 +86,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
       name: NOM_ITEM,
       slug: NOM_ITEM
         .toLowerCase()
-        .replace(' ', '_')
-        .replace(',', '_'),
+        .replace(/[^a-z0-9-_./]/gi, '_'),
       price,
       status: STATUS_ITEM,
       quantity: SALDO_DISPONIVEL || 0,

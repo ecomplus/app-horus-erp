@@ -44,8 +44,7 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
       name: codEditora ? nomeEditora : nomeAutor,
       slug: (codEditora ? nomeEditora : nomeAutor)
         .toLowerCase()
-        .replace(' ', '_')
-        .replace(',', '_'),
+        .replace(/[^a-z0-9-_./]/gi, '_'),
       metafields: [
         {
           _id: ecomUtils.randomObjectId(),

@@ -35,8 +35,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
     name: nomeGenero,
     slug: nomeGenero
       .toLowerCase()
-      .replace(' ', '_')
-      .replace(',', '_'),
+      .replace(/[^a-z0-9-_./]/gi, '_'),
     metafields: [
       {
         _id: ecomUtils.randomObjectId(),
