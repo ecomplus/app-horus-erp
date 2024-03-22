@@ -13,7 +13,9 @@ const getAppSdk = () => {
 module.exports = async (
   {
     storeId,
-    productHorus
+    productHorus,
+    updateProduct,
+    updatePrice
   },
   context
 ) => {
@@ -35,9 +37,8 @@ module.exports = async (
             ? now.toISOString()
             : date.toISOString()
 
-          await docRef.set({
-            lastUpdateProduct
-          }, { merge: true })
+          const body = { lastUpdateProduct }
+          await docRef.set(body, { merge: true })
             .catch(console.error)
 
           return null
@@ -55,7 +56,8 @@ module.exports = async (
             ? now.toISOString()
             : date.toISOString()
 
-          await docRef.set({ lastUpdateProduct }, { merge: true })
+          const body = { lastUpdateProduct }
+          await docRef.set(body, { merge: true })
             .catch(console.error)
         }
         throw err

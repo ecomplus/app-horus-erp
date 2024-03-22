@@ -3,7 +3,7 @@ const importBrands = require('./brands-to-ecom')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
 
-module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
+module.exports = async ({ appSdk, storeId, auth }, productHorus, updateProduct, updatePrice) => {
   const {
     COD_ITEM,
     // COD_BARRA_ITEM,
@@ -77,12 +77,14 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
       throw err
     })
 
-  if (product) {
-    if (price !== product.price) {
-      const endpoint = `products/${product._id}.json`
-      const body = {
-        price
-      }
+  if (product && !updateProduct) {
+    const endpoint = `products/${product._id}.json`
+    const body = {}
+    if (price !== product.price && updatePrice) {
+      body.price = price
+    }
+
+    if (Object.keys(body).length) {
       return appSdk.apiRequest(storeId, endpoint, 'PATCH', body, auth)
     }
     return null
@@ -210,6 +212,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
 
     console.log('>> body ', JSON.stringify(body))
     const endpoint = 'products.json'
-    return appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
+    const method = !product ? 'POST' : 'PATCH'
+    return appSdk.apiRequest(storeId, endpoint, method, body, auth)
   }
 }

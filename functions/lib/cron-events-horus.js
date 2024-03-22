@@ -32,7 +32,6 @@ const listStoreIds = async () => {
 }
 
 const requestGetHorus = (horus, endpoint, isRetry) => new Promise((resolve, reject) => {
-  console.log(' > is Retry ', isRetry)
   horus.get(endpoint)
     .then((resp) => {
       const { data } = resp
@@ -50,7 +49,13 @@ const requestGetHorus = (horus, endpoint, isRetry) => new Promise((resolve, reje
 })
 
 const productsEvents = async (appData, storeId) => {
-  const { username, password, baseURL } = appData
+  const {
+    username,
+    password,
+    baseURL,
+    update_product: updateProduct,
+    update_price: updatePrice
+  } = appData
   const horus = new Horus(username, password, baseURL)
   let dateInit = parseDate(new Date(1), true)
   const dateEnd = parseDate(new Date(), true)
@@ -65,38 +70,36 @@ const productsEvents = async (appData, storeId) => {
 
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}`
 
-  let reply = true
+  // let reply = true
   let offset = 0
-  const limit = 10
+  const limit = 1000
 
   console.log('>>Cron s:', storeId, ' ', dateInit, ' ', dateEnd, ' <')
   const promisesSendTopics = []
-  while (reply) {
-    // create Object Horus to request api Horus
-    const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
-    const products = await requestGetHorus(horus, endpoint)
-      .catch((err) => {
-        if (err.response) {
-          console.warn(JSON.stringify(err.response))
-        } else {
-          console.error(err)
-        }
-        return null
-      })
+  // while (reply) {
+  // create Object Horus to request api Horus
+  const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
+  const products = await requestGetHorus(horus, endpoint)
+    .catch((err) => {
+      if (err.response) {
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
+      }
+      return null
+    })
 
-    if (products && Array.isArray(products)) {
-      products.forEach((productHorus, index) => {
-        promisesSendTopics.push(
-          sendMessageTopic(topicProductsHorus, { storeId, productHorus })
-            .catch(console.error)
-        )
-      })
-    } else {
-      reply = false
-    }
-
-    offset += limit
+  if (products && Array.isArray(products)) {
+    products.forEach((productHorus, index) => {
+      promisesSendTopics.push(
+        sendMessageTopic(topicProductsHorus, { storeId, productHorus, updateProduct, updatePrice })
+          .catch(console.error)
+      )
+    })
   }
+
+  offset += limit
+  // }
 
   return Promise.all(promisesSendTopics)
     .then(() => {

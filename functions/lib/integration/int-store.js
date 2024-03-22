@@ -31,6 +31,6 @@ module.exports = async ({ appSdk, storeId, auth }, appData) => {
   await updateAppData({ appSdk, storeId, auth }, { init_store: { cod_item_end: undefined } })
   await Promise.all(promisesProducts)
   listProducts.forEach((productHorus) => {
-    sendMessageTopic(topicProductsHorus, { storeId, productHorus })
+    sendMessageTopic(topicProductsHorus, { storeId, productHorus, isInit: true })
   })
 }
