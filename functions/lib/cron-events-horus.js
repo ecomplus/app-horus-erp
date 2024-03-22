@@ -52,6 +52,7 @@ const productsEvents = async (appData, storeId) => {
   const limit = 100
 
   console.log('>>Cron s:', storeId, ' ', dateInit, ' ', dateEnd, ' <')
+  const promisesSendTopics = []
   while (reply) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
@@ -70,8 +71,10 @@ const productsEvents = async (appData, storeId) => {
 
     if (products && Array.isArray(products)) {
       products.forEach((productHorus, index) => {
-        console.log('> ', index, ' ', JSON.stringify(productHorus))
-        sendMessageTopic(topicProductsHorus, { storeId, productHorus })
+        // console.log('> ', index, ' ', JSON.stringify(productHorus))
+        promisesSendTopics.push(
+          sendMessageTopic(topicProductsHorus, { storeId, productHorus })
+        )
       })
     } else {
       reply = false
@@ -79,6 +82,7 @@ const productsEvents = async (appData, storeId) => {
 
     offset += limit
   }
+  await Promise.all(promisesSendTopics).then(() => console.log('Finish Exec ', storeId))
 }
 
 /*
