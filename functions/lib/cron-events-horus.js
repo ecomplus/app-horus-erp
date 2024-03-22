@@ -60,8 +60,10 @@ const productsEvents = async (appData, storeId) => {
     const products = await horus.get(endpoint)
       .then(({ data }) => {
         if (data && data.length && !data[0].Mensagem) {
+          console.log('>> Return data ')
           return data
         }
+        console.log('>> Return null ', data)
         return null
       })
       .catch((err) => {
@@ -69,6 +71,7 @@ const productsEvents = async (appData, storeId) => {
         return null
       })
 
+    console.log('>> Offset ', offset, ' data exists ', products !== null)
     if (products && Array.isArray(products)) {
       products.forEach((productHorus, index) => {
         // console.log('> ', index, ' ', JSON.stringify(productHorus))
@@ -139,7 +142,7 @@ module.exports = context => setup(null, true, firestore())
 
     return Promise.all(promises)
       .then(() => {
-        console.log('> Finish Cron stores')
+        console.log('> Finish Check Events stores')
       })
   })
   .catch(console.error)
