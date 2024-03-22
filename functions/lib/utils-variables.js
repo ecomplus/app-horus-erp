@@ -3,7 +3,7 @@ const collectionHorusEvents = 'horusEvents'
 
 // Events Names
 const topicProductsHorus = 'products_update'
-const topicCustomerHorus = 'customers'
+const topicResourceToEcom = 'resourse_to_ecom'
 
 const removeAccents = str => str.replace(/[áàãâÁÀÃÂ]/gi, 'a')
   .replace(/[éêÉÊ]/gi, 'e')
@@ -16,5 +16,5 @@ module.exports = {
   removeAccents,
   collectionHorusEvents,
   topicProductsHorus,
-  topicCustomerHorus
+  topicResourceToEcom
 }

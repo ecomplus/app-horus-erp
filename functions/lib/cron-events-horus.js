@@ -74,17 +74,18 @@ const productsEvents = async (appData, storeId) => {
   while (reply) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
-    // console.log('>> ', reply, ' ', endpoint)
     const products = await requestGetHorus(horus, endpoint)
       .catch((err) => {
-        console.error(err)
+        if (err.response) {
+          console.warn(JSON.stringify(err.response))
+        } else {
+          console.error(err)
+        }
         return null
       })
 
-    console.log('>> Offset ', offset, ' data exists ', products !== null)
     if (products && Array.isArray(products)) {
       products.forEach((productHorus, index) => {
-        // console.log('> ', index, ' ', JSON.stringify(productHorus))
         promisesSendTopics.push(
           sendMessageTopic(topicProductsHorus, { storeId, productHorus })
             .catch(console.error)

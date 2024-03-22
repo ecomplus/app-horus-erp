@@ -149,16 +149,16 @@ console.log(`-- Sheduled update E-Com Plus tokens '${cron}'`)
 // topics pub/sub
 const {
   topicProductsHorus,
-  topicCustomerHorus
+  topicResourceToEcom
 } = require('./lib/utils-variables')
 const handleProductHorusEvent = require('./lib/pub-sub/events/products')
-const handleCustomerHorusEvent = require('./lib/pub-sub/events/customers')
+const handleResourseToEcomEvent = require('./lib/pub-sub/events/import-to-ecom')
 
 exports.onProductHorusEvent = require('./lib/pub-sub/utils')
   .createEventsFunction(topicProductsHorus, handleProductHorusEvent)
 
 exports.onCustomerHorusEvent = require('./lib/pub-sub/utils')
-  .createEventsFunction(topicCustomerHorus, handleCustomerHorusEvent)
+  .createEventsFunction(topicResourceToEcom, handleResourseToEcomEvent)
 
 // cron jobs
 const handleCrons = require('./lib/cron-events-horus')
