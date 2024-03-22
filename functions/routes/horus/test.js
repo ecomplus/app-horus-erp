@@ -54,6 +54,7 @@ const productsEvents = async (appData, storeId) => {
   while (reply) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
+    console.time(endpoint)
     const products = await requestGetHorus(horus, endpoint)
       .catch((err) => {
         if (err.response) {
@@ -64,6 +65,7 @@ const productsEvents = async (appData, storeId) => {
         return null
       })
 
+    console.timeEnd(endpoint)
     if (products && Array.isArray(products)) {
       products.forEach((productHorus, index) => {
         console.log('>> ', JSON.stringify(productHorus))
