@@ -161,9 +161,9 @@ exports.onCustomerHorusEvent = require('./lib/pub-sub/utils')
   .createEventsFunction(topicResourceToEcom, handleResourseToEcomEvent)
 
 // cron jobs
-// const handleCrons = require('./lib/cron-events-horus')
-// const eventsCron = '*/1 * * * *'
-/*
+const handleCrons = require('./lib/cron-events-horus')
+const eventsCron = '*/1 * * * *'
+// /*
 exports.horusEvents = functions.pubsub.schedule(eventsCron)
   .onRun(() => handleCrons())
 console.log(`-- Check Events in Horus ERP'${eventsCron}'`)

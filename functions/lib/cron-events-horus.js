@@ -70,36 +70,38 @@ const productsEvents = async (appData, storeId) => {
 
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}`
 
-  // let reply = true
+  let reply = true
   let offset = 0
-  const limit = 1000
+  const limit = 100
 
   console.log('>>Cron s:', storeId, ' ', query, ' <')
   const promisesSendTopics = []
-  // while (reply) {
-  // create Object Horus to request api Horus
-  const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
-  const products = await requestGetHorus(horus, endpoint)
-    .catch((err) => {
-      if (err.response) {
-        console.warn(JSON.stringify(err.response))
-      } else {
-        console.error(err)
-      }
-      return null
-    })
+  while (reply) {
+    // create Object Horus to request api Horus
+    const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
+    const products = await requestGetHorus(horus, endpoint)
+      .catch((err) => {
+        if (err.response) {
+          console.warn(JSON.stringify(err.response))
+        } else {
+          console.error(err)
+        }
+        return null
+      })
 
-  if (products && Array.isArray(products)) {
-    products.forEach((productHorus, index) => {
-      promisesSendTopics.push(
-        sendMessageTopic(topicProductsHorus, { storeId, productHorus, updateProduct, updatePrice })
-          .catch(console.error)
-      )
-    })
+    if (products && Array.isArray(products)) {
+      products.forEach((productHorus, index) => {
+        promisesSendTopics.push(
+          sendMessageTopic(topicProductsHorus, { storeId, productHorus, updateProduct, updatePrice })
+            .catch(console.error)
+        )
+      })
+    } else {
+      reply = false
+    }
+
+    offset += limit
   }
-
-  offset += limit
-  // }
 
   return Promise.all(promisesSendTopics)
     .then(() => {
@@ -147,6 +149,7 @@ module.exports = context => setup(null, true, firestore())
           // if (now.getMinutes() % 5 === 0) {
           //   customerEvents(appData, storeId)
           // }
+          return null
         })
     }
     console.log('>>Check Events ', storeIds.length, ' <')
