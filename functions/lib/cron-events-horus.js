@@ -70,6 +70,7 @@ const productsEvents = async (appData, storeId) => {
 
     if (products && Array.isArray(products)) {
       products.forEach((productHorus, index) => {
+        console.log('> ', index, ' ', JSON.stringify(productHorus))
         sendMessageTopic(topicProductsHorus, { storeId, productHorus })
       })
     } else {
