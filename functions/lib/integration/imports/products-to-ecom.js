@@ -1,6 +1,7 @@
 const importCategories = require('./categories-to-ecom')
 const importBrands = require('./brands-to-ecom')
 const { removeAccents } = require('../../utils-variables')
+const { parsePrice } = require('../../parsers/parse-to-ecom')
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
   const {
@@ -55,7 +56,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     throw new Error(productHorus.Mensagem)
   }
   console.log('> product ', JSON.stringify(productHorus))
-  const price = parseFloat(VLR_CAPA)
+  const price = parsePrice(VLR_CAPA)
   const endpoint = `products.json?sku=COD_ITEM${COD_ITEM}&limit=1`
 
   const product = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)

@@ -6,16 +6,16 @@ const {
   topicProductsHorus
   // topicCustomerHorus
 } = require('./utils-variables')
-const parseDate = require('./parsers/date')
+const { parseDate } = require('./parsers/parse-to-ecom')
 const Horus = require('./horus/client')
 const { sendMessageTopic } = require('./pub-sub/utils')
 
 const listStoreIds = async () => {
   const storeIds = []
   const date = new Date()
-  date.setHours(date.getHours() - 28)
+  date.setHours(date.getHours() - 51) // 48 hours + 3 hours (cron update token)
 
-  console.log('>> ', date.toISOString(), ' <<')
+  // console.log('>> ', date.toISOString(), ' <<')
   const querySnapshot = await firestore()
     .collection('ecomplus_app_auth')
     .where('updated_at', '>', firestore.Timestamp.fromDate(date))
@@ -107,8 +107,9 @@ module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     const storeIds = await listStoreIds()
     const promises = []
-    // const now = new Date()
+    const now = new Date()
     const runEvent = async (storeId) => {
+      console.log(`>> Run #${storeId} in ${now.toISOString()}`)
       await appSdk.getAuth(storeId)
         .then((auth) => {
           return getAppData({ appSdk, storeId, auth }, true)

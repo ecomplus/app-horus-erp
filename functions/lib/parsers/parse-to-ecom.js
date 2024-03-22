@@ -17,4 +17,9 @@ const parseDate = (date = new Date(), isComplete) => {
   return format
 }
 
-module.exports = parseDate
+const parsePrice = (str) => parseFloat(str.replace(',', '.'))
+
+module.exports = {
+  parseDate,
+  parsePrice
+}
