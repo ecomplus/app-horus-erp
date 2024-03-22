@@ -27,8 +27,8 @@ module.exports = async (
   return appSdk.getAuth(storeId)
     .then((auth) => {
       return appSdk.apiRequest(storeId, endpoint, method, body, auth)
-        .then(() => {
-          console.log('>> Created ', resourse)
+        .then(({ response }) => {
+          console.log('>> Created ', resourse, ' ', response?.data?._id)
         })
     })
     .catch((err) => {

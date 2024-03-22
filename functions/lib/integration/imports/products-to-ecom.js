@@ -1,9 +1,7 @@
-const getCategories = require('../../store-api/get/categories')
-const getBrands = require('../../store-api/get/brands')
+const importCategories = require('./categories-to-ecom')
+const importBrands = require('./brands-to-ecom')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
-const { sendMessageTopic } = require('../../pub-sub/utils')
-const { topicProductsHorus } = require('../../utils-variables')
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
   const {
@@ -128,38 +126,38 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
 
     if (COD_GENERO) {
       promisesCategories.push(
-        getCategories({ appSdk, storeId, auth },
+        importCategories({ appSdk, storeId, auth },
           {
             codGenero: COD_GENERO,
             nomeGenero: GENERO_NIVEL_1
-          }, true
+          }
         )
       )
     }
     if (COD_GENERO_NIVEL2) {
       promisesCategories.push(
-        getCategories({ appSdk, storeId, auth },
+        importCategories({ appSdk, storeId, auth },
           {
             codGenero: COD_GENERO_NIVEL2,
             nomeGenero: GENERO_NIVEL_2
-          }, true
+          }
         )
       )
     }
     if (COD_GENERO_NIVEL3) {
       promisesCategories.push(
-        getCategories({ appSdk, storeId, auth },
+        importCategories({ appSdk, storeId, auth },
           {
             codGenero: COD_GENERO_NIVEL3,
             nomeGenero: GENERO_NIVEL_3
-          }, true
+          }
         )
       )
     }
 
     if (COD_EDITORA) {
       promisesBrands.push(
-        getBrands({ appSdk, storeId, auth },
+        importBrands({ appSdk, storeId, auth },
           {
             codEditora: COD_EDITORA,
             nomeEditora: NOM_EDITORA
@@ -169,32 +167,25 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus) => {
     }
 
     const categories = await Promise.all(promisesCategories)
-    // const brands = await Promise.all(promisesBrands)
+    const brands = await Promise.all(promisesBrands)
 
-    let awaitCreate = false
     categories.forEach((category) => {
       if (category) {
         if (!Array.isArray(body.categories)) {
           body.categories = []
         }
         body.categories.push({ _id: category._id, name: category.name })
-      } else {
-        awaitCreate = true
       }
     })
-    if (awaitCreate) {
-      sendMessageTopic(topicProductsHorus, { storeId, productHorus })
-      return null
-    }
 
-    // brands.forEach((brand) => {
-    //   if (brand) {
-    //     if (!Array.isArray(body.brands)) {
-    //       body.brands = []
-    //     }
-    //     body.brands.push({ _id: brand._id, name: brand.name })
-    //   }
-    // })
+    brands.forEach((brand) => {
+      if (brand) {
+        if (!Array.isArray(body.brands)) {
+          body.brands = []
+        }
+        body.brands.push({ _id: brand._id, name: brand.name })
+      }
+    })
 
     if (PALAVRAS_CHAVE) {
       body.keywords = PALAVRAS_CHAVE.split(',')

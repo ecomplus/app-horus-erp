@@ -1,9 +1,7 @@
 const ecomUtils = require('@ecomplus/utils')
 const { removeAccents } = require('../../utils-variables')
-const { sendMessageTopic } = require('../../pub-sub/utils')
-const { topicResourceToEcom } = require('../../utils-variables')
 
-module.exports = async ({ appSdk, storeId, auth }, categoriesHorus, isSendCreate) => {
+module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   // metafields.namespace='horus-erp'
   // metafields.field='COD_GENERO'
   // metafields.value=categoriesHorus.codGenero
@@ -50,10 +48,13 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus, isSendCreate
     }
   }
 
-  if (isSendCreate) {
-    endpoint = 'categories.json'
-    sendMessageTopic(topicResourceToEcom, { storeId, endpoint, method: 'POST', body })
-  }
+  endpoint = 'categories.json'
+  const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
+    .then(({ response }) => response.data)
+    .catch((err) => {
+      console.error(err)
+      return null
+    })
 
-  return null
+  return data ? { _id: data._id, name: nomeGenero } : data
 }
