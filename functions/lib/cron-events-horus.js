@@ -31,6 +31,24 @@ const listStoreIds = async () => {
   return storeIds
 }
 
+const requestGetHorus = (horus, endpoint, isRetry) => new Promise((resolve, reject) => {
+  console.log(' > is Retry ', isRetry)
+  horus.get(endpoint)
+    .then((resp) => {
+      const { data } = resp
+      if (resp && data.length && !data[0].Mensagem) {
+        resolve(data)
+      }
+      resolve(null)
+    })
+    .catch((err) => {
+      if (!isRetry) {
+        setTimeout(() => requestGetHorus(horus, endpoint, true), 1000)
+      }
+      reject(err)
+    })
+})
+
 const productsEvents = async (appData, storeId) => {
   const { username, password, baseURL } = appData
   const horus = new Horus(username, password, baseURL)
@@ -57,17 +75,7 @@ const productsEvents = async (appData, storeId) => {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
     // console.log('>> ', reply, ' ', endpoint)
-    const products = await horus.get(endpoint)
-      .then((resp) => {
-        const { data, status } = resp
-        console.log(' ', status)
-        if (resp && data.length && !data[0].Mensagem) {
-          console.log('>> Return data ')
-          return data
-        }
-        console.log('>> Return null ')
-        return null
-      })
+    const products = await requestGetHorus(horus, endpoint)
       .catch((err) => {
         console.error(err)
         return null
