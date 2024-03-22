@@ -59,7 +59,7 @@ const productsEvents = async (appData, storeId) => {
     // console.log('>> ', reply, ' ', endpoint)
     const products = await horus.get(endpoint)
       .then((resp) => {
-        console.log('>> Resp ', JSON.stringify(resp))
+        console.log('>> Resp ', resp)
         const { data } = resp
         if (resp && data.length && !data[0].Mensagem) {
           console.log('>> Return data ')
