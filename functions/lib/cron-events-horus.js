@@ -67,7 +67,7 @@ const productsEvents = async (appData, storeId) => {
 
   let reply = true
   let offset = 0
-  const limit = 50
+  const limit = 10
 
   console.log('>>Cron s:', storeId, ' ', dateInit, ' ', dateEnd, ' <')
   const promisesSendTopics = []
