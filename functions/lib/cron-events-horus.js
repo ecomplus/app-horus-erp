@@ -36,7 +36,7 @@ const requestGetHorus = (horus, endpoint, isRetry) => new Promise((resolve, reje
   horus.get(endpoint)
     .then((resp) => {
       const { data } = resp
-      if (resp && data.length && !data[0].Mensagem) {
+      if (data && data.length && !data[0].Mensagem) {
         resolve(data)
       }
       resolve(null)

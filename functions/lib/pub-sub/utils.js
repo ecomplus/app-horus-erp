@@ -25,7 +25,7 @@ const createPubSubFunction = (
 const createEventsFunction = (
   eventName,
   fn,
-  eventMaxAgeMs = 60000
+  eventMaxAgeMs = 58000
 ) => {
   const topicName = getPubSubTopic(eventName)
   return createPubSubFunction(topicName, fn, eventMaxAgeMs)

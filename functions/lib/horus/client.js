@@ -18,7 +18,7 @@ class Horus {
         Authorization: 'Basic ' +
           Buffer.from(`${username}:${password}`, 'utf8').toString('base64')
       },
-      timeout: 15000
+      timeout: 10000
     })
   }
 
