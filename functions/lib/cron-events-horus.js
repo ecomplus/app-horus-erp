@@ -74,6 +74,7 @@ const productsEvents = async (appData, storeId) => {
         // console.log('> ', index, ' ', JSON.stringify(productHorus))
         promisesSendTopics.push(
           sendMessageTopic(topicProductsHorus, { storeId, productHorus })
+            .catch(console.error)
         )
       })
     } else {
@@ -82,7 +83,11 @@ const productsEvents = async (appData, storeId) => {
 
     offset += limit
   }
-  await Promise.all(promisesSendTopics).then(() => console.log('Finish Exec ', storeId))
+
+  return Promise.all(promisesSendTopics)
+    .then(() => {
+      console.log('Finish Exec ', storeId)
+    })
 }
 
 /*
@@ -133,5 +138,8 @@ module.exports = context => setup(null, true, firestore())
     })
 
     return Promise.all(promises)
+      .then(() => {
+        console.log('> Finish Cron stores')
+      })
   })
   .catch(console.error)
