@@ -1,5 +1,5 @@
 const { firestore } = require('firebase-admin')
-const getAppData = require('./store-api/get-app-data')
+const getAppData = require('../../lib/store-api/get-app-data')
 const {
   collectionHorusEvents
 } = require('../../lib/utils-variables')
