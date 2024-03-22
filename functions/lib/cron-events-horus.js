@@ -55,6 +55,7 @@ const productsEvents = async (appData, storeId) => {
   while (reply) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
+    console.log('>> ', reply, ' ', endpoint)
     const products = await horus.get(endpoint)
       .then(({ data }) => {
         if (data && data.length && !data[0].Mensagem) {

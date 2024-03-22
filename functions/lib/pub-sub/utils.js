@@ -33,13 +33,12 @@ const createEventsFunction = (
 
 const sendMessageTopic = async (eventName, json) => {
   const topicName = getPubSubTopic(eventName)
-  const messageId = await new PubSub()
+  return new PubSub()
     .topic(topicName)
     .publishMessage({ json })
-
-  console.log('>> MessageId: ', messageId, '-s', json?.storeId, ' Topic: ', topicName)
-
-  return Promise.resolve(200)
+    .then((messageId) => {
+      console.log('>> MessageId: ', messageId, '-s', json?.storeId, ' Topic: ', topicName)
+    })
 }
 
 module.exports = {
