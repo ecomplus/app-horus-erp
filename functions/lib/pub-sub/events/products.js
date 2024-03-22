@@ -29,7 +29,7 @@ module.exports = async (
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
-      return importProductToEcom(appClient, productHorus)
+      return importProductToEcom(appClient, productHorus, updateProduct, updatePrice)
         .then(async () => {
           const date = new Date(lastUpdate)
           const now = new Date()

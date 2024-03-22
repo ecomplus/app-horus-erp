@@ -74,7 +74,7 @@ const productsEvents = async (appData, storeId) => {
   let offset = 0
   const limit = 1000
 
-  console.log('>>Cron s:', storeId, ' ', dateInit, ' ', dateEnd, ' <')
+  console.log('>>Cron s:', storeId, ' ', query, ' <')
   const promisesSendTopics = []
   // while (reply) {
   // create Object Horus to request api Horus
