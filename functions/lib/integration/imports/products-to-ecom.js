@@ -20,7 +20,8 @@ const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData) => {
   const promisesSendTopics = []
   while (hasRepeat) {
     // create Object Horus to request api Horus
-    const endpoint = `/Autores_item${codItem}&offset=${offset}&limit=${limit}`
+    const endpoint = `/Autores_item?COD_ITEM=${codItem}&offset=${offset}&limit=${limit}`
+    console.log('>> endpoint: ', endpoint)
     const autores = await requestHorus(horus, endpoint)
       .catch((err) => {
         if (err.response) {
@@ -216,10 +217,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       )
     }
 
-    const categories = await Promise.all(
-      promisesCategories,
-      ...getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
-    )
+    const categories = await Promise.all(promisesCategories)
+    await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
     const brands = await Promise.all(promisesBrands)
 
     categories.forEach((category) => {
