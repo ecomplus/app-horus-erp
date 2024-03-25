@@ -41,7 +41,7 @@ const productsEvents = async (horus, storeId, opts) => {
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resource}`)
 
-  console.log('>> ', resource, ' => ', field)
+  // console.log('>> ', resource, ' => ', field)
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
     const lastUpdateResource = docSnapshot.data()[field]
