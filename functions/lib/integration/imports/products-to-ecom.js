@@ -59,8 +59,6 @@ const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData) => {
 }
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
-  // const { updateProduct, updatePrice, horus } = opts
-  console.log('>> ', opts)
   const {
     update_product: updateProduct,
     update_price: updatePrice
