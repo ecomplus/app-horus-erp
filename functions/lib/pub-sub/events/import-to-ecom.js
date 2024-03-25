@@ -42,11 +42,11 @@ module.exports = async (
         .then(async () => {
           const date = new Date(lastUpdate)
           const now = new Date()
-          const lastUpdateProduct = now.getTime() > date.getTime()
+          const lastUpdateResource = now.getTime() > date.getTime()
             ? now.toISOString()
             : date.toISOString()
 
-          const body = { lastUpdateProduct }
+          const body = { [`${field}`]: lastUpdateResource }
           await docRef.set(body, { merge: true })
             .catch(console.error)
 
