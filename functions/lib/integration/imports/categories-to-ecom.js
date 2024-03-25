@@ -77,7 +77,11 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
     if (codAutor) {
       const categoryAuthors = await getCategory({ appSdk, storeId, auth }, 'categories.json?name=Autores&limit=1')
       if (categoryAuthors) {
-        body.parent = categoryAuthors
+        body.parent = {
+          _id: categoryAuthors._id,
+          name: categoryAuthors.name,
+          slug: categoryAuthors.slug
+        }
       }
     }
     return createCategory({ appSdk, storeId, auth }, 'categories.json', body)

@@ -37,7 +37,7 @@ const sendMessageTopic = async (eventName, json) => {
     .topic(topicName)
     .publishMessage({ json })
 
-  console.log(`>> MessageId: #${messageId}-s${json?.storeId} Topic: ${topicName}`)
+  console.log(`>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - ${json?.resource}`)
 
   return Promise.resolve(200)
 }
