@@ -1,62 +1,64 @@
-const importCategories = require('./categories-to-ecom')
-const importBrands = require('./brands-to-ecom')
+const getCategories = require('./categories-to-ecom')
+// const importBrands = require('./brands-to-ecom')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
-const requestHorus = require('../../horus/request')
-const Horus = require('../../horus/client')
+const { firestore } = require('firebase-admin')
+const { collectionHorusEvents } = require('../../utils-variables')
+// const requestHorus = require('../../horus/request')
+// const Horus = require('../../horus/client')
 
-const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData) => {
-  const {
-    username,
-    password,
-    baseURL
-  } = appData
-  const horus = new Horus(username, password, baseURL)
-  // /Autores_item?COD_ITEM=1&offset=0&limit=100
-  let hasRepeat = true
-  let offset = 0
-  const limit = 100
+// const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData) => {
+//   const {
+//     username,
+//     password,
+//     baseURL
+//   } = appData
+//   const horus = new Horus(username, password, baseURL)
+//   // /Autores_item?COD_ITEM=1&offset=0&limit=100
+//   let hasRepeat = true
+//   let offset = 0
+//   const limit = 100
 
-  const promisesSendTopics = []
-  while (hasRepeat) {
-    // create Object Horus to request api Horus
-    const endpoint = `/Autores_item?COD_ITEM=${codItem}&offset=${offset}&limit=${limit}`
-    console.log('>> endpoint: ', endpoint)
-    const autores = await requestHorus(horus, endpoint)
-      .catch((err) => {
-        if (err.response) {
-          console.warn(JSON.stringify(err.response))
-        } else {
-          console.error(err)
-        }
-        return null
-      })
+//   const promisesSendTopics = []
+//   while (hasRepeat) {
+//     // create Object Horus to request api Horus
+//     const endpoint = `/Autores_item?COD_ITEM=${codItem}&offset=${offset}&limit=${limit}`
+//     console.log('>> endpoint: ', endpoint)
+//     const autores = await requestHorus(horus, endpoint)
+//       .catch((err) => {
+//         if (err.response) {
+//           console.warn(JSON.stringify(err.response))
+//         } else {
+//           console.error(err)
+//         }
+//         return null
+//       })
 
-    if (autores && Array.isArray(autores)) {
-      autores.forEach((autor, index) => {
-        const {
-          COD_AUTOR: codAutor,
-          NOM_AUTOR: nomeAutor
-        } = autor
-        promisesSendTopics.push(
-          importCategories({ appSdk, storeId, auth },
-            {
-              codAutor,
-              nomeAutor
-            }
-          )
-        )
-      })
-    } else {
-      hasRepeat = false
-    }
+//     if (autores && Array.isArray(autores)) {
+//       autores.forEach((autor, index) => {
+//         const {
+//           COD_AUTOR: codAutor,
+//           NOM_AUTOR: nomeAutor
+//         } = autor
+//         promisesSendTopics.push(
+//           importCategories({ appSdk, storeId, auth },
+//             {
+//               codAutor,
+//               nomeAutor
+//             }
+//           )
+//         )
+//       })
+//     } else {
+//       hasRepeat = false
+//     }
 
-    offset += limit
-  }
-  const categories = await Promise.all(promisesSendTopics)
-  console.log('>> categories ', categories)
-  return categories
-}
+//     offset += limit
+//   }
+//   const categories = await Promise.all(promisesSendTopics)
+//   console.log('>> categories ', categories)
+//   return categories
+// }
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const {
@@ -71,8 +73,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     // COD_ISBN_ITEM,
     // COD_ISSN_ITEM,
     NOM_ITEM,
-    COD_EDITORA,
-    NOM_EDITORA,
+    // COD_EDITORA,
+    // NOM_EDITORA,
     // SELO,
     // COD_GRUPO_ITEM,
     // NOM_GRUPO_ITEM,
@@ -184,40 +186,48 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
 
     const promisesGenders = []
-    const promisesBrands = []
-    const generos = ['COD_GENERO_NIVEL', 'COD_GENERO_NIVEL2', 'COD_GENERO_NIVEL3']
+    const sendSyncCategories = []
+    // const promisesBrands = []
+    const generos = ['COD_GENERO', 'COD_GENERO_NIVEL2', 'COD_GENERO_NIVEL3']
 
     generos.forEach(genero => {
       if (productHorus[genero]) {
         const strNumeral = genero.replace('COD_GENERO_NIVEL', '')
         const numeral = Number.isInteger(parseInt(strNumeral)) && parseInt(strNumeral)
+        const codGenero = productHorus[genero]
+        const nomeGenero = productHorus[`GENERO_NIVEL_${numeral || 1}`]
         promisesGenders.push(
-          importCategories({ appSdk, storeId, auth },
+          getCategories({ appSdk, storeId, auth },
             {
-              codGenero: productHorus[genero],
-              nomeGenero: productHorus[`GENERO_NIVEL_${numeral || 1}`]
+              codGenero,
+              nomeGenero
             }
-          )
+          ).then(resp => {
+            if (!resp) {
+              sendSyncCategories({ codGenero, nomeGenero })
+            }
+            return resp
+          })
         )
       }
     })
 
-    if (COD_EDITORA) {
-      promisesBrands.push(
-        importBrands({ appSdk, storeId, auth },
-          {
-            codEditora: COD_EDITORA,
-            nomeEditora: NOM_EDITORA
-          }
-        )
-      )
-    }
+    // if (COD_EDITORA) {
+    //   promisesBrands.push(
+    //     importBrands({ appSdk, storeId, auth },
+    //       {
+    //         codEditora: COD_EDITORA,
+    //         nomeEditora: NOM_EDITORA
+    //       }
+    //     )
+    //   )
+    // }
 
     const genders = await Promise.all(promisesGenders)
-    const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
-    const brands = await Promise.all(promisesBrands)
+    // const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
+    // const brands = await Promise.all(promisesBrands)
 
-    const categories = [...genders, ...authors]
+    const categories = [...genders]
     categories.forEach((category) => {
       if (category) {
         if (!Array.isArray(body.categories)) {
@@ -227,14 +237,14 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     })
 
-    brands.forEach((brand) => {
-      if (brand) {
-        if (!Array.isArray(body.brands)) {
-          body.brands = []
-        }
-        body.brands.push({ _id: brand._id, name: brand.name })
-      }
-    })
+    // brands.forEach((brand) => {
+    //   if (brand) {
+    //     if (!Array.isArray(body.brands)) {
+    //       body.brands = []
+    //     }
+    //     body.brands.push({ _id: brand._id, name: brand.name })
+    //   }
+    // })
 
     if (PALAVRAS_CHAVE) {
       body.keywords = PALAVRAS_CHAVE.split(',')
@@ -256,9 +266,33 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
     // TODO: check kit
 
-    console.log('>> body ', JSON.stringify(body))
+    // console.log('>> body ', JSON.stringify(body))
     const endpoint = 'products.json'
     const method = !product ? 'POST' : 'PATCH'
-    return appSdk.apiRequest(storeId, endpoint, method, body, auth)
+    const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
+    const productId = product ? product._id : newProduct._id
+    const docFirestore = `${collectionHorusEvents}/${storeId}_products/syncCategory`
+    let i = 0
+
+    while (i < sendSyncCategories.length) {
+      const categoryHorus = sendSyncCategories[i]
+      const {
+        codGenero
+        // nomeGenero
+      } = categoryHorus
+
+      const idCategory = codGenero ? `COD_GENERO${codGenero}` : ''
+      const idDocFirestore = docFirestore + `/${idCategory}/products/${productId}`
+      await firestore().doc(idDocFirestore)
+        .set({
+          productId,
+          ...categoryHorus
+        }, { merge: true })
+        .catch(console.error)
+
+      i += 1
+    }
+
+    return newProduct
   }
 }

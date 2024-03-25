@@ -16,7 +16,6 @@ module.exports = async (
   {
     storeId,
     resource,
-    horusRequest,
     objectHorus,
     opts
   },

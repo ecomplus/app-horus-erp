@@ -34,7 +34,7 @@ const createCategory = async ({ appSdk, storeId, auth }, endpoint, body) => {
   return data ? { _id: data._id, name: body.name } : data
 }
 
-module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
+module.exports = async ({ appSdk, storeId, auth }, categoriesHorus, isCreate) => {
   // metafields.namespace='horus-erp'
   // metafields.field='COD_GENERO'
   // metafields.value=categoriesHorus.codGenero
@@ -73,7 +73,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   endpoint += '&limit=1'
 
   const category = await getCategory({ appSdk, storeId, auth }, endpoint)
-  if (!category) {
+  if (!category && isCreate) {
     if (codAutor) {
       const categoryAuthors = await getCategory({ appSdk, storeId, auth }, 'categories.json?name=Autores&limit=1')
       if (categoryAuthors) {
