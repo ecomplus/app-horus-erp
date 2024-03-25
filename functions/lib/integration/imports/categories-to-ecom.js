@@ -12,8 +12,10 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
     nomeAutor
   } = categoriesHorus
 
+  const name = codGenero ? nomeGenero : nomeAutor
   const body = {
-    slug: removeAccents(nomeGenero.toLowerCase())
+    name,
+    slug: removeAccents(name.toLowerCase())
       .replace(/[^a-z0-9-_./]/gi, '_')
   }
 
@@ -29,7 +31,6 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
     }]
   } else if (codAutor) {
     endpoint += `&metafields.field=COD_AUTOR&metafields.value=${codAutor}`
-    body.name = nomeAutor
     body.metafields = [{
       _id: ecomUtils.randomObjectId(),
       namespace: 'horus-erp',
