@@ -3,62 +3,66 @@ const getCategories = require('./categories-to-ecom')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
 const { firestore } = require('firebase-admin')
-const { collectionHorusEvents } = require('../../utils-variables')
-// const requestHorus = require('../../horus/request')
-// const Horus = require('../../horus/client')
+const requestHorus = require('../../horus/request')
+const Horus = require('../../horus/client')
 
-// const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData) => {
-//   const {
-//     username,
-//     password,
-//     baseURL
-//   } = appData
-//   const horus = new Horus(username, password, baseURL)
-//   // /Autores_item?COD_ITEM=1&offset=0&limit=100
-//   let hasRepeat = true
-//   let offset = 0
-//   const limit = 100
+const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, sendSyncCategories) => {
+  const {
+    username,
+    password,
+    baseURL
+  } = appData
+  const horus = new Horus(username, password, baseURL)
+  // /Autores_item?COD_ITEM=1&offset=0&limit=100
+  let hasRepeat = true
+  let offset = 0
+  const limit = 100
 
-//   const promisesSendTopics = []
-//   while (hasRepeat) {
-//     // create Object Horus to request api Horus
-//     const endpoint = `/Autores_item?COD_ITEM=${codItem}&offset=${offset}&limit=${limit}`
-//     console.log('>> endpoint: ', endpoint)
-//     const autores = await requestHorus(horus, endpoint)
-//       .catch((err) => {
-//         if (err.response) {
-//           console.warn(JSON.stringify(err.response))
-//         } else {
-//           console.error(err)
-//         }
-//         return null
-//       })
+  const promisesSendTopics = []
+  while (hasRepeat) {
+    // create Object Horus to request api Horus
+    const endpoint = `/Autores_item?COD_ITEM=${codItem}&offset=${offset}&limit=${limit}`
+    console.log('>> endpoint: ', endpoint)
+    const autores = await requestHorus(horus, endpoint)
+      .catch((err) => {
+        if (err.response) {
+          console.warn(JSON.stringify(err.response))
+        } else {
+          console.error(err)
+        }
+        return null
+      })
 
-//     if (autores && Array.isArray(autores)) {
-//       autores.forEach((autor, index) => {
-//         const {
-//           COD_AUTOR: codAutor,
-//           NOM_AUTOR: nomeAutor
-//         } = autor
-//         promisesSendTopics.push(
-//           importCategories({ appSdk, storeId, auth },
-//             {
-//               codAutor,
-//               nomeAutor
-//             }
-//           )
-//         )
-//       })
-//     } else {
-//       hasRepeat = false
-//     }
+    if (autores && Array.isArray(autores)) {
+      autores.forEach((autor, index) => {
+        const {
+          COD_AUTOR: codAutor,
+          NOM_AUTOR: nomeAutor
+        } = autor
+        promisesSendTopics.push(
+          getCategories({ appSdk, storeId, auth },
+            {
+              codAutor,
+              nomeAutor
+            }
+          ).then(resp => {
+            if (!resp) {
+              sendSyncCategories.push({ codAutor, nomeAutor })
+            }
+            return resp
+          })
+        )
+      })
+    } else {
+      hasRepeat = false
+    }
 
-//     offset += limit
-//   }
-//   const categories = await Promise.all(promisesSendTopics)
-//   console.log('>> categories ', categories)
-//   return categories
-// }
+    offset += limit
+  }
+  const categories = await Promise.all(promisesSendTopics)
+  console.log('>> categories ', categories)
+  return categories
+}
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const {
@@ -224,10 +228,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     // }
 
     const genders = await Promise.all(promisesGenders)
-    // const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
+    const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, sendSyncCategories)
     // const brands = await Promise.all(promisesBrands)
 
-    const categories = [...genders]
+    const categories = [...genders, ...authors]
     categories.forEach((category) => {
       if (category) {
         if (!Array.isArray(body.categories)) {
@@ -266,23 +270,22 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
     // TODO: check kit
 
-    // console.log('>> body ', JSON.stringify(body))
     const endpoint = 'products.json'
     const method = !product ? 'POST' : 'PATCH'
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
       .then(({ response }) => response.data)
     const productId = product ? product._id : newProduct._id
-    const docFirestore = `${collectionHorusEvents}/${storeId}_products/syncCategory`
+    const docFirestore = `syncCategory/${storeId}`
     let i = 0
 
     while (i < sendSyncCategories.length) {
       const categoryHorus = sendSyncCategories[i]
       const {
-        codGenero
-        // nomeGenero
+        codGenero,
+        codAutor
       } = categoryHorus
 
-      const idCategory = codGenero ? `COD_GENERO${codGenero}` : ''
+      const idCategory = codGenero ? `COD_GENERO${codGenero}` : `COD_AUTOR${codAutor}`
       const idDocFirestore = docFirestore + `/${idCategory}/products/${productId}`
       await firestore().doc(idDocFirestore)
         .set({
