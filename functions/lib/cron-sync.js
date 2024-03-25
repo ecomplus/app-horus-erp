@@ -37,7 +37,7 @@ module.exports = context => setup(null, true, firestore())
           })
           let data
           if (index === 0) {
-            data = await getData()
+            data = await getData
           }
           console.log('>> data:  ', data, productId)
         })
