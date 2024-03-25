@@ -17,16 +17,16 @@ module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     console.log('>>init sync')
     const querySnapshot = await firestore()
-      .doc(collectionName)
+      .collection(collectionName)
       .get()
 
-    console.log('>> querySnapshot ', querySnapshot)
-    querySnapshot?.forEach(documentSnapshot => {
-      const storeId = documentSnapshot.id
-      const docId = `${collectionName}/${storeId}`
-      const data = documentSnapshot.data()
-      console.log('>> ', storeId, JSON.stringify(data), docId)
-    })
+    console.log('>> querySnapshot ', querySnapshot.docs)
+    // querySnapshot?.forEach(documentSnapshot => {
+    //   const storeId = documentSnapshot.id
+    //   const docId = `${collectionName}/${storeId}`
+    //   const data = documentSnapshot.data()
+    //   console.log('>> ', storeId, JSON.stringify(data), docId)
+    // })
     return null
 
     // return Promise.all(promises)
