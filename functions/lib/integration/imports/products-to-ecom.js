@@ -3,7 +3,8 @@ const importBrands = require('./brands-to-ecom')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
 
-module.exports = async ({ appSdk, storeId, auth }, productHorus, updateProduct, updatePrice) => {
+module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
+  const { updateProduct, updatePrice } = opts
   const {
     COD_ITEM,
     // COD_BARRA_ITEM,

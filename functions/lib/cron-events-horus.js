@@ -3,7 +3,8 @@ const { setup } = require('@ecomplus/application-sdk')
 const getAppData = require('./store-api/get-app-data')
 const {
   collectionHorusEvents,
-  topicProductsHorus
+  topicResourceToEcom
+  // topicProductsHorus
   // topicCustomerHorus
 } = require('./utils-variables')
 const { parseDate } = require('./parsers/parse-to-ecom')
@@ -70,13 +71,15 @@ const productsEvents = async (appData, storeId) => {
 
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}`
 
-  let reply = true
+  let hasRepeat = true
   let offset = 0
   const limit = 100
 
+  const opts = { updateProduct, updatePrice }
+
   console.log('>>Cron s:', storeId, ' ', query, ' <')
   const promisesSendTopics = []
-  while (reply) {
+  while (hasRepeat) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
     const products = await requestGetHorus(horus, endpoint)
@@ -92,12 +95,19 @@ const productsEvents = async (appData, storeId) => {
     if (products && Array.isArray(products)) {
       products.forEach((productHorus, index) => {
         promisesSendTopics.push(
-          sendMessageTopic(topicProductsHorus, { storeId, productHorus, updateProduct, updatePrice })
+          sendMessageTopic(
+            topicResourceToEcom,
+            {
+              storeId,
+              resourse: 'products',
+              objectHorus: productHorus,
+              opts
+            })
             .catch(console.error)
         )
       })
     } else {
-      reply = false
+      hasRepeat = false
     }
 
     offset += limit
