@@ -19,7 +19,6 @@ module.exports = context => setup(null, true, firestore())
     const querySnapshot = await firestore()
       .collection(collectionName)
       .listDocuments()
-      .get()
 
     console.log('>> querySnapshot ', querySnapshot)
     // querySnapshot?.forEach(documentSnapshot => {
