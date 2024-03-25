@@ -1,6 +1,39 @@
 const ecomUtils = require('@ecomplus/utils')
 const { removeAccents } = require('../../utils-variables')
 
+const getCategory = ({ appSdk, storeId, auth }, endpoint) => {
+  return appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
+    .then(({ response }) => {
+      const { data } = response
+      if (data && data.result && data.result.length) {
+        return data.result[0]
+      }
+      return null
+    })
+    .catch((err) => {
+      if (err.response?.status === 404 || err.message === 'not found') {
+        return null
+      }
+      if (err.response) {
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
+      }
+      throw err
+    })
+}
+
+const createCategory = async ({ appSdk, storeId, auth }, endpoint, body) => {
+  const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
+    .then(({ response }) => response.data)
+    .catch((err) => {
+      console.error(err)
+      return null
+    })
+
+  return data ? { _id: data._id, name: body.name } : data
+}
+
 module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   // metafields.namespace='horus-erp'
   // metafields.field='COD_GENERO'
@@ -22,7 +55,6 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   let endpoint = 'categories.json?metafields.namespace=horus-erp'
   if (codGenero) {
     endpoint += `&metafields.field=COD_GENERO&metafields.value=${codGenero}`
-    body.name = nomeGenero
     body.metafields = [{
       _id: ecomUtils.randomObjectId(),
       namespace: 'horus-erp',
@@ -40,33 +72,23 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus) => {
   }
   endpoint += '&limit=1'
 
-  const category = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
-    .then(({ response }) => response.data)
-    .catch((err) => {
-      if (err.response?.status === 404 || err.message === 'not found') {
-        return null
+  const category = await getCategory({ appSdk, storeId, auth }, endpoint)
+  if (!category) {
+    if (codAutor) {
+      let categoryAuthors = await getCategory({ appSdk, storeId, auth }, 'categories.json?name=Autores&limit=1')
+      if (!categoryAuthors) {
+        categoryAuthors = await createCategory(
+          { appSdk, storeId, auth },
+          'categories.json',
+          { name: 'Autores', slug: 'autores' }
+        )
       }
-      if (err.response) {
-        console.warn(JSON.stringify(err.response))
-      } else {
-        console.error(err)
+      if (categoryAuthors) {
+        body.parent = categoryAuthors
       }
-      throw err
-    })
-
-  if (category) {
-    if (category.result && category.result.length) {
-      return category.result[0]
     }
+    return createCategory({ appSdk, storeId, auth }, 'categories.json', body)
   }
 
-  endpoint = 'categories.json'
-  const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
-    .then(({ response }) => response.data)
-    .catch((err) => {
-      console.error(err)
-      return null
-    })
-
-  return data ? { _id: data._id, name: nomeGenero } : data
+  return category
 }

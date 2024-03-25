@@ -35,13 +35,14 @@ module.exports = async (
     lastUpdateDoc = docSnapshot.data()[field]
   }
 
+  const now = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
+
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
       return imports[resource](appClient, objectHorus, opts)
         .then(async () => {
           const date = new Date(lastUpdate)
-          const now = new Date()
           const lastUpdateResource = now.getTime() > date.getTime()
             ? now.toISOString()
             : date.toISOString()
@@ -60,7 +61,7 @@ module.exports = async (
       } else {
         if (lastUpdate) {
           const date = new Date(lastUpdate)
-          const lastDoc = lastUpdateDoc ? new Date(lastUpdateDoc) : new Date()
+          const lastDoc = lastUpdateDoc ? new Date(lastUpdateDoc) : now
           const lastUpdateResource = lastDoc.getTime() < date.getTime()
             ? lastDoc.toISOString()
             : date.toISOString()
