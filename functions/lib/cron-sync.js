@@ -20,13 +20,13 @@ module.exports = context => setup(null, true, firestore())
       .collection(collectionName)
       .listDocuments()
 
-    console.log('>> querySnapshot ', querySnapshot)
-    // querySnapshot?.forEach(documentSnapshot => {
+    console.log('>> querySnapshot ', querySnapshot.length)
+    querySnapshot?.forEach(documentSnapshot => {
     //   const storeId = documentSnapshot.id
     //   const docId = `${collectionName}/${storeId}`
     //   const data = documentSnapshot.data()
-    //   console.log('>> ', storeId, JSON.stringify(data), docId)
-    // })
+      console.log('>> ', documentSnapshot)
+    })
     return null
 
     // return Promise.all(promises)
