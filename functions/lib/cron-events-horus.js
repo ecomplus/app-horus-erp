@@ -9,6 +9,7 @@ const {
 } = require('./utils-variables')
 const { parseDate } = require('./parsers/parse-to-ecom')
 const Horus = require('./horus/client')
+const requestHorus = require('./horus/request')
 const { sendMessageTopic } = require('./pub-sub/utils')
 
 const listStoreIds = async () => {
@@ -32,32 +33,8 @@ const listStoreIds = async () => {
   return storeIds
 }
 
-const requestGetHorus = (horus, endpoint, isRetry) => new Promise((resolve, reject) => {
-  horus.get(endpoint)
-    .then((resp) => {
-      const { data } = resp
-      if (data && data.length && !data[0].Mensagem) {
-        resolve(data)
-      }
-      resolve(null)
-    })
-    .catch((err) => {
-      if (!isRetry) {
-        setTimeout(() => requestGetHorus(horus, endpoint, true), 1000)
-      }
-      reject(err)
-    })
-})
-
-const productsEvents = async (appData, storeId) => {
-  const {
-    username,
-    password,
-    baseURL,
-    update_product: updateProduct,
-    update_price: updatePrice
-  } = appData
-  const horus = new Horus(username, password, baseURL)
+const productsEvents = async (storeId, opts) => {
+  const { horus } = opts
   let dateInit = parseDate(new Date(1), true)
   const dateEnd = parseDate(new Date(), true)
   const docRef = firestore()
@@ -75,14 +52,12 @@ const productsEvents = async (appData, storeId) => {
   let offset = 0
   const limit = 100
 
-  const opts = { updateProduct, updatePrice }
-
   console.log('>>Cron s:', storeId, ' ', query, ' <')
   const promisesSendTopics = []
   while (hasRepeat) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
-    const products = await requestGetHorus(horus, endpoint)
+    const products = await requestHorus(horus, endpoint, 'get')
       .catch((err) => {
         if (err.response) {
           console.warn(JSON.stringify(err.response))
@@ -94,6 +69,8 @@ const productsEvents = async (appData, storeId) => {
 
     if (products && Array.isArray(products)) {
       products.forEach((productHorus, index) => {
+        // autores
+        // /Autores_item?COD_ITEM=1'
         promisesSendTopics.push(
           sendMessageTopic(
             topicResourceToEcom,
@@ -143,6 +120,8 @@ const customerEvents = async (appData, storeId) => {
 }
 */
 
+// Autores_item?COD_ITEM=1
+
 module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     const storeIds = await listStoreIds()
@@ -155,7 +134,16 @@ module.exports = context => setup(null, true, firestore())
           return getAppData({ appSdk, storeId, auth }, true)
         })
         .then((appData) => {
-          productsEvents(appData, storeId)
+          const {
+            username,
+            password,
+            baseURL,
+            update_product: updateProduct,
+            update_price: updatePrice
+          } = appData
+          const horus = new Horus(username, password, baseURL)
+          const opts = { updateProduct, updatePrice, horus }
+          productsEvents(storeId, opts)
           // if (now.getMinutes() % 5 === 0) {
           //   customerEvents(appData, storeId)
           // }

@@ -16,12 +16,12 @@ module.exports = async (
   {
     storeId,
     resourse,
+    horusRequest,
     objectHorus,
     opts
   },
   context
 ) => {
-  console.log('>> context ', JSON.stringify(context))
   const { eventId } = context
   const { DAT_ULT_ATL: lastUpdate } = objectHorus
   const logId = `${eventId}-s${storeId}`
@@ -48,7 +48,7 @@ module.exports = async (
         })
     })
     .catch(async (err) => {
-      console.error('Error in #', logId)
+      console.error('Error in #', logId, ' import ', resourse)
       if (err.appWithoutAuth) {
         console.error(err)
       } else {

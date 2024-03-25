@@ -2,9 +2,56 @@ const importCategories = require('./categories-to-ecom')
 const importBrands = require('./brands-to-ecom')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
+const requestHorus = require('../../horus/request')
+
+const getHorusAutores = async ({ appSdk, storeId, auth }, horus, codItem) => {
+  // /Autores_item?COD_ITEM=1&offset=0&limit=100
+  let hasRepeat = true
+  let offset = 0
+  const limit = 100
+
+  const promisesSendTopics = []
+  while (hasRepeat) {
+    // create Object Horus to request api Horus
+    const endpoint = `/Autores_item${codItem}&offset=${offset}&limit=${limit}`
+    const autores = await requestHorus(horus, endpoint)
+      .catch((err) => {
+        if (err.response) {
+          console.warn(JSON.stringify(err.response))
+        } else {
+          console.error(err)
+        }
+        return null
+      })
+
+    if (autores && Array.isArray(autores)) {
+      autores.forEach((autor, index) => {
+        const {
+          COD_AUTOR: codAutor,
+          NOM_AUTOR: nomeAutor
+        } = autor
+        promisesSendTopics.push(
+          importCategories({ appSdk, storeId, auth },
+            {
+              codAutor,
+              nomeAutor
+            }
+          )
+        )
+      })
+    } else {
+      hasRepeat = false
+    }
+
+    offset += limit
+  }
+  const categories = await Promise.all(promisesSendTopics)
+  console.log('>> categories ', categories)
+  return categories
+}
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
-  const { updateProduct, updatePrice } = opts
+  const { updateProduct, updatePrice, horus } = opts
   const {
     COD_ITEM,
     // COD_BARRA_ITEM,
@@ -20,12 +67,12 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     // COD_UNIDADE,
     // NOM_UNIDADE,
     // TIPO,
-    COD_GENERO,
-    GENERO_NIVEL_1,
-    COD_GENERO_NIVEL2,
-    GENERO_NIVEL_2,
-    COD_GENERO_NIVEL3,
-    GENERO_NIVEL_3,
+    // COD_GENERO,
+    // GENERO_NIVEL_1,
+    // COD_GENERO_NIVEL2,
+    // GENERO_NIVEL_2,
+    // COD_GENERO_NIVEL3,
+    // GENERO_NIVEL_3,
     SUBTITULO,
     DESC_SINOPSE,
     OBS_ESPECIAIS,
@@ -126,37 +173,24 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
     const promisesCategories = []
     const promisesBrands = []
+    const generos = ['COD_GENERO_NIVEL', 'COD_GENERO_NIVEL2', 'COD_GENERO_NIVEL3']
 
-    if (COD_GENERO) {
-      promisesCategories.push(
-        importCategories({ appSdk, storeId, auth },
-          {
-            codGenero: COD_GENERO,
-            nomeGenero: GENERO_NIVEL_1
-          }
+    generos.forEach(genero => {
+      if (productHorus[genero]) {
+        const strNumeral = genero.replace('COD_GENERO_NIVEL', '')
+        const numeral = Number.isInteger(parseInt(strNumeral)) && parseInt(strNumeral)
+        promisesCategories.push(
+          importCategories({ appSdk, storeId, auth },
+            {
+              codGenero: productHorus[genero],
+              nomeGenero: productHorus[`GENERO_NIVEL_${numeral || 1}`]
+            }
+          )
         )
-      )
-    }
-    if (COD_GENERO_NIVEL2) {
-      promisesCategories.push(
-        importCategories({ appSdk, storeId, auth },
-          {
-            codGenero: COD_GENERO_NIVEL2,
-            nomeGenero: GENERO_NIVEL_2
-          }
-        )
-      )
-    }
-    if (COD_GENERO_NIVEL3) {
-      promisesCategories.push(
-        importCategories({ appSdk, storeId, auth },
-          {
-            codGenero: COD_GENERO_NIVEL3,
-            nomeGenero: GENERO_NIVEL_3
-          }
-        )
-      )
-    }
+      }
+    })
+
+    // /Autores_item?COD_ITEM=1&offset=0&limit=100
 
     if (COD_EDITORA) {
       promisesBrands.push(
@@ -169,7 +203,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       )
     }
 
-    const categories = await Promise.all(promisesCategories)
+    const categories = await Promise.all(
+      promisesCategories,
+      ...getHorusAutores({ appSdk, storeId, auth }, horus, COD_ITEM)
+    )
     const brands = await Promise.all(promisesBrands)
 
     categories.forEach((category) => {

@@ -8,33 +8,30 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
 
   const {
     codEditora,
-    nomeEditora,
-    nomeAutor
+    nomeEditora
   } = brandHorus
 
   let endpoint = 'brands.json?metafields.namespace=horus-erp'
   if (codEditora) {
     endpoint += `&metafields.field=COD_EDITORA&metafields.value=${codEditora}`
-  } else if (nomeAutor) {
-    endpoint += `&metafields.field=NOME_AUTOR&metafields.value=${nomeAutor}`
   }
   endpoint += '&limit=1'
 
   const body = {
-    name: codEditora ? nomeEditora : nomeAutor,
-    slug: removeAccents((codEditora ? nomeEditora : nomeAutor).toLowerCase())
+    name: nomeEditora,
+    slug: removeAccents((nomeEditora).toLowerCase())
       .replace(/[^a-z0-9-_./]/gi, '_'),
     metafields: [
       {
         _id: ecomUtils.randomObjectId(),
         namespace: 'horus-erp',
-        field: codEditora ? 'COD_EDITORA' : 'NOME_AUTOR',
-        value: codEditora ? `${codEditora}` : nomeAutor
+        field: 'COD_EDITORA',
+        value: `${codEditora}`
       }
     ]
   }
 
-  if (codEditora || nomeAutor) {
+  if (codEditora) {
     const brands = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
       .then(({ response }) => response.data)
       .catch((err) => {
@@ -63,7 +60,7 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
         return null
       })
 
-    return data ? { _id: data._id, name: codEditora ? nomeEditora : nomeAutor } : data
+    return data ? { _id: data._id, name: nomeEditora } : data
   }
   return null
 }
