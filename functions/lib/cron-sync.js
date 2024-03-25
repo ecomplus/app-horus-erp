@@ -17,7 +17,7 @@ module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     console.log('>>init sync')
     const querySnapshot = await firestore()
-      .collection(collectionName)
+      .doc(collectionName)
       .get()
 
     console.log('>> querySnapshot ', querySnapshot)
