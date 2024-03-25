@@ -270,6 +270,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const endpoint = 'products.json'
     const method = !product ? 'POST' : 'PATCH'
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
+      .then(({ response }) => response.data)
     const productId = product ? product._id : newProduct._id
     const docFirestore = `${collectionHorusEvents}/${storeId}_products/syncCategory`
     let i = 0
