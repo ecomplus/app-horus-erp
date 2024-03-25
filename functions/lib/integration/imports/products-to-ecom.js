@@ -204,8 +204,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     })
 
-    // /Autores_item?COD_ITEM=1&offset=0&limit=100
-
     if (COD_EDITORA) {
       promisesBrands.push(
         importBrands({ appSdk, storeId, auth },
@@ -217,8 +215,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       )
     }
 
-    const categories = await Promise.all(promisesCategories)
-    await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
+    const categories = await Promise.all(
+      promisesCategories,
+      ...getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
+    )
     const brands = await Promise.all(promisesBrands)
 
     categories.forEach((category) => {

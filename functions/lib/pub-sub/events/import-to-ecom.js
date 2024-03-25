@@ -26,7 +26,7 @@ module.exports = async (
   const { DAT_ULT_ATL: lastUpdate } = objectHorus
   const logId = `${eventId}-s${storeId}`
   const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_${resource}`)
-  console.log('>> Exec Event #', logId, ' import ', resource)
+  console.log(`>> Exec Event #${logId} import: ${resource}`)
   const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
   let lastUpdateDoc
   const appSdk = await getAppSdk()
@@ -54,7 +54,7 @@ module.exports = async (
         })
     })
     .catch(async (err) => {
-      console.error('Error in #', logId, ' import ', resource)
+      console.error(`>> Error Event #${logId} import: ${resource}`)
       if (err.appWithoutAuth) {
         console.error(err)
       } else {
