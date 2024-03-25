@@ -21,7 +21,8 @@ module.exports = context => setup(null, true, firestore())
       .listDocuments()
 
     console.log('>> querySnapshot ', querySnapshot.length)
-    querySnapshot?.forEach(documentSnapshot => {
+    querySnapshot?.forEach(async documentSnapshot => {
+      const t = await documentSnapshot.listCollections()
     //   const storeId = documentSnapshot.id
     //   const docId = `${collectionName}/${storeId}`
     //   const data = documentSnapshot.data()
