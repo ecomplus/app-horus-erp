@@ -33,8 +33,7 @@ const listStoreIds = async () => {
   return storeIds
 }
 
-const productsEvents = async (storeId, opts) => {
-  const { horus } = opts
+const productsEvents = async (horus, storeId, opts) => {
   let dateInit = parseDate(new Date(1), true)
   const dateEnd = parseDate(new Date(), true)
   const docRef = firestore()
@@ -137,13 +136,13 @@ module.exports = context => setup(null, true, firestore())
           const {
             username,
             password,
-            baseURL,
-            update_product: updateProduct,
-            update_price: updatePrice
+            baseURL
+            // update_product: updateProduct,
+            // update_price: updatePrice
           } = appData
           const horus = new Horus(username, password, baseURL)
-          const opts = { updateProduct, updatePrice, horus }
-          productsEvents(storeId, opts)
+          const opts = { appData }
+          productsEvents(horus, storeId, opts)
           // if (now.getMinutes() % 5 === 0) {
           //   customerEvents(appData, storeId)
           // }

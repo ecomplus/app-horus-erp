@@ -3,8 +3,15 @@ const importBrands = require('./brands-to-ecom')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
 const requestHorus = require('../../horus/request')
+const Horus = require('../../horus/client')
 
-const getHorusAutores = async ({ appSdk, storeId, auth }, horus, codItem) => {
+const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData) => {
+  const {
+    username,
+    password,
+    baseURL
+  } = appData
+  const horus = new Horus(username, password, baseURL)
   // /Autores_item?COD_ITEM=1&offset=0&limit=100
   let hasRepeat = true
   let offset = 0
@@ -51,7 +58,12 @@ const getHorusAutores = async ({ appSdk, storeId, auth }, horus, codItem) => {
 }
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
-  const { updateProduct, updatePrice, horus } = opts
+  // const { updateProduct, updatePrice, horus } = opts
+  const {
+    update_product: updateProduct,
+    update_price: updatePrice
+  } = opts.appData
+
   const {
     COD_ITEM,
     // COD_BARRA_ITEM,
@@ -205,7 +217,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
     const categories = await Promise.all(
       promisesCategories,
-      ...getHorusAutores({ appSdk, storeId, auth }, horus, COD_ITEM)
+      ...getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
     )
     const brands = await Promise.all(promisesBrands)
 
