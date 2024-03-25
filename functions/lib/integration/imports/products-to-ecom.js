@@ -5,6 +5,7 @@ const { parsePrice } = require('../../parsers/parse-to-ecom')
 const { firestore } = require('firebase-admin')
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
+const { collectionHorusEvents } = require('../../utils-variables')
 
 const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, sendSyncCategories) => {
   const {
@@ -275,7 +276,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
       .then(({ response }) => response.data)
     const productId = product ? product._id : newProduct._id
-    const docFirestore = `syncCategory/s${storeId}`
+    const docFirestore = `${collectionHorusEvents}/${storeId}_syncCategory`
     let i = 0
 
     while (i < sendSyncCategories.length) {
