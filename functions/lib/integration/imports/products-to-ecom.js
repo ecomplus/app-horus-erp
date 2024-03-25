@@ -5,7 +5,7 @@ const { parsePrice } = require('../../parsers/parse-to-ecom')
 const { firestore } = require('firebase-admin')
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
-const { collectionHorusEvents } = require('../../utils-variables')
+// const { collectionHorusEvents } = require('../../utils-variables')
 
 const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, sendSyncCategories) => {
   const {
