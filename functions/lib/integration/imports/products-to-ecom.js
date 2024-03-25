@@ -53,7 +53,7 @@ const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData) => {
 
     offset += limit
   }
-  const categories = await Promise.all(promisesSendTopics)
+  const [categories] = await Promise.all(promisesSendTopics)
   console.log('>> categories ', categories)
   return categories
 }
@@ -185,7 +185,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.subtitle = SUBTITULO
     }
 
-    const promisesCategories = []
+    const promisesGenders = []
     const promisesBrands = []
     const generos = ['COD_GENERO_NIVEL', 'COD_GENERO_NIVEL2', 'COD_GENERO_NIVEL3']
 
@@ -193,7 +193,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       if (productHorus[genero]) {
         const strNumeral = genero.replace('COD_GENERO_NIVEL', '')
         const numeral = Number.isInteger(parseInt(strNumeral)) && parseInt(strNumeral)
-        promisesCategories.push(
+        promisesGenders.push(
           importCategories({ appSdk, storeId, auth },
             {
               codGenero: productHorus[genero],
@@ -215,12 +215,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       )
     }
 
-    const categories = await Promise.all(
-      promisesCategories,
-      ...getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
-    )
+    const genders = await Promise.all(promisesGenders)
+    const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData)
     const brands = await Promise.all(promisesBrands)
 
+    const categories = [...genders, ...authors]
     categories.forEach((category) => {
       if (category) {
         if (!Array.isArray(body.categories)) {
@@ -257,7 +256,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.body_html += QTD_PAGINAS ? ` Quantidade de páginas: ${QTD_PAGINAS} <br/>` : ''
     }
 
-    // TODO: Actor Names create brands ?
     // TODO: check kit
 
     console.log('>> body ', JSON.stringify(body))
