@@ -18,9 +18,10 @@ module.exports = context => setup(null, true, firestore())
     console.log('>>init sync')
     const querySnapshot = await firestore()
       .collection(collectionName)
+      .listDocuments()
       .get()
 
-    console.log('>> querySnapshot ', querySnapshot.docs)
+    console.log('>> querySnapshot ', querySnapshot)
     // querySnapshot?.forEach(documentSnapshot => {
     //   const storeId = documentSnapshot.id
     //   const docId = `${collectionName}/${storeId}`
