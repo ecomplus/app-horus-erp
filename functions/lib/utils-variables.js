@@ -3,7 +3,7 @@ const collectionHorusEvents = 'horusEvents'
 
 // Events Names
 const topicProductsHorus = 'products_update'
-const topicResourceToEcom = 'resourse_to_ecom'
+const topicResourceToEcom = 'resource_to_ecom'
 
 const removeAccents = str => str.replace(/[áàãâÁÀÃÂ]/gi, 'a')
   .replace(/[éêÉÊ]/gi, 'e')

@@ -152,13 +152,13 @@ const {
   topicResourceToEcom
 } = require('./lib/utils-variables')
 // const handleProductHorusEvent = require('./lib/pub-sub/events/products')
-const handleResourseToEcomEvent = require('./lib/pub-sub/events/import-to-ecom')
+const handleResourceToEcomEvent = require('./lib/pub-sub/events/import-to-ecom')
 
 // exports.onProductHorusEvent = require('./lib/pub-sub/utils')
 //   .createEventsFunction(topicProductsHorus, handleProductHorusEvent)
 
-exports.onResourseToEcomEvent = require('./lib/pub-sub/utils')
-  .createEventsFunction(topicResourceToEcom, handleResourseToEcomEvent)
+exports.onResourceToEcomEvent = require('./lib/pub-sub/utils')
+  .createEventsFunction(topicResourceToEcom, handleResourceToEcomEvent)
 
 // cron jobs
 const handleCrons = require('./lib/cron-events-horus')

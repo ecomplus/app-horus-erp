@@ -34,15 +34,17 @@ const listStoreIds = async () => {
 }
 
 const productsEvents = async (horus, storeId, opts) => {
+  const resource = 'products'
+  const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
   let dateInit = parseDate(new Date(1), true)
   const dateEnd = parseDate(new Date(), true)
   const docRef = firestore()
-    .doc(`${collectionHorusEvents}/${storeId}_products`)
+    .doc(`${collectionHorusEvents}/${storeId}_${resource}`)
 
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
-    const { lastUpdateProduct } = docSnapshot.data()
-    dateInit = parseDate(new Date(lastUpdateProduct), true)
+    const lastUpdateResource = docSnapshot.data()[field]
+    dateInit = parseDate(new Date(lastUpdateResource), true)
   }
 
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}`
@@ -75,7 +77,7 @@ const productsEvents = async (horus, storeId, opts) => {
             topicResourceToEcom,
             {
               storeId,
-              resourse: 'products',
+              resource,
               objectHorus: productHorus,
               opts
             })

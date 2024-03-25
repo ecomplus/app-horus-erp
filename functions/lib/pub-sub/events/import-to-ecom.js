@@ -15,7 +15,7 @@ const getAppSdk = () => {
 module.exports = async (
   {
     storeId,
-    resourse,
+    resource,
     horusRequest,
     objectHorus,
     opts
@@ -25,14 +25,20 @@ module.exports = async (
   const { eventId } = context
   const { DAT_ULT_ATL: lastUpdate } = objectHorus
   const logId = `${eventId}-s${storeId}`
-  const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_${resourse}`)
-  console.log('>> Exec Event #', logId, ' import ', resourse)
+  const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_${resource}`)
+  console.log('>> Exec Event #', logId, ' import ', resource)
+  const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
+  let lastUpdateDoc
   const appSdk = await getAppSdk()
+  const docSnapshot = await docRef.get()
+  if (docSnapshot.exists) {
+    lastUpdateDoc = docSnapshot.data()[field]
+  }
 
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
-      return imports[resourse](appClient, objectHorus, opts)
+      return imports[resource](appClient, objectHorus, opts)
         .then(async () => {
           const date = new Date(lastUpdate)
           const now = new Date()
@@ -48,18 +54,18 @@ module.exports = async (
         })
     })
     .catch(async (err) => {
-      console.error('Error in #', logId, ' import ', resourse)
+      console.error('Error in #', logId, ' import ', resource)
       if (err.appWithoutAuth) {
         console.error(err)
       } else {
         if (lastUpdate) {
           const date = new Date(lastUpdate)
-          const now = new Date()
-          const lastUpdateProduct = now.getTime() < date.getTime()
-            ? now.toISOString()
+          const lastDoc = lastUpdateDoc ? new Date(lastUpdateDoc) : new Date()
+          const lastUpdateResource = lastDoc.getTime() < date.getTime()
+            ? lastDoc.toISOString()
             : date.toISOString()
 
-          const body = { lastUpdateProduct }
+          const body = { [`${field}`]: lastUpdateResource }
           await docRef.set(body, { merge: true })
             .catch(console.error)
         }
