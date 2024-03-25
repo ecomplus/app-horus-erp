@@ -27,6 +27,20 @@ module.exports = context => setup(null, true, firestore())
       console.log('>> id: ', storeId, listCategories.length)
       listCategories.forEach(async docCategory => {
         console.log('>> docId: ', docCategory.id)
+        const products = await docCategory.listDocuments()
+        products.forEach(async (docProduct, index) => {
+          const productId = docProduct.id
+          const getData = new Promise((resolve) => {
+            docProduct.onSnapshot(data => {
+              resolve(data.data())
+            })
+          })
+          let data
+          if (index === 0) {
+            data = await getData()
+          }
+          console.log('>> data:  ', data, productId)
+        })
       })
     })
     return null
