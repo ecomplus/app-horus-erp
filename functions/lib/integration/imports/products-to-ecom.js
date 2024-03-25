@@ -276,7 +276,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
       .then(({ response }) => response.data)
     const productId = product ? product._id : newProduct._id
-    const docFirestore = `${collectionHorusEvents}/syncCategory/${storeId}`
+    const docFirestore = `syncCategory/${storeId}`
     let i = 0
 
     while (i < sendSyncCategories.length) {
@@ -287,7 +287,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       } = categoryHorus
 
       const idCategory = codGenero ? `COD_GENERO${codGenero}` : `COD_AUTOR${codAutor}`
-      const idDocFirestore = docFirestore + `/${idCategory}/products/${productId}`
+      const idDocFirestore = docFirestore + `/${idCategory}/${productId}`
       await firestore().doc(idDocFirestore)
         .set({
           productId,
