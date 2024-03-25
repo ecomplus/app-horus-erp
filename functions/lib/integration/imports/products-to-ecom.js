@@ -53,7 +53,7 @@ const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData) => {
 
     offset += limit
   }
-  const [categories] = await Promise.all(promisesSendTopics)
+  const categories = await Promise.all(promisesSendTopics)
   console.log('>> categories ', categories)
   return categories
 }
