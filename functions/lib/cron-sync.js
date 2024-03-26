@@ -19,16 +19,16 @@ module.exports = context => setup(null, true, firestore())
     console.log('>> Sync: ', querySnapshot.length)
     querySnapshot?.forEach(async docStore => {
       const storeId = parseInt(docStore.id, 10)
-      console.log('>> ', storeId, typeof storeId)
+      // console.log('>> ', storeId, typeof storeId)
       await appSdk.getAuth(storeId)
         .then(async (auth) => {
-        // const appData = await getAppData({ appSdk, storeId, auth }, true)
           const listGeneroAutor = await docStore.listCollections()
           const promisesProducts = []
 
           listGeneroAutor.forEach(async docGeneroAutor => {
             const products = await docGeneroAutor.listDocuments()
             let categoryHorus
+            let category
             products.forEach(async (docProduct, index) => {
               const productId = docProduct.id
               const getData = new Promise((resolve) => {
@@ -36,14 +36,16 @@ module.exports = context => setup(null, true, firestore())
                   resolve(data.data())
                 })
               })
-              if (index === 0) {
+              if (!categoryHorus) {
                 categoryHorus = await getData
                 delete categoryHorus.productId
               }
-              // console.log('>>Cat ', categoryHorus)
+
               if (categoryHorus) {
-                const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
-                  .catch(() => null)
+                if (!category) {
+                  category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
+                    .catch(() => null)
+                }
                 if (category) {
                   promisesProducts.push(
                     updateProduct({ appSdk, storeId, auth }, productId, category._id)
