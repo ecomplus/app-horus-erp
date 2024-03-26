@@ -42,9 +42,7 @@ module.exports = async (
       return imports[resource](appClient, objectHorus, opts)
         .then(async () => {
           const date = new Date(lastUpdate)
-          const lastUpdateResource = now.getTime() > date.getTime()
-            ? now.toISOString()
-            : date.toISOString()
+          const lastUpdateResource = new Date(date.getTime() + 60 * 1000)
 
           const body = { [`${field}`]: lastUpdateResource }
           await docRef.set(body, { merge: true })
