@@ -11,6 +11,28 @@ const saveFirestore = (idDoc, body) => firestore()
   .set(body, { merge: true })
   .catch(console.error)
 
+const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => {
+  const docFirestore = `sync/${resource}/${storeId}`
+  let resouceId
+  if (objectHorus.codGenero) {
+    resouceId = `COD_GENERO${objectHorus.codGenero}`
+  } else if (objectHorus.codAutor) {
+    resouceId = `COD_AUTOR${objectHorus.codAutor}`
+  } else if (objectHorus.codEditora) {
+    resouceId = `COD_EDITORA${objectHorus.codEditora}`
+  }
+  if (resouceId) {
+    const docFirestoreId = docFirestore + `/${resouceId}`
+    const bodyCategory = { ...objectHorus }
+    const bodyProduct = { productId, createdAt: new Date().toISOString() }
+
+    await Promise.all([
+      saveFirestore(docFirestoreId, bodyCategory),
+      saveFirestore(`${docFirestoreId}/products/${productId}`, bodyProduct)
+    ])
+  }
+}
+
 const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, sendSyncCategories) => {
   const {
     username,
@@ -196,8 +218,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
     const promisesGenders = []
     const promisesBrands = []
-    const sendSyncCategories = []
-    const sendSyncBrands = []
+    const categoriesForSync = []
+    const brandsForSync = []
 
     // const promisesBrands = []
     const generos = ['COD_GENERO', 'COD_GENERO_NIVEL2', 'COD_GENERO_NIVEL3']
@@ -214,9 +236,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
               codGenero,
               nomeGenero
             }
-          ).then(resp => {
+          ).then(async (resp) => {
             if (!resp) {
-              sendSyncCategories.push({ codGenero, nomeGenero })
+              categoriesForSync.push({ codGenero, nomeGenero })
             }
             return resp
           })
@@ -236,7 +258,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         )
           .then(resp => {
             if (!resp) {
-              sendSyncBrands.push({ codEditora, nomeEditora })
+              brands.push({ codEditora, nomeEditora })
             }
             return resp
           })
@@ -244,7 +266,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
 
     const genders = await Promise.all(promisesGenders)
-    const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, sendSyncCategories)
+    const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, categoriesForSync)
     const brands = await Promise.all(promisesBrands)
 
     const categories = [...genders, ...authors]
@@ -291,46 +313,20 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
       .then(({ response }) => response.data)
     const productId = product ? product._id : newProduct._id
-    const docFirestore = `sync/category/${storeId}`
-    let i = 0
+    const sendForSync = []
+    categoriesForSync.forEach((categoryHorus) => {
+      sendForSync.push(
+        sendToQueueForSync(storeId, 'category', categoryHorus, productId)
+      )
+    })
 
-    while (i < sendSyncCategories.length) {
-      const categoryHorus = sendSyncCategories[i]
-      const {
-        codGenero,
-        codAutor
-      } = categoryHorus
+    brandsForSync.forEach((brandHorus) => {
+      sendForSync.push(
+        sendToQueueForSync(storeId, 'brand', brandHorus, productId)
+      )
+    })
 
-      const idCategory = codGenero ? `COD_GENERO${codGenero}` : `COD_AUTOR${codAutor}`
-      const idDocFirestore = docFirestore + `/${idCategory}`
-      const bodyCategory = { ...categoryHorus }
-      const bodyProduct = { productId, createdAt: new Date().toISOString() }
-
-      await Promise.all([
-        saveFirestore(idDocFirestore, bodyCategory),
-        saveFirestore(`${idDocFirestore}/products/${productId}`, bodyProduct)
-      ])
-
-      i += 1
-    }
-
-    const docFirestoreBrands = `sync/brand/${storeId}`
-    let j = 0
-    while (j < sendSyncBrands.length) {
-      const brandHorus = sendSyncBrands[i]
-
-      const idCategory = `COD_EDITORA${brandHorus.codEditora}`
-      const idDocFirestore = docFirestoreBrands + `/${idCategory}`
-      const bodyBrands = { ...brandHorus }
-      const bodyProduct = { productId, createdAt: new Date().toISOString() }
-
-      await Promise.all([
-        saveFirestore(idDocFirestore, bodyBrands),
-        saveFirestore(`${idDocFirestore}/products/${productId}`, bodyProduct)
-      ])
-
-      j += 1
-    }
+    await Promise.all(sendForSync)
 
     return newProduct
   }
