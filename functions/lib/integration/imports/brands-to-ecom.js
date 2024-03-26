@@ -11,15 +11,12 @@ const getBrand = ({ appSdk, storeId, auth }, endpoint, isReplay) => {
       return null
     })
     .catch((err) => {
-      if (err.response?.status === 404 || err.message === 'not found') {
-        return null
-      }
       if (err.response) {
         console.warn(JSON.stringify(err.response))
       } else {
         console.error(err)
       }
-      throw err
+      return null
     })
 }
 
@@ -27,7 +24,11 @@ const createBrands = async ({ appSdk, storeId, auth }, endpoint, body) => {
   const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
     .then(({ response }) => response.data)
     .catch((err) => {
-      console.error(err)
+      if (err.response) {
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
+      }
       return null
     })
 
