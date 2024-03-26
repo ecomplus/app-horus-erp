@@ -30,9 +30,9 @@ module.exports = context => setup(null, true, firestore())
       await appSdk.getAuth(storeId)
         .then(async (auth) => {
           const listGeneroAutor = await firestore()
-            .collection(`${collectionName}`)
-            .doc(`${storeId}`)
-            .listCollections()
+            .collection(`${collectionName}/${storeId}`)
+            .listDocuments()
+
           console.log('>> ', listGeneroAutor)
 
           listGeneroAutor.forEach(a => {
