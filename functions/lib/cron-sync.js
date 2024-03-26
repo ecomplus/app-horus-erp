@@ -33,10 +33,16 @@ module.exports = context => setup(null, true, firestore())
             .collection(`${collectionName}/${storeId}`)
             .listDocuments()
 
-          console.log('>> ', listGeneroAutor)
-
-          listGeneroAutor.forEach(a => {
-            console.log('>> A', a.id)
+          listGeneroAutor.forEach(async (docFirestore) => {
+            const categoryHorusId = docFirestore.id
+            const doc = await getDoc(docFirestore)
+            console.log('>> ', doc.data())
+            const listProducts = await firestore()
+              .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
+              .listDocuments()
+            listProducts.forEach(docProduct => {
+              console.log('>> ', docProduct.id)
+            })
           })
           // const listGeneroAutor = await docStore.
           // const promisesProducts = []
