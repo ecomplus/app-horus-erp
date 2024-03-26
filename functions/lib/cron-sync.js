@@ -40,7 +40,7 @@ module.exports = context => setup(null, true, firestore())
                 categoryHorus = await getData
                 delete categoryHorus.productId
               }
-              console.log('>>Cat ', categoryHorus)
+              // console.log('>>Cat ', categoryHorus)
               if (categoryHorus) {
                 const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
                   .catch(() => null)
@@ -48,6 +48,7 @@ module.exports = context => setup(null, true, firestore())
                   promisesProducts.push(
                     updateProduct({ appSdk, storeId, auth }, productId, category._id)
                       .then(() => {
+                        console.log('>> Update ', productId)
                         return docProduct.delete()
                       })
                   )
