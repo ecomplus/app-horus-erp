@@ -27,37 +27,30 @@ module.exports = context => setup(null, true, firestore())
 
           listGeneroAutor.forEach(async docGeneroAutor => {
             const products = await docGeneroAutor.listDocuments()
-            let categoryHorus
-            let category
-            products.forEach(async (docProduct, index) => {
-              const productId = docProduct.id
-              const getData = new Promise((resolve) => {
-                docProduct.onSnapshot(data => {
-                  resolve(data.data())
-                })
-              })
-              if (!categoryHorus) {
-                categoryHorus = await getData
-                delete categoryHorus.productId
-              }
 
-              if (categoryHorus) {
-                if (!category) {
-                  category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
-                    .catch(() => null)
-                }
-                if (category) {
-                  promisesProducts.push(
-                    updateProduct({ appSdk, storeId, auth }, productId, category._id)
-                      .then(() => {
-                        console.log('>> Update ', productId)
-                        return docProduct.delete()
-                      })
-                  )
-                }
-              }
+            const getData = (docProduct) => new Promise((resolve) => {
+              docProduct.onSnapshot(data => {
+                resolve(data.data())
+              })
             })
+            const categoryHorus = await getData(products[0])
+            delete categoryHorus.productId
+            const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
+              .catch(() => null)
+            if (category) {
+              products.forEach(async (docProduct) => {
+                const productId = docProduct.id
+                promisesProducts.push(
+                  updateProduct({ appSdk, storeId, auth }, productId, category._id)
+                    .then(() => {
+                      console.log('>> Update ', productId)
+                      return docProduct.delete()
+                    })
+                )
+              })
+            }
           })
+          await Promise.all(promisesProducts)
         })
     })
     return null
