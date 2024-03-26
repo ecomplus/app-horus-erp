@@ -82,7 +82,6 @@ const productsEvents = async (horus, storeId, opts) => {
               objectHorus: productHorus,
               opts
             })
-            .catch(console.error)
         )
       })
     } else {

@@ -31,29 +31,36 @@ module.exports = context => setup(null, true, firestore())
             console.log('ID: ', docGeneroAutor.id)
             const products = await docGeneroAutor.listDocuments()
 
-            const getData = (docProduct) => new Promise((resolve) => {
-              docProduct.onSnapshot(data => {
-                resolve(data.data())
+            const getDoc = (doc) => new Promise((resolve) => {
+              doc.onSnapshot(data => {
+                resolve(data)
               })
             })
-            const categoryHorus = await getData(products[0])
-            delete categoryHorus.productId
-            const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
-              .catch(() => null)
-            if (category) {
-              let i = 0
-              while (i < products.length) {
-                const docProduct = products[i]
-                // products.forEach(async (docProduct) => {
-                const productId = docProduct.id
-                promisesProducts.push(
-                  updateProduct({ appSdk, storeId, auth }, productId, category._id)
-                    .then(() => {
-                      console.log('>> Update ', productId)
-                      return docProduct.delete()
-                    })
-                )
-                i += 1
+
+            const doc = await getDoc(docGeneroAutor)
+            let isRun = doc.data().isRun
+            if (!isRun) {
+              isRun = true
+              await doc.set({ isRun }).catch(console.error)
+              const categoryHorus = (await getDoc(products[0])).data()
+              delete categoryHorus.productId
+              const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
+                .catch(() => null)
+              if (category) {
+                let i = 0
+                while (i < products.length) {
+                  const docProduct = products[i]
+                  // products.forEach(async (docProduct) => {
+                  const productId = docProduct.id
+                  promisesProducts.push(
+                    updateProduct({ appSdk, storeId, auth }, productId, category._id)
+                      .then(() => {
+                        console.log('>> Update ', productId)
+                        return docProduct.delete()
+                      })
+                  )
+                  i += 1
+                }
               }
             }
             index += 1

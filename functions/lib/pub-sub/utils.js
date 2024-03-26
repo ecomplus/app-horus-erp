@@ -36,10 +36,11 @@ const sendMessageTopic = async (eventName, json) => {
   const messageId = await new PubSub()
     .topic(topicName)
     .publishMessage({ json })
+    .catch(console.error)
 
   console.log(`>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - ${json?.resource}`)
 
-  return Promise.resolve(200)
+  return null
 }
 
 module.exports = {
