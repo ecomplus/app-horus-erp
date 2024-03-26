@@ -27,8 +27,8 @@ module.exports = context => setup(null, true, firestore())
           let index = 0
 
           while (index < listGeneroAutor.length) {
-          // listGeneroAutor.forEach(async docGeneroAutor => {
             const docGeneroAutor = listGeneroAutor[index]
+            console.log('ID: ', docGeneroAutor.id)
             const products = await docGeneroAutor.listDocuments()
 
             const getData = (docProduct) => new Promise((resolve) => {

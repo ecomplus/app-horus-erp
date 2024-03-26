@@ -54,6 +54,7 @@ const productsEvents = async (horus, storeId, opts) => {
   let offset = 0
   const limit = 100
 
+  let total = 0
   console.log('>>Cron s:', storeId, ' ', query, ' <')
   const promisesSendTopics = []
   while (hasRepeat) {
@@ -70,9 +71,8 @@ const productsEvents = async (horus, storeId, opts) => {
       })
 
     if (products && Array.isArray(products)) {
+      total += products.length
       products.forEach((productHorus, index) => {
-        // autores
-        // /Autores_item?COD_ITEM=1'
         promisesSendTopics.push(
           sendMessageTopic(
             topicResourceToEcom,
@@ -91,6 +91,7 @@ const productsEvents = async (horus, storeId, opts) => {
 
     offset += limit
   }
+  console.log('Total imports ', total)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
