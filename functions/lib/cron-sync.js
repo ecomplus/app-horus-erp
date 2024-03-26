@@ -39,26 +39,29 @@ module.exports = context => setup(null, true, firestore())
             const categoryHorus = doc.data()
             const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
               .catch(() => null)
+            console.log('>> ', category)
             const promisesProducts = []
             const listProducts = await firestore()
               .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
               .listDocuments()
 
-            listProducts.forEach(docProduct => {
-              console.log('>> ', docProduct.id)
-              promisesProducts.push(
-                updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
-                  .then(() => {
-                    console.log('>> Update ', docProduct.id)
-                    return docProduct.delete()
-                  })
+            if (category && category._id) {
+              listProducts.forEach(docProduct => {
+                console.log('>> ', docProduct.id)
+                promisesProducts.push(
+                  updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
+                    .then(() => {
+                      console.log('>> Update ', docProduct.id)
+                      return docProduct.delete()
+                    })
 
-              )
-            })
+                )
+              })
+            }
             await Promise.all(promisesProducts)
               .then(() => {
                 console.log('remove ', categoryHorusId)
-                return doc.delete()
+                return docFirestore.delete()
               })
               .catch(console.error)
           })
