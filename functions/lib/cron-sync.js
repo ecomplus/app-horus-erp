@@ -9,7 +9,7 @@ const updateProduct = async ({ appSdk, storeId, auth }, productId, categoryId) =
     .then(({ response }) => response.data)
 }
 
-const collectionName = 'syncCategory'
+const collectionName = 'sync/category'
 module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     const querySnapshot = await firestore()
