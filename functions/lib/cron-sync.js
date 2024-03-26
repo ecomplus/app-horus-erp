@@ -1,4 +1,4 @@
-const { firestore, auth } = require('firebase-admin')
+const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 // const getAppData = require('./store-api/get-app-data')
 const importCategories = require('../lib/integration/imports/categories-to-ecom')
@@ -33,7 +33,8 @@ module.exports = context => setup(null, true, firestore())
               const productId = docProduct.id
               const getData = new Promise((resolve) => {
                 docProduct.onSnapshot(data => {
-                  resolve(data.data())
+                  console.log('>> data ', data)
+                  resolve(data)
                 })
               })
               if (index === 0) {
