@@ -1,6 +1,6 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
-const getAppData = require('./store-api/get-app-data')
+// const getAppData = require('./store-api/get-app-data')
 const importCategories = require('../lib/integration/imports/categories-to-ecom')
 
 const updateProduct = async ({ appSdk, storeId, auth }, productId, categoryId) => {
@@ -16,17 +16,18 @@ module.exports = context => setup(null, true, firestore())
       .collection(collectionName)
       .listDocuments()
 
-    console.log('>> Sync :', querySnapshot.length)
+    console.log('>> Sync: ', querySnapshot.length)
     querySnapshot?.forEach(async docStore => {
       const storeId = docStore.id
-      const auth = await appSdk.getAuth(storeId)
+      console.log('>> ', storeId, typeof storeId)
+      const auth = await appSdk.getAuth(parseInt(storeId), 10)
       // const appData = await getAppData({ appSdk, storeId, auth }, true)
-      const listCategories = await docStore.listCollections()
+      const listGeneroAutor = await docStore.listCollections()
 
       const promisesProducts = []
 
-      listCategories.forEach(async docCategory => {
-        const products = await docCategory.listDocuments()
+      listGeneroAutor.forEach(async docGeneroAutor => {
+        const products = await docGeneroAutor.listDocuments()
         let categoryHorus
         products.forEach(async (docProduct, index) => {
           const productId = docProduct.id
