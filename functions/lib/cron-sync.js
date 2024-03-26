@@ -43,6 +43,7 @@ module.exports = context => setup(null, true, firestore())
               console.log('>>Cat ', categoryHorus)
               if (categoryHorus) {
                 const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
+                  .catch(() => null)
                 if (category) {
                   promisesProducts.push(
                     updateProduct({ appSdk, storeId, auth }, productId, category._id)
