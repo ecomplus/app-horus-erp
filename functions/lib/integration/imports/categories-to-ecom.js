@@ -1,7 +1,7 @@
 const ecomUtils = require('@ecomplus/utils')
 const { removeAccents } = require('../../utils-variables')
 
-const getCategory = ({ appSdk, storeId, auth }, endpoint) => {
+const getCategory = ({ appSdk, storeId, auth }, endpoint, isReplay) => {
   return appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
     .then(({ response }) => {
       const { data } = response
@@ -14,7 +14,9 @@ const getCategory = ({ appSdk, storeId, auth }, endpoint) => {
       if (err.response?.status === 404 || err.message === 'not found') {
         return null
       }
-      if (err.response) {
+      if (!isReplay) {
+        setTimeout(() => getCategory({ appSdk, storeId, auth }, endpoint, true))
+      } else if (err.response) {
         console.warn(JSON.stringify(err.response))
       } else {
         console.error(err)
