@@ -26,11 +26,12 @@ module.exports = context => setup(null, true, firestore())
     console.log('>> Sync: ', listStoreIds.length)
     listStoreIds?.forEach(async docStore => {
       const storeId = parseInt(docStore.id, 10)
-      // console.log('>> ', storeId, typeof storeId)
+      console.log('>> ', storeId, typeof storeId)
       await appSdk.getAuth(storeId)
         .then(async (auth) => {
           const listGeneroAutor = await docStore.doc(`${collectionName}/${storeId}`)
             .listCollections()
+          console.log('>> ', listGeneroAutor)
 
           listGeneroAutor.forEach(a => {
             console.log('>> A', a.id)
