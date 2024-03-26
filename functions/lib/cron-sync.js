@@ -9,21 +9,29 @@ const updateProduct = async ({ appSdk, storeId, auth }, productId, categoryId) =
     .then(({ response }) => response.data)
 }
 
+const getDoc = (doc) => new Promise((resolve) => {
+  doc?.onSnapshot(data => {
+    resolve(data)
+  })
+})
+
 const collectionName = 'sync/category'
 module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
-    const querySnapshot = await firestore()
-      .collection(collectionName)
-      .listDocuments()
+    const listStoreIds = await firestore()
+      .collection('sync')
+      .doc('category')
+      .listCollections()
 
-    console.log('>> Sync: ', querySnapshot.length)
-    querySnapshot?.forEach(async docStore => {
+    console.log('>> Sync: ', listStoreIds.length)
+    listStoreIds?.forEach(async docStore => {
       const storeId = parseInt(docStore.id, 10)
       // console.log('>> ', storeId, typeof storeId)
       await appSdk.getAuth(storeId)
         .then(async (auth) => {
-          const listGeneroAutor = await docStore.collection(`${collectionName}/${storeId}`)
-            .listDocuments()
+          const listGeneroAutor = await docStore.doc(`${collectionName}/${storeId}`)
+            .listCollections()
+
           listGeneroAutor.forEach(a => {
             console.log('>> A', a.id)
           })
@@ -38,12 +46,6 @@ module.exports = context => setup(null, true, firestore())
           //   console.log('ID: ', docGeneroAutor.id)
           //   console.log('>: ', generoAutor)
           //   const products = await docGeneroAutor.listDocuments()
-
-          //   const getDoc = (doc) => new Promise((resolve) => {
-          //     doc.onSnapshot(data => {
-          //       resolve(data)
-          //     })
-          //   })
 
           //   const doc = await getDoc(docGeneroAutor)
           //   let isRun = doc.data().isRun
