@@ -165,7 +165,9 @@ const handleCrons = require('./lib/cron-events-horus')
 const handleSync = require('./lib/cron-sync')
 const eventsCron = '*/1 * * * *'
 // /*
-exports.horusEvents = functions.pubsub.schedule(eventsCron)
+exports.horusEvents = functions
+  .runWith({ memory: '512MB' })
+  .pubsub.schedule(eventsCron)
   .onRun(() => handleCrons())
 console.log(`-- Check Events in Horus ERP'${eventsCron}'`)
 // */
