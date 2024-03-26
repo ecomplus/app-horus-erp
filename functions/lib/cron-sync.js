@@ -36,55 +36,32 @@ module.exports = context => setup(null, true, firestore())
           listGeneroAutor.forEach(async (docFirestore) => {
             const categoryHorusId = docFirestore.id
             const doc = await getDoc(docFirestore)
-            console.log('>> ', doc.data())
+            const categoryHorus = doc.data()
+            const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
+              .catch(() => null)
+            const promisesProducts = []
             const listProducts = await firestore()
               .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
               .listDocuments()
+
             listProducts.forEach(docProduct => {
               console.log('>> ', docProduct.id)
+              promisesProducts.push(
+                updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
+                  .then(() => {
+                    console.log('>> Update ', docProduct.id)
+                    return docProduct.delete()
+                  })
+
+              )
             })
+            await Promise.all(promisesProducts)
+              .then(() => {
+                console.log('remove ', categoryHorusId)
+                return doc.delete()
+              })
+              .catch(console.error)
           })
-          // const listGeneroAutor = await docStore.
-          // const promisesProducts = []
-          // let index = 0
-
-          // while (index < listGeneroAutor.length) {
-          //   const docGeneroAutor = listGeneroAutor[index]
-          //   const generoAutor = await docGeneroAutor.get()
-
-          //   console.log('ID: ', docGeneroAutor.id)
-          //   console.log('>: ', generoAutor)
-          //   const products = await docGeneroAutor.listDocuments()
-
-          //   const doc = await getDoc(docGeneroAutor)
-          //   let isRun = doc.data().isRun
-          //   if (!isRun) {
-          //     isRun = true
-          //     await doc.set({ isRun }).catch(console.error)
-          //     const categoryHorus = (await getDoc(products[0])).data()
-          //     delete categoryHorus.productId
-          //     const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
-          //       .catch(() => null)
-          //     if (category) {
-          //       let i = 0
-          //       while (i < products.length) {
-          //         const docProduct = products[i]
-          //         // products.forEach(async (docProduct) => {
-          //         const productId = docProduct.id
-          //         promisesProducts.push(
-          //           updateProduct({ appSdk, storeId, auth }, productId, category._id)
-          //             .then(() => {
-          //               console.log('>> Update ', productId)
-          //               return docProduct.delete()
-          //             })
-          //         )
-          //         i += 1
-          //       }
-          //     }
-          //   }
-            // index += 1
-          // }
-          // await Promise.all(promisesProducts)
         })
     })
     return null
