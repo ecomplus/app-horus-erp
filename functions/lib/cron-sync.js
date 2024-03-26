@@ -1,4 +1,4 @@
-const { firestore } = require('firebase-admin')
+const { firestore, auth } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 // const getAppData = require('./store-api/get-app-data')
 const importCategories = require('../lib/integration/imports/categories-to-ecom')
@@ -18,39 +18,40 @@ module.exports = context => setup(null, true, firestore())
 
     console.log('>> Sync: ', querySnapshot.length)
     querySnapshot?.forEach(async docStore => {
-      const storeId = docStore.id
+      const storeId = parseInt(docStore.id, 10)
       console.log('>> ', storeId, typeof storeId)
-      const auth = await appSdk.getAuth(parseInt(storeId), 10)
-      // const appData = await getAppData({ appSdk, storeId, auth }, true)
-      const listGeneroAutor = await docStore.listCollections()
+      await appSdk.getAuth(storeId)
+        .then(async (auth) => {
+        // const appData = await getAppData({ appSdk, storeId, auth }, true)
+          const listGeneroAutor = await docStore.listCollections()
+          const promisesProducts = []
 
-      const promisesProducts = []
-
-      listGeneroAutor.forEach(async docGeneroAutor => {
-        const products = await docGeneroAutor.listDocuments()
-        let categoryHorus
-        products.forEach(async (docProduct, index) => {
-          const productId = docProduct.id
-          const getData = new Promise((resolve) => {
-            docProduct.onSnapshot(data => {
-              resolve(data)
+          listGeneroAutor.forEach(async docGeneroAutor => {
+            const products = await docGeneroAutor.listDocuments()
+            let categoryHorus
+            products.forEach(async (docProduct, index) => {
+              const productId = docProduct.id
+              const getData = new Promise((resolve) => {
+                docProduct.onSnapshot(data => {
+                  resolve(data)
+                })
+              })
+              if (index === 0) {
+                categoryHorus = await getData
+                delete categoryHorus.productId
+              }
+              const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
+              if (category) {
+                promisesProducts.push(
+                  updateProduct({ appSdk, storeId, auth }, productId, category._id)
+                    .then(() => {
+                      return docProduct.delete()
+                    })
+                )
+              }
             })
           })
-          if (index === 0) {
-            categoryHorus = await getData
-            delete categoryHorus.productId
-          }
-          const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
-          if (category) {
-            promisesProducts.push(
-              updateProduct({ appSdk, storeId, auth }, productId, category._id)
-                .then(() => {
-                  return docProduct.delete()
-                })
-            )
-          }
         })
-      })
     })
     return null
   })
