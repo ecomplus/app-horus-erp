@@ -22,7 +22,8 @@ module.exports = context => setup(null, true, firestore())
       // console.log('>> ', storeId, typeof storeId)
       await appSdk.getAuth(storeId)
         .then(async (auth) => {
-          const listGeneroAutor = await docStore.collection().listDocuments()
+          const listGeneroAutor = await docStore.collection(`${collectionName}/${storeId}`)
+            .listDocuments()
           listGeneroAutor.forEach(a => {
             console.log('>> A', a.id)
           })
