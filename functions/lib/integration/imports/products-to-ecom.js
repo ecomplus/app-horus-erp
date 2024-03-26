@@ -287,12 +287,17 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       } = categoryHorus
 
       const idCategory = codGenero ? `COD_GENERO${codGenero}` : `COD_AUTOR${codAutor}`
-      const idDocFirestore = docFirestore + `/${idCategory}/${productId}`
+      const idDocFirestore = docFirestore + `/${idCategory}`
+      const doc = await firestore().doc(idDocFirestore).get()
+      let { products } = doc.data()
+      const body = { ...categoryHorus }
+      if (!products) {
+        products = []
+      }
+      products.push(productId)
+
       await firestore().doc(idDocFirestore)
-        .set({
-          productId,
-          ...categoryHorus
-        }, { merge: true })
+        .set(body, { merge: true })
         .catch(console.error)
 
       i += 1
