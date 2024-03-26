@@ -6,6 +6,10 @@ const { firestore } = require('firebase-admin')
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
 // const { collectionHorusEvents } = require('../../utils-variables')
+const saveFirestore = (idDoc, body) => firestore()
+  .doc(idDoc)
+  .set(body, { merge: true })
+  .catch(console.error)
 
 const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, sendSyncCategories) => {
   const {
@@ -78,8 +82,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     // COD_ISBN_ITEM,
     // COD_ISSN_ITEM,
     NOM_ITEM,
-    COD_EDITORA: codEditora,
-    NOM_EDITORA: nomeEditora,
+    COD_EDITORA,
+    NOM_EDITORA,
     // SELO,
     // COD_GRUPO_ITEM,
     // NOM_GRUPO_ITEM,
@@ -220,7 +224,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     })
 
-    if (codEditora) {
+    if (COD_EDITORA) {
+      const codEditora = COD_EDITORA
+      const nomeEditora = NOM_EDITORA
       promisesBrands.push(
         getBrands({ appSdk, storeId, auth },
           {
@@ -297,14 +303,13 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
       const idCategory = codGenero ? `COD_GENERO${codGenero}` : `COD_AUTOR${codAutor}`
       const idDocFirestore = docFirestore + `/${idCategory}`
+      const bodyCategory = { ...categoryHorus }
+      const bodyProduct = { productId, createdAt: new Date().toISOString() }
 
-      await firestore().doc(idDocFirestore)
-        .set({ ...categoryHorus }, { merge: true })
-        .catch(console.error)
-
-      await firestore().doc(`${idDocFirestore}/products/${productId}`)
-        .set({ productId, createdAt: new Date().toISOString() }, { merge: true })
-        .catch(console.error)
+      await Promise.all([
+        saveFirestore(idDocFirestore, bodyCategory),
+        saveFirestore(`${idDocFirestore}/products/${productId}`, bodyProduct)
+      ])
 
       i += 1
     }
@@ -316,14 +321,13 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
       const idCategory = `COD_EDITORA${brandHorus.codEditora}`
       const idDocFirestore = docFirestoreBrands + `/${idCategory}`
+      const bodyBrands = { ...brandHorus }
+      const bodyProduct = { productId, createdAt: new Date().toISOString() }
 
-      await firestore().doc(idDocFirestore)
-        .set({ ...brandHorus }, { merge: true })
-        .catch(console.error)
-
-      await firestore().doc(`${idDocFirestore}/products/${productId}`)
-        .set({ productId, createdAt: new Date().toISOString() }, { merge: true })
-        .catch(console.error)
+      await Promise.all([
+        saveFirestore(idDocFirestore, bodyBrands),
+        saveFirestore(`${idDocFirestore}/products/${productId}`, bodyProduct)
+      ])
 
       j += 1
     }
