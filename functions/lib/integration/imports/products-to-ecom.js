@@ -276,7 +276,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
       .then(({ response }) => response.data)
     const productId = product ? product._id : newProduct._id
-    const docFirestore = `syncCategory/${storeId}`
+    const docFirestore = `sync/category/${storeId}`
     let i = 0
 
     while (i < sendSyncCategories.length) {
