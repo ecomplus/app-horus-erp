@@ -289,7 +289,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       const idCategory = codGenero ? `COD_GENERO${codGenero}` : `COD_AUTOR${codAutor}`
       const idDocFirestore = docFirestore + `/${idCategory}`
       const doc = await firestore().doc(idDocFirestore).get()
-      let { products } = doc.data()
+      let products = doc?.data().products
       const body = { ...categoryHorus }
       if (!products) {
         products = []
