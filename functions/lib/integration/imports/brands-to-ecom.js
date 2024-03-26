@@ -1,7 +1,40 @@
 const ecomUtils = require('@ecomplus/utils')
 const { removeAccents } = require('../../utils-variables')
 
-module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
+const getBrand = ({ appSdk, storeId, auth }, endpoint, isReplay) => {
+  return appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
+    .then(({ response }) => {
+      const { data } = response
+      if (data && data.result && data.result.length) {
+        return data.result[0]
+      }
+      return null
+    })
+    .catch((err) => {
+      if (err.response?.status === 404 || err.message === 'not found') {
+        return null
+      }
+      if (err.response) {
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
+      }
+      throw err
+    })
+}
+
+const createBrands = async ({ appSdk, storeId, auth }, endpoint, body) => {
+  const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
+    .then(({ response }) => response.data)
+    .catch((err) => {
+      console.error(err)
+      return null
+    })
+
+  return data ? { _id: data._id, name: body.name } : data
+}
+
+module.exports = async ({ appSdk, storeId, auth }, brandHorus, isCreate) => {
   // metafields.namespace='horus-erp'
   // metafields.field='COD_EDITORA' || autor
   // metafields.value=categoriesHorus.COD_EDITORA || autor
@@ -31,36 +64,10 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus) => {
     ]
   }
 
-  if (codEditora) {
-    const brands = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
-      .then(({ response }) => response.data)
-      .catch((err) => {
-        if (err.response?.status === 404 || err.message === 'not found') {
-          return null
-        }
-        if (err.response) {
-          console.warn(JSON.stringify(err.response))
-        } else {
-          console.error(err)
-        }
-        throw err
-      })
+  const brand = await getBrand({ appSdk, storeId, auth }, endpoint)
 
-    if (brands) {
-      if (brands.result && brands.result.length) {
-        return brands.result[0]
-      }
-    }
-
-    endpoint = 'brands.json'
-    const data = await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
-      .then(({ response }) => response.data)
-      .catch((err) => {
-        console.error(err)
-        return null
-      })
-
-    return data ? { _id: data._id, name: nomeEditora } : data
+  if (!brand && isCreate) {
+    return createBrands({}, 'brands.json', body)
   }
-  return null
+  return brand
 }

@@ -1,5 +1,5 @@
 const getCategories = require('./categories-to-ecom')
-// const importBrands = require('./brands-to-ecom')
+const getBrands = require('./brands-to-ecom')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
 const { firestore } = require('firebase-admin')
@@ -78,8 +78,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     // COD_ISBN_ITEM,
     // COD_ISSN_ITEM,
     NOM_ITEM,
-    // COD_EDITORA,
-    // NOM_EDITORA,
+    COD_EDITORA: codEditora,
+    NOM_EDITORA: nomeEditora,
     // SELO,
     // COD_GRUPO_ITEM,
     // NOM_GRUPO_ITEM,
@@ -191,7 +191,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
 
     const promisesGenders = []
+    const promisesBrands = []
     const sendSyncCategories = []
+    const sendSyncBrands = []
+
     // const promisesBrands = []
     const generos = ['COD_GENERO', 'COD_GENERO_NIVEL2', 'COD_GENERO_NIVEL3']
 
@@ -217,20 +220,26 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     })
 
-    // if (COD_EDITORA) {
-    //   promisesBrands.push(
-    //     importBrands({ appSdk, storeId, auth },
-    //       {
-    //         codEditora: COD_EDITORA,
-    //         nomeEditora: NOM_EDITORA
-    //       }
-    //     )
-    //   )
-    // }
+    if (codEditora) {
+      promisesBrands.push(
+        getBrands({ appSdk, storeId, auth },
+          {
+            codEditora,
+            nomeEditora
+          }
+        )
+          .then(resp => {
+            if (!resp) {
+              sendSyncBrands.push({ codEditora, nomeEditora })
+            }
+            return resp
+          })
+      )
+    }
 
     const genders = await Promise.all(promisesGenders)
     const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, sendSyncCategories)
-    // const brands = await Promise.all(promisesBrands)
+    const brands = await Promise.all(promisesBrands)
 
     const categories = [...genders, ...authors]
     categories.forEach((category) => {
@@ -242,14 +251,14 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     })
 
-    // brands.forEach((brand) => {
-    //   if (brand) {
-    //     if (!Array.isArray(body.brands)) {
-    //       body.brands = []
-    //     }
-    //     body.brands.push({ _id: brand._id, name: brand.name })
-    //   }
-    // })
+    brands.forEach((brand) => {
+      if (brand) {
+        if (!Array.isArray(body.brands)) {
+          body.brands = []
+        }
+        body.brands.push({ _id: brand._id, name: brand.name })
+      }
+    })
 
     if (PALAVRAS_CHAVE) {
       body.keywords = PALAVRAS_CHAVE.split(',')
@@ -298,6 +307,25 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         .catch(console.error)
 
       i += 1
+    }
+
+    const docFirestoreBrands = `sync/brand/${storeId}`
+    let j = 0
+    while (j < sendSyncBrands.length) {
+      const brandHorus = sendSyncBrands[i]
+
+      const idCategory = `COD_EDITORA${brandHorus.codEditora}`
+      const idDocFirestore = docFirestoreBrands + `/${idCategory}`
+
+      await firestore().doc(idDocFirestore)
+        .set({ ...brandHorus }, { merge: true })
+        .catch(console.error)
+
+      await firestore().doc(`${idDocFirestore}/products/${productId}`)
+        .set({ productId, createdAt: new Date().toISOString() }, { merge: true })
+        .catch(console.error)
+
+      j += 1
     }
 
     return newProduct

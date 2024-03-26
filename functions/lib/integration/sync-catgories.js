@@ -1,7 +1,7 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 // const getAppData = require('./store-api/get-app-data')
-const importCategories = require('../lib/integration/imports/categories-to-ecom')
+const importCategories = require('./imports/categories-to-ecom')
 
 const updateProduct = async ({ appSdk, storeId, auth }, productId, categoryId) => {
   const endpoint = `/products/${productId}/categories.json`
@@ -39,7 +39,7 @@ module.exports = context => setup(null, true, firestore())
             const categoryHorus = doc.data()
             const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
               .catch(() => null)
-            console.log('>> ', category)
+
             const promisesProducts = []
             const listProducts = await firestore()
               .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
@@ -47,11 +47,10 @@ module.exports = context => setup(null, true, firestore())
 
             if (category && category._id) {
               listProducts.forEach(docProduct => {
-                console.log('>> ', docProduct.id)
                 promisesProducts.push(
                   updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
                     .then(() => {
-                      console.log('>> Update ', docProduct.id)
+                      console.log('>> Update Product ', docProduct.id)
                       return docProduct.delete()
                     })
 
@@ -59,11 +58,19 @@ module.exports = context => setup(null, true, firestore())
               })
             }
             await Promise.all(promisesProducts)
-              .then(() => {
-                console.log('remove ', categoryHorusId)
-                return docFirestore.delete()
+              .then(async () => {
+                const listDocs = await firestore()
+                  .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
+                  .listDocuments()
+                if (!listDocs.length) {
+                  console.log('> Remove ', categoryHorusId)
+                  return docFirestore.delete()
+                }
+                return null
               })
-              .catch(console.error)
+              .catch(() => {
+                console.log('> Error Delete ', JSON.stringify(categoryHorus))
+              })
           })
         })
     })
