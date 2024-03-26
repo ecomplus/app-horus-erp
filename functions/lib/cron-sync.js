@@ -24,8 +24,11 @@ module.exports = context => setup(null, true, firestore())
         .then(async (auth) => {
           const listGeneroAutor = await docStore.listCollections()
           const promisesProducts = []
+          let index = 0
 
-          listGeneroAutor.forEach(async docGeneroAutor => {
+          while (index < listGeneroAutor.length) {
+          // listGeneroAutor.forEach(async docGeneroAutor => {
+            const docGeneroAutor = listGeneroAutor[index]
             const products = await docGeneroAutor.listDocuments()
 
             const getData = (docProduct) => new Promise((resolve) => {
@@ -38,7 +41,10 @@ module.exports = context => setup(null, true, firestore())
             const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
               .catch(() => null)
             if (category) {
-              products.forEach(async (docProduct) => {
+              let i = 0
+              while (i < products.length) {
+                const docProduct = products[i]
+                // products.forEach(async (docProduct) => {
                 const productId = docProduct.id
                 promisesProducts.push(
                   updateProduct({ appSdk, storeId, auth }, productId, category._id)
@@ -47,9 +53,11 @@ module.exports = context => setup(null, true, firestore())
                       return docProduct.delete()
                     })
                 )
-              })
+                i += 1
+              }
             }
-          })
+            index += 1
+          }
           await Promise.all(promisesProducts)
         })
     })
