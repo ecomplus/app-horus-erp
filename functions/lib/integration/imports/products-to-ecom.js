@@ -258,7 +258,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         )
           .then(resp => {
             if (!resp) {
-              brands.push({ codEditora, nomeEditora })
+              brandsForSync.push({ codEditora, nomeEditora })
             }
             return resp
           })

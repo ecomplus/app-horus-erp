@@ -33,44 +33,46 @@ module.exports = context => setup(null, true, firestore())
             .collection(`${collectionName}/${storeId}`)
             .listDocuments()
 
-          listGeneroAutor.forEach(async (docFirestore) => {
-            const categoryHorusId = docFirestore.id
-            const doc = await getDoc(docFirestore)
-            const categoryHorus = doc.data()
-            const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
-              .catch(() => null)
+          const LIMIT = 10
+          listGeneroAutor.forEach(async (docFirestore, index) => {
+            if (index <= LIMIT) {
+              const categoryHorusId = docFirestore.id
+              const doc = await getDoc(docFirestore)
+              const categoryHorus = doc.data()
+              const category = await importCategories({ appSdk, storeId, auth }, categoryHorus, true)
+                .catch(() => null)
 
-            const promisesProducts = []
-            const listProducts = await firestore()
-              .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
-              .listDocuments()
+              const promisesProducts = []
+              const listProducts = await firestore()
+                .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
+                .listDocuments()
 
-            if (category && category._id) {
-              listProducts.forEach(docProduct => {
-                promisesProducts.push(
-                  updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
-                    .then(() => {
-                      console.log('>> Update Product ', docProduct.id)
-                      return docProduct.delete()
-                    })
-
-                )
-              })
+              if (category && category._id) {
+                listProducts.forEach((docProduct) => {
+                  promisesProducts.push(
+                    updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
+                      .then(() => {
+                        console.log('>> Update Product ', docProduct.id)
+                        return docProduct.delete()
+                      })
+                  )
+                })
+              }
+              await Promise.all(promisesProducts)
+                .then(async () => {
+                  const listDocs = await firestore()
+                    .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
+                    .listDocuments()
+                  if (!listDocs.length) {
+                    console.log('> Remove ', categoryHorusId)
+                    return docFirestore.delete()
+                  }
+                  return null
+                })
+                .catch(() => {
+                  console.log('> Error Delete ', JSON.stringify(categoryHorus))
+                })
             }
-            await Promise.all(promisesProducts)
-              .then(async () => {
-                const listDocs = await firestore()
-                  .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
-                  .listDocuments()
-                if (!listDocs.length) {
-                  console.log('> Remove ', categoryHorusId)
-                  return docFirestore.delete()
-                }
-                return null
-              })
-              .catch(() => {
-                console.log('> Error Delete ', JSON.stringify(categoryHorus))
-              })
           })
         })
     })
