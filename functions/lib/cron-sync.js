@@ -33,8 +33,7 @@ module.exports = context => setup(null, true, firestore())
               const productId = docProduct.id
               const getData = new Promise((resolve) => {
                 docProduct.onSnapshot(data => {
-                  console.log('>> data ', data)
-                  resolve(data)
+                  resolve(data.data())
                 })
               })
               if (index === 0) {
