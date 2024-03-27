@@ -39,7 +39,8 @@ const sendImportProdutHorusByCodItem = async (storeId, appData, queueEntry) => {
       queueEntry,
       isUpdateDate: false
     }
-    return sendMessageTopic(
+    console.log('>> opts', JSON.stringify(opts))
+    await sendMessageTopic(
       topicResourceToEcom,
       {
         storeId,
