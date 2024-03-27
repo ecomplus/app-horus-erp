@@ -162,7 +162,7 @@ exports.onResourceToEcomEvent = require('./lib/pub-sub/utils')
 
 // cron jobs
 const handleCrons = require('./lib/cron-events-horus')
-const handleSyncCategories = require('./lib/integration/sync-catgories')
+const handleSyncCategories = require('./lib/integration/sync-categories')
 const eventsCron = '*/1 * * * *'
 // /*
 exports.horusEvents = functions
