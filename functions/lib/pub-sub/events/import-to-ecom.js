@@ -55,6 +55,8 @@ module.exports = async (
             await docRef.set(body, { merge: true })
               .catch(console.error)
           }
+          // update appDate check id is equals COD_ITEM
+          console.log('queueEntry ', JSON.stringify(opts.queueEntry))
 
           return null
         })

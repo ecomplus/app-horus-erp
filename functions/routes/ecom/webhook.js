@@ -1,10 +1,53 @@
 // read configured E-Com Plus app data
 const getAppData = require('./../../lib/store-api/get-app-data')
+const Horus = require('../../lib/horus/client')
+const requestHorus = require('../../lib/horus/request')
+const { topicResourceToEcom } = require('../../lib/utils-variables')
+const { sendMessageTopic } = require('../../lib/pub-sub/utils')
 
 const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
+
+const sendImportProdutHorusByCodItem = async (storeId, appData, queueEntry) => {
+  const {
+    username,
+    password,
+    baseURL
+  } = appData
+
+  const horus = new Horus(username, password, baseURL)
+  const endpoint = `/Busca_Acervo?COD_ITEM=${queueEntry.nextId}&offset=0&limit=1`
+  const item = await requestHorus(horus, endpoint, 'get')
+    .catch((err) => {
+      if (err.response) {
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
+      }
+      return null
+    })
+
+  if (item && item.length) {
+    // send
+    const opts = {
+      appData,
+      queueEntry,
+      isUpdateDate: false
+    }
+    return sendMessageTopic(
+      topicResourceToEcom,
+      {
+        storeId,
+        resource: 'products',
+        objectHorus: item[0],
+        opts
+      })
+  }
+  return null
+}
+
 const integrationHandlers = {
   // init_store: require('../../lib/integration/int-store'),
   exportation: {
@@ -12,8 +55,7 @@ const integrationHandlers = {
     // order_ids: require('./../../lib/integration/export-order')
   },
   importation: {
-    // skus: require('./../../lib/integration/import-product'),
-    // order_numbers: require('./../../lib/integration/import-order')
+    products: sendImportProdutHorusByCodItem
   }
 }
 
@@ -67,20 +109,15 @@ exports.post = ({ appSdk }, req, res) => {
                 Object.keys(actionQueues).forEach((queue) => {
                   const ids = actionQueues[queue]
                   const handlerName = action.replace(/^_+/, '')
-                  // if (action !== 'init_store') {
-                  //   // console.log('>> queue: ', queue, ' ', ids)
                   if (Array.isArray(ids) && ids.length) {
                     const isHiddenQueue = action.charAt(0) === '_'
                     const mustUpdateAppQueue = trigger.resource === 'applications'
-                    // const handler = integrationHandlers[handlerName][queue.toLowerCase()]
+                    const handler = integrationHandlers[handlerName][queue.toLowerCase()]
                     const nextId = ids[0]
                     console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId, queue.toLowerCase())
+                    const queueEntry = { action, queue, nextId, mustUpdateAppQueue }
+                    return handler(storeId, appData, queueEntry)
                   }
-                  // } else if (ids) {
-                  //   const handler = integrationHandlers[handlerName]
-                  //   return handler({ appSdk, storeId, auth }, appData)
-                  //     .then(() => ({ appData, action, queue }))
-                  // }
                 })
                 //
               }

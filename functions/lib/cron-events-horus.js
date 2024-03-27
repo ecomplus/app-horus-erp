@@ -4,8 +4,6 @@ const getAppData = require('./store-api/get-app-data')
 const {
   collectionHorusEvents,
   topicResourceToEcom
-  // topicProductsHorus
-  // topicCustomerHorus
 } = require('./utils-variables')
 const { parseDate } = require('./parsers/parse-to-ecom')
 const Horus = require('./horus/client')
@@ -140,8 +138,6 @@ module.exports = context => setup(null, true, firestore())
             username,
             password,
             baseURL
-            // update_product: updateProduct,
-            // update_price: updatePrice
           } = appData
           const horus = new Horus(username, password, baseURL)
           const opts = { appData }
