@@ -5,9 +5,9 @@ const getBrands = require('./imports/brands-to-ecom')
 const { sendMessageTopic } = require('../pub-sub/utils')
 const { topicResourceToEcom } = require('../utils-variables')
 
-const updateProduct = async ({ appSdk, storeId, auth }, productId, categoryId) => {
-  const endpoint = `/products/${productId}/categories.json`
-  await appSdk.apiRequest(storeId, endpoint, 'POST', { _id: categoryId }, auth)
+const updateProduct = async ({ appSdk, storeId, auth }, productId, brandId) => {
+  const endpoint = `/products/${productId}/brands.json`
+  await appSdk.apiRequest(storeId, endpoint, 'POST', { _id: brandId }, auth)
     .then(({ response }) => response.data)
 }
 
