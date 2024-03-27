@@ -11,6 +11,7 @@ const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
 
 const sendImportProdutHorusByCodItem = async (storeId, appData, queueEntry) => {
+  console.log('>> Import Products')
   const {
     username,
     password,
@@ -117,6 +118,7 @@ exports.post = ({ appSdk }, req, res) => {
                     console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId, queue.toLowerCase())
                     const queueEntry = { action, queue, nextId, mustUpdateAppQueue }
                     return handler(storeId, appData, queueEntry)
+                      .then(() => ({ appData, action, queue }))
                   }
                 })
                 //
