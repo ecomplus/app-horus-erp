@@ -110,7 +110,11 @@ exports.post = ({ appSdk }, req, res) => {
               const actionQueues = integrationConfig[action]
               // console.log('>> ', action, ' ', actionQueues)
               if (typeof actionQueues === 'object' && actionQueues) {
-                Object.keys(actionQueues).forEach((queue) => {
+                let j = 0
+                const fields = Object.keys(actionQueues)
+                while (j < fields.length) {
+                  const queue = fields[j]
+                  // Object.keys(actionQueues).forEach((queue) => {
                   const ids = actionQueues[queue]
                   const handlerName = action.replace(/^_+/, '')
                   if (Array.isArray(ids) && ids.length) {
@@ -123,7 +127,8 @@ exports.post = ({ appSdk }, req, res) => {
                     return handler(storeId, appData, queueEntry)
                       .then(() => ({ appData, action, queue }))
                   }
-                })
+                  j += 1
+                }
                 //
               }
               //

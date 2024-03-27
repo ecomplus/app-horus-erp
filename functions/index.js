@@ -172,4 +172,4 @@ console.log(`-- Sync Categories to E-com'${eventsCron}'`)
 
 exports.syncBrands = functions.pubsub.schedule(eventsCron)
   .onRun(() => handleSyncBrands())
-console.log(`-- Sync Categories to E-com'${eventsCron}'`)
+console.log(`-- Sync Brands to E-com'${eventsCron}'`)
