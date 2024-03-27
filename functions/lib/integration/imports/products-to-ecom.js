@@ -252,6 +252,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       })
     }
 
+    if (sendSyncKit.length) {
+      // Incomplete Kit
+      body.available = false
+    }
+
     const endpoint = 'products.json'
     const method = !product ? 'POST' : 'PATCH'
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
@@ -270,7 +275,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       )
     })
 
-    if (sendSyncKit) {
+    if (sendSyncKit.length) {
       sendForSync.push(
         sendToQueueForSync(storeId, 'kit', { items: sendSyncKit, productId })
       )
