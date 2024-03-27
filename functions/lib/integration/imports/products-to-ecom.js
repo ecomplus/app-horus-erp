@@ -265,15 +265,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       )
     }
 
-    // const gendersHorus = await Promise.all(promisesGenders)
-    // const authorsHorus = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, categoriesForSync)
-    // const brands = await Promise.all(promisesPublishingCompanies)
-
-    const [gendersHorus, authorsHorus, brands] = await Promise.all([
-      promisesGenders,
-      getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, categoriesForSync),
-      promisesPublishingCompanies
-    ])
+    const gendersHorus = await Promise.all(promisesGenders)
+    const authorsHorus = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, categoriesForSync)
+    const brands = await Promise.all(promisesPublishingCompanies)
 
     const categories = [...gendersHorus, ...authorsHorus]
     categories.forEach((category) => {
