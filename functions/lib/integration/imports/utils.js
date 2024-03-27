@@ -99,7 +99,7 @@ const getHorusKitComposition = async ({ appSdk, storeId, auth }, cod, appData, s
   while (hasRepeat) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo_kit?COD_ITEM=${cod}&offset=${offset}&limit=${limit}`
-    // console.log('>> endpoint: ', endpoint)
+    console.log('>> endpoint: ', endpoint)
     const items = await requestHorus(horus, endpoint)
       .catch((err) => {
         if (err.response) {

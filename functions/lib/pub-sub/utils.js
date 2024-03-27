@@ -38,7 +38,9 @@ const sendMessageTopic = async (eventName, json) => {
       .topic(topicName)
       .publishMessage({ json })
 
-    console.log(`>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - ${json?.resource}`)
+    let msg = `>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - `
+    msg += `${json?.resource} - ${json?.objectHorus?.COD_ITEM}`
+    console.log(msg)
   } catch (e) {
     //
   }

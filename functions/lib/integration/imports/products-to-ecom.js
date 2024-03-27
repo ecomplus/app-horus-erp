@@ -15,6 +15,7 @@ const saveFirestore = (idDoc, body) => firestore()
   .catch(console.error)
 
 const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => {
+  console.log('>> Queue ', resource)
   const docFirestore = `sync/${resource}/${storeId}`
   let resouceId
   if (objectHorus.codGenero) {
@@ -24,6 +25,7 @@ const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => 
   } else if (objectHorus.codEditora) {
     resouceId = `COD_EDITORA${objectHorus.codEditora}`
   } else if (objectHorus.productId) {
+    console.log('>> obj: ', JSON.stringify(objectHorus))
     resouceId = `${objectHorus.productId}`
   }
 
@@ -276,6 +278,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     })
 
     if (sendSyncKit.length) {
+      console.log('>> Send to queue kit')
       sendForSync.push(
         sendToQueueForSync(storeId, 'kit', { items: sendSyncKit, productId })
       )
