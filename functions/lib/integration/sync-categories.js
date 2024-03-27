@@ -53,15 +53,20 @@ module.exports = context => setup(null, true, firestore())
 
                 if (category && category._id) {
                   console.log('>> try update')
-                  listProducts.forEach((docProduct) => {
-                    promisesProducts.push(
-                      updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
-                        .then(() => {
-                          console.log('>> Update Product ', docProduct.id)
-                          return docProduct.delete()
-                        })
-                    )
-                  })
+                  if (listProducts.length) {
+                    listProducts.forEach((docProduct) => {
+                      promisesProducts.push(
+                        updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
+                          .then(() => {
+                            console.log('>> Update Product ', docProduct.id)
+                            return docProduct.delete()
+                          })
+                      )
+                    })
+                  } else {
+                    await docFirestore.delete()
+                      .catch()
+                  }
                 } else {
                   promisesSendTopics.push(
                     sendMessageTopic(

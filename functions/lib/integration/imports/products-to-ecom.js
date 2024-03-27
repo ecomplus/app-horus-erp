@@ -5,7 +5,7 @@ const { parsePrice } = require('../../parsers/parse-to-ecom')
 const { firestore } = require('firebase-admin')
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
-// const { collectionHorusEvents } = require('../../utils-variables')
+
 const saveFirestore = (idDoc, body) => firestore()
   .doc(idDoc)
   .set(body, { merge: true })
@@ -22,9 +22,10 @@ const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => 
     resouceId = `COD_EDITORA${objectHorus.codEditora}`
   }
   if (resouceId) {
+    const createdAt = new Date().toISOString()
     const docFirestoreId = docFirestore + `/${resouceId}`
-    const bodyCategory = { ...objectHorus }
-    const bodyProduct = { productId, createdAt: new Date().toISOString() }
+    const bodyCategory = { ...objectHorus, createdAt }
+    const bodyProduct = { productId, createdAt }
 
     await Promise.all([
       saveFirestore(docFirestoreId, bodyCategory),
