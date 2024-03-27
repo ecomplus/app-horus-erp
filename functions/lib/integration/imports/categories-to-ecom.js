@@ -35,7 +35,7 @@ const createCategory = async ({ appSdk, storeId, auth }, endpoint, body) => {
   return data ? { _id: data._id, name: body.name } : data
 }
 
-module.exports = async ({ appSdk, storeId, auth }, categoriesHorus, opts) => {
+module.exports = async ({ appSdk, storeId, auth }, categoriesHorus, opts = {}) => {
   const {
     isCreate
   } = opts

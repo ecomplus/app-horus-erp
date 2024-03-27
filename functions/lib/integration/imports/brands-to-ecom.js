@@ -35,7 +35,10 @@ const createBrands = async ({ appSdk, storeId, auth }, endpoint, body) => {
   return data ? { _id: data._id, name: body.name } : data
 }
 
-module.exports = async ({ appSdk, storeId, auth }, brandHorus, isCreate) => {
+module.exports = async ({ appSdk, storeId, auth }, brandHorus, opts = {}) => {
+  const {
+    isCreate
+  } = opts
   // metafields.namespace='horus-erp'
   // metafields.field='COD_EDITORA' || autor
   // metafields.value=categoriesHorus.COD_EDITORA || autor
