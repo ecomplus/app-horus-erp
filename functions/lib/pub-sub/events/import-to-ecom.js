@@ -57,17 +57,15 @@ module.exports = async (
       if (err.appWithoutAuth) {
         console.error(err)
       } else {
-        if (lastUpdate) {
-          const date = new Date(lastUpdate)
-          const lastDoc = lastUpdateDoc ? new Date(lastUpdateDoc) : now
-          const lastUpdateResource = lastDoc.getTime() < date.getTime()
-            ? lastDoc.toISOString()
-            : date.toISOString()
+        const date = new Date(lastUpdate || Date.now())
+        const lastDoc = lastUpdateDoc ? new Date(lastUpdateDoc) : now
+        const lastUpdateResource = lastDoc.getTime() < date.getTime()
+          ? lastDoc.toISOString()
+          : date.toISOString()
 
-          const body = { [`${field}`]: lastUpdateResource }
-          await docRef.set(body, { merge: true })
-            .catch(console.error)
-        }
+        const body = { [`${field}`]: lastUpdateResource }
+        await docRef.set(body, { merge: true })
+          .catch(console.error)
         throw err
       }
     })
