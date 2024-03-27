@@ -6,7 +6,7 @@ const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
 const integrationHandlers = {
-  init_store: require('../../lib/integration/int-store'),
+  // init_store: require('../../lib/integration/int-store'),
   exportation: {
     // product_ids: require('./../../lib/integration/export-product'),
     // order_ids: require('./../../lib/integration/export-order')
