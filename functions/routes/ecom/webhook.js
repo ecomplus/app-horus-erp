@@ -30,6 +30,8 @@ const sendImportProdutHorusByCodItem = async (storeId, appData, queueEntry) => {
       return null
     })
 
+  console.log('>> item', JSON.stringify(item))
+
   if (item && item.length) {
     // send
     const opts = {
