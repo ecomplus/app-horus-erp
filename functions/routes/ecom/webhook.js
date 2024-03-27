@@ -111,9 +111,9 @@ exports.post = ({ appSdk }, req, res) => {
               // console.log('>> ', action, ' ', actionQueues)
               if (typeof actionQueues === 'object' && actionQueues) {
                 let j = 0
-                const fields = Object.keys(actionQueues)
-                while (j < fields.length) {
-                  const queue = fields[j]
+                const queues = Object.keys(actionQueues)
+                while (j < queues.length) {
+                  const queue = queues[j]
                   // Object.keys(actionQueues).forEach((queue) => {
                   const ids = actionQueues[queue]
                   const handlerName = action.replace(/^_+/, '')

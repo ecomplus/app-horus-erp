@@ -243,7 +243,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
     const sendSyncKit = []
     if (KIT === 'S') {
-      const productsKit = await getHorusKitComposition({ appSdk, storeId, auth }, COD_ITEM, opts.appSdk, sendSyncKit)
+      const productsKit = await getHorusKitComposition({ appSdk, storeId, auth }, COD_ITEM, opts.appData, sendSyncKit)
       productsKit.forEach((kit) => {
         if (kit) {
           if (!Array.isArray(body.kit_composition)) {
