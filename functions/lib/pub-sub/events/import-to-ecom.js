@@ -3,7 +3,8 @@ const { setup } = require('@ecomplus/application-sdk')
 const { collectionHorusEvents } = require('../../utils-variables')
 const imports = {
   products: require('../../integration/imports/products-to-ecom'),
-  categories: require('../../integration/imports/categories-to-ecom')
+  categories: require('../../integration/imports/categories-to-ecom'),
+  brands: require('../../integration/imports/brands-to-ecom')
 }
 
 const getAppSdk = () => {
