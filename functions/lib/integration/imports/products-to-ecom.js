@@ -50,7 +50,7 @@ const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, send
   while (hasRepeat) {
     // create Object Horus to request api Horus
     const endpoint = `/Autores_item?COD_ITEM=${codItem}&offset=${offset}&limit=${limit}`
-    console.log('>> endpoint: ', endpoint)
+    // console.log('>> endpoint: ', endpoint)
     const autores = await requestHorus(horus, endpoint)
       .catch((err) => {
         if (err.response) {
@@ -88,7 +88,7 @@ const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, send
     offset += limit
   }
   const categories = await Promise.all(promisesSendTopics)
-  console.log('>> categories ', categories)
+  // console.log('>> categories ', categories)
   return categories
 }
 
@@ -218,18 +218,17 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
 
     const promisesGenders = []
-    const promisesBrands = []
+    const promisesPublishingCompanies = []
     const categoriesForSync = []
     const brandsForSync = []
 
-    // const promisesBrands = []
-    const generos = ['COD_GENERO', 'COD_GENERO_NIVEL2', 'COD_GENERO_NIVEL3']
+    const genders = ['COD_GENERO', 'COD_GENERO_NIVEL2', 'COD_GENERO_NIVEL3']
 
-    generos.forEach(genero => {
-      if (productHorus[genero]) {
-        const strNumeral = genero.replace('COD_GENERO_NIVEL', '')
+    genders.forEach(gender => {
+      if (productHorus[gender]) {
+        const strNumeral = gender.replace('COD_GENERO_NIVEL', '')
         const numeral = Number.isInteger(parseInt(strNumeral)) && parseInt(strNumeral)
-        const codGenero = productHorus[genero]
+        const codGenero = productHorus[gender]
         const nomeGenero = productHorus[`GENERO_NIVEL_${numeral || 1}`]
         promisesGenders.push(
           getCategories({ appSdk, storeId, auth },
@@ -250,7 +249,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     if (COD_EDITORA) {
       const codEditora = COD_EDITORA
       const nomeEditora = NOM_EDITORA
-      promisesBrands.push(
+      promisesPublishingCompanies.push(
         getBrands({ appSdk, storeId, auth },
           {
             codEditora,
@@ -266,11 +265,17 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       )
     }
 
-    const genders = await Promise.all(promisesGenders)
-    const authors = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, categoriesForSync)
-    const brands = await Promise.all(promisesBrands)
+    // const gendersHorus = await Promise.all(promisesGenders)
+    // const authorsHorus = await getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, categoriesForSync)
+    // const brands = await Promise.all(promisesPublishingCompanies)
 
-    const categories = [...genders, ...authors]
+    const [gendersHorus, authorsHorus, brands] = await Promise.all([
+      promisesGenders,
+      getHorusAutores({ appSdk, storeId, auth }, COD_ITEM, opts.appData, categoriesForSync),
+      promisesPublishingCompanies
+    ])
+
+    const categories = [...gendersHorus, ...authorsHorus]
     categories.forEach((category) => {
       if (category) {
         if (!Array.isArray(body.categories)) {

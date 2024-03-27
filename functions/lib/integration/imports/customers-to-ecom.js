@@ -1,4 +1,5 @@
-//
+const ecomUtils = require('@ecomplus/utils')
+
 const findCustomer = async ({ appSdk, storeId, auth }, codClient, docCustomer) => {
   let endpoint = '/custormers.json?'
   if (codClient) {
@@ -29,7 +30,7 @@ const findCustomer = async ({ appSdk, storeId, auth }, codClient, docCustomer) =
     })
 }
 
-module.exports = async ({ appSdk, storeId, auth }, customerHorus) => {
+module.exports = async ({ appSdk, storeId, auth }, customerHorus, opts = {}) => {
   const {
     COD_CLI,
     NOM_CLI,
@@ -105,6 +106,7 @@ module.exports = async ({ appSdk, storeId, auth }, customerHorus) => {
     registry_type: registryType,
     metafields: [
       {
+        _id: ecomUtils.randomObjectId(),
         namespace: 'horus-erp',
         field: 'COD_CLI',
         value: COD_CLI
