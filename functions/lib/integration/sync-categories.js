@@ -34,12 +34,12 @@ module.exports = context => setup(null, true, firestore())
             .collection(`${collectionName}/${storeId}`)
             .listDocuments()
 
-          const LIMIT = 10
+          // const LIMIT = listGeneroAutor.length
           console.log('>> ', storeId, listGeneroAutor.length)
           const promisesSendTopics = []
           listGeneroAutor.forEach(async (docFirestore, index) => {
             // console.log('>> ', index, index <= LIMIT)
-            if (index <= LIMIT) {
+            if (index <= listGeneroAutor.length) {
               const categoryHorusId = docFirestore.id
               const doc = await getDoc(docFirestore)
               const categoryHorus = doc.data()
@@ -52,6 +52,7 @@ module.exports = context => setup(null, true, firestore())
                   .listDocuments()
 
                 if (category && category._id) {
+                  console.log('>> try update')
                   listProducts.forEach((docProduct) => {
                     promisesProducts.push(
                       updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
