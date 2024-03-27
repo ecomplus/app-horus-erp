@@ -1,7 +1,7 @@
 const ecomUtils = require('@ecomplus/utils')
 const { removeAccents } = require('../../utils-variables')
 
-const getBrand = ({ appSdk, storeId, auth }, endpoint, isReplay) => {
+const getBrands = ({ appSdk, storeId, auth }, endpoint, isReplay) => {
   return appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
     .then(({ response }) => {
       const { data } = response
@@ -68,10 +68,10 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus, opts = {}) => {
     ]
   }
 
-  const brand = await getBrand({ appSdk, storeId, auth }, endpoint)
+  const brand = await getBrands({ appSdk, storeId, auth }, endpoint)
 
   if (!brand && isCreate) {
-    return createBrands({}, 'brands.json', body)
+    return createBrands({ appSdk, storeId, auth }, 'brands.json', body)
   }
   return brand
 }
