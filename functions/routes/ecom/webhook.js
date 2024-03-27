@@ -67,20 +67,20 @@ exports.post = ({ appSdk }, req, res) => {
                 Object.keys(actionQueues).forEach((queue) => {
                   const ids = actionQueues[queue]
                   const handlerName = action.replace(/^_+/, '')
-                  if (action !== 'init_store') {
-                    // console.log('>> queue: ', queue, ' ', ids)
-                    if (Array.isArray(ids) && ids.length) {
-                      // const isHiddenQueue = action.charAt(0) === '_'
-                      // const mustUpdateAppQueue = trigger.resource === 'applications'
-                      // const handler = integrationHandlers[handlerName][queue.toLowerCase()]
-                      // const nextId = ids[0]
-                      // console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId)
-                    }
-                  } else if (ids) {
-                    const handler = integrationHandlers[handlerName]
-                    return handler({ appSdk, storeId, auth }, appData)
-                      .then(() => ({ appData, action, queue }))
+                  // if (action !== 'init_store') {
+                  //   // console.log('>> queue: ', queue, ' ', ids)
+                  if (Array.isArray(ids) && ids.length) {
+                    const isHiddenQueue = action.charAt(0) === '_'
+                    const mustUpdateAppQueue = trigger.resource === 'applications'
+                    // const handler = integrationHandlers[handlerName][queue.toLowerCase()]
+                    const nextId = ids[0]
+                    console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId, queue.toLowerCase())
                   }
+                  // } else if (ids) {
+                  //   const handler = integrationHandlers[handlerName]
+                  //   return handler({ appSdk, storeId, auth }, appData)
+                  //     .then(() => ({ appData, action, queue }))
+                  // }
                 })
                 //
               }
