@@ -25,7 +25,7 @@ module.exports = context => setup(null, true, firestore())
       .doc('category')
       .listCollections()
 
-    console.log('>> Sync: ', listStoreIds.length)
+    console.log('>> Sync Categories: ', listStoreIds.length)
     listStoreIds?.forEach(async docStore => {
       const storeId = parseInt(docStore.id, 10)
       await appSdk.getAuth(storeId)
@@ -52,7 +52,7 @@ module.exports = context => setup(null, true, firestore())
                   .listDocuments()
 
                 if (category && category._id) {
-                  console.log('>> try update')
+                  // console.log('>> try update')
                   if (listProducts.length) {
                     listProducts.forEach((docProduct) => {
                       promisesProducts.push(

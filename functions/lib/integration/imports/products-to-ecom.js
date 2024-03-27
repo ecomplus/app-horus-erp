@@ -1,10 +1,13 @@
 const getCategories = require('./categories-to-ecom')
 const getBrands = require('./brands-to-ecom')
+const {
+  getHorusAutores,
+  getProductByCodItem,
+  getHorusKitComposition
+} = require('./utils')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
 const { firestore } = require('firebase-admin')
-const requestHorus = require('../../horus/request')
-const Horus = require('../../horus/client')
 
 const saveFirestore = (idDoc, body) => firestore()
   .doc(idDoc)
@@ -20,76 +23,24 @@ const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => 
     resouceId = `COD_AUTOR${objectHorus.codAutor}`
   } else if (objectHorus.codEditora) {
     resouceId = `COD_EDITORA${objectHorus.codEditora}`
+  } else if (objectHorus.productId) {
+    resouceId = `${objectHorus.productId}`
   }
+
   if (resouceId) {
     const createdAt = new Date().toISOString()
     const docFirestoreId = docFirestore + `/${resouceId}`
-    const bodyCategory = { ...objectHorus, createdAt }
-    const bodyProduct = { productId, createdAt }
-
-    await Promise.all([
-      saveFirestore(docFirestoreId, bodyCategory),
-      saveFirestore(`${docFirestoreId}/products/${productId}`, bodyProduct)
-    ])
-  }
-}
-
-const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, sendSyncCategories) => {
-  const {
-    username,
-    password,
-    baseURL
-  } = appData
-  const horus = new Horus(username, password, baseURL)
-  // /Autores_item?COD_ITEM=1&offset=0&limit=100
-  let hasRepeat = true
-  let offset = 0
-  const limit = 100
-
-  const promisesSendTopics = []
-  while (hasRepeat) {
-    // create Object Horus to request api Horus
-    const endpoint = `/Autores_item?COD_ITEM=${codItem}&offset=${offset}&limit=${limit}`
-    // console.log('>> endpoint: ', endpoint)
-    const autores = await requestHorus(horus, endpoint)
-      .catch((err) => {
-        if (err.response) {
-          console.warn(JSON.stringify(err.response))
-        } else {
-          console.error(err)
-        }
-        return null
-      })
-
-    if (autores && Array.isArray(autores)) {
-      autores.forEach((autor, index) => {
-        const {
-          COD_AUTOR: codAutor,
-          NOM_AUTOR: nomeAutor
-        } = autor
-        promisesSendTopics.push(
-          getCategories({ appSdk, storeId, auth },
-            {
-              codAutor,
-              nomeAutor
-            }
-          ).then(resp => {
-            if (!resp) {
-              sendSyncCategories.push({ codAutor, nomeAutor })
-            }
-            return resp
-          })
-        )
-      })
-    } else {
-      hasRepeat = false
+    const bodyResource = { ...objectHorus, createdAt }
+    const promises = []
+    if (!objectHorus.productId) {
+      const bodyProduct = { productId, createdAt }
+      promises.push(saveFirestore(`${docFirestoreId}/products/${productId}`, bodyProduct))
     }
 
-    offset += limit
+    promises.push(saveFirestore(docFirestoreId, bodyResource))
+
+    await Promise.all(promises)
   }
-  const categories = await Promise.all(promisesSendTopics)
-  // console.log('>> categories ', categories)
-  return categories
 }
 
 module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
@@ -139,8 +90,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     // SITUACAO_ITEM,
     // SITUACAO_ITEM_DESC,
     // DAT_EXP_LANCTO,
-    PALAVRAS_CHAVE
-    // KIT,
+    PALAVRAS_CHAVE,
+    KIT
     // COD_ORIGEM_EDITORA,
     // POD,
     // DISPONIBILIDADE_MERCADO,
@@ -151,25 +102,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   }
   console.log('> product ', JSON.stringify(productHorus))
   const price = parsePrice(VLR_CAPA)
-  const endpoint = `products.json?sku=COD_ITEM${COD_ITEM}&limit=1`
-
-  const product = await appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
-    .then(({ response }) => response.data)
-    .then(({ result }) => {
-      if (result.length) {
-        const endpoint = `products/${result[0]._id}.json`
-        return appSdk.apiRequest(storeId, endpoint, 'GET', null, auth)
-          .then(async ({ response }) => response.data)
-      }
-      throw new Error('not found')
-    })
-    .catch((err) => {
-      if (err.response?.status === 404 || err.message === 'not found') {
-        return null
-      }
-      console.error(err)
-      throw err
-    })
+  const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)
 
   if (product && !updateProduct) {
     const endpoint = `products/${product._id}.json`
@@ -306,7 +239,18 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.body_html += QTD_PAGINAS ? ` Quantidade de páginas: ${QTD_PAGINAS} <br/>` : ''
     }
 
-    // TODO: check kit
+    const sendSyncKit = []
+    if (KIT === 'S') {
+      const productsKit = await getHorusKitComposition({ appSdk, storeId, auth }, COD_ITEM, opts.appSdk, sendSyncKit)
+      productsKit.forEach((kit) => {
+        if (kit) {
+          if (!Array.isArray(body.kit_composition)) {
+            body.kit_composition = []
+          }
+          body.kit_composition.push({ _id: kit._id, quantity: 1 })
+        }
+      })
+    }
 
     const endpoint = 'products.json'
     const method = !product ? 'POST' : 'PATCH'
@@ -325,6 +269,12 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         sendToQueueForSync(storeId, 'brand', brandHorus, productId)
       )
     })
+
+    if (sendSyncKit) {
+      sendForSync.push(
+        sendToQueueForSync(storeId, 'kit', { items: sendSyncKit, productId })
+      )
+    }
 
     await Promise.all(sendForSync)
 

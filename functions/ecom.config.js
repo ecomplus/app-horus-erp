@@ -222,8 +222,8 @@ const app = {
             type: 'array',
             items: {
               type: 'string',
-              title: 'ID do produto no erp',
-              description: 'ID do produto no erp que você deseja importar para a E-com'
+              title: 'Código do produto no erp',
+              description: 'Código do produto no erp que você deseja importar para a E-com'
             }
           }
         }
@@ -249,20 +249,20 @@ const app = {
       },
       hide: false
     },
-    init_store: {
-      schema: {
-        title: 'Setup inicial',
-        description: 'Primeira importação do ERP',
-        type: 'object',
-        properties: {
-          cod_item_end: {
-            title: 'Código do último produto cadatrado no ERP',
-            type: 'number',
-          }
-        }
-      },
-      hide: false
-    },
+    // init_store: {
+    //   schema: {
+    //     title: 'Setup inicial',
+    //     description: 'Primeira importação do ERP',
+    //     type: 'object',
+    //     properties: {
+    //       cod_item_end: {
+    //         title: 'Código do último produto cadatrado no ERP',
+    //         type: 'number',
+    //       }
+    //     }
+    //   },
+    //   hide: false
+    // },
   }
 }
 

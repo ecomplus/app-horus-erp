@@ -25,7 +25,7 @@ module.exports = context => setup(null, true, firestore())
       .doc('brand')
       .listCollections()
 
-    console.log('>> Sync: ', listStoreIds.length)
+    console.log('>> Sync Brands: ', listStoreIds.length)
     listStoreIds?.forEach(async docStore => {
       const storeId = parseInt(docStore.id, 10)
       await appSdk.getAuth(storeId)
