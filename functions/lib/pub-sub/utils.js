@@ -33,12 +33,15 @@ const createEventsFunction = (
 
 const sendMessageTopic = async (eventName, json) => {
   const topicName = getPubSubTopic(eventName)
-  const messageId = await new PubSub()
-    .topic(topicName)
-    .publishMessage({ json })
-    .catch(console.error)
+  try {
+    const messageId = await new PubSub()
+      .topic(topicName)
+      .publishMessage({ json })
 
-  console.log(`>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - ${json?.resource}`)
+    console.log(`>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - ${json?.resource}`)
+  } catch (e) {
+    //
+  }
 
   return null
 }

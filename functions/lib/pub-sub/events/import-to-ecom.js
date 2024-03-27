@@ -42,7 +42,7 @@ module.exports = async (
       const appClient = { appSdk, storeId, auth }
       return imports[resource](appClient, objectHorus, opts)
         .then(async () => {
-          const date = new Date(lastUpdate)
+          const date = new Date(lastUpdate || Date.now())
           const lastUpdateResource = new Date(date.getTime() + 60 * 1000).toISOString()
 
           const body = { [`${field}`]: lastUpdateResource }
