@@ -50,8 +50,7 @@ const sendMessageTopic = async (eventName, json) => {
   } catch (e) {
     console.warn('Error send pub/sub')
     const collectionName = 'pubSubErro'
-    const id = Buffer.from(JSON.stringify(json)).toString('base64')
-    return saveFirestore(`${collectionName}/${id}`, { eventName, json })
+    return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
   }
 
   return null
