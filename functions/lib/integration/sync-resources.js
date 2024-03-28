@@ -6,10 +6,10 @@ const syncKits = require('./handles-queues/queue-kit')
 
 module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
-    return Promise.all(
+    return Promise.all([
       syncBrands(appSdk),
       syncCategories(appSdk),
       syncKits(appSdk)
-    )
+    ])
   })
   .catch(console.error)

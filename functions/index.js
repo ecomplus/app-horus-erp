@@ -165,6 +165,6 @@ exports.horusEvents = functions
   .onRun(() => handleEventsHorus())
 console.log(`-- Check Events in Horus ERP'${eventsCron}'`)
 
-exports.syncResources = functions.pubsub.schedule(eventsCron)
+exports.syncResourcesToEcom = functions.pubsub.schedule(eventsCron)
   .onRun(() => handleSyncResources())
 console.log(`-- Sync Resources to E-com'${eventsCron}'`)
