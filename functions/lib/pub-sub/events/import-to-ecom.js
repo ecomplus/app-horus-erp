@@ -71,7 +71,7 @@ module.exports = async (
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
       return imports[resource](appClient, objectHorus, opts)
-        .then(async () => {
+        .then(async ({ _id }) => {
           if (isUpdateDate) {
             const date = new Date(lastUpdate || Date.now())
             const lastUpdateResource = new Date(date.getTime() + 60 * 1000).toISOString()
@@ -102,19 +102,25 @@ module.exports = async (
                 [queue]: queueList
               }
             }
-            return updateAppData({ appSdk, storeId, auth }, data).catch(err => {
-              if (err.response && (!err.response.status || err.response.status >= 500)) {
-                queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
-              } else {
-                throw err
-              }
-            })
+            console.log(`#${storeId} ${JSON.stringify(data)}`)
+            return updateAppData({ appSdk, storeId, auth }, data)
+              .then(() => {
+                return { _id }
+              })
+              .catch(async (err) => {
+                if (err.response && (!err.response.status || err.response.status >= 500)) {
+                  await queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
+                  return { _id }
+                } else {
+                  throw err
+                }
+              })
           }
-          return null
+          return { _id }
         })
     })
-    .then(() => {
-      console.log('>> Sucess Import ', resource, JSON.stringify(objectHorus))
+    .then(({ _id }) => {
+      console.log(`>> Sucess #${logId} import [${resource}: ${_id}]`)
     })
     .catch(async (err) => {
       console.error(`>> Error Event #${logId} import: ${resource}`)
