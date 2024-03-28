@@ -157,26 +157,22 @@ const getItemHorusAndSendProductToImport = async (storeId, codItem, appData, opt
       return null
     })
 
-  console.log('>> item', JSON.stringify(item))
+  // console.log('>> item', JSON.stringify(item))
 
-  if (item && item.length) {
-    // send
-    const opts = {
-      appData,
-      isUpdateDate: false,
-      ...options
-    }
-    console.log('>> opts', JSON.stringify(opts))
-    await sendMessageTopic(
-      topicResourceToEcom,
-      {
-        storeId,
-        resource: 'products',
-        objectHorus: item[0],
-        opts
-      })
+  const opts = {
+    appData,
+    isUpdateDate: false,
+    ...options
   }
-  return null
+  console.log('>> opts', JSON.stringify(opts))
+  return sendMessageTopic(
+    topicResourceToEcom,
+    {
+      storeId,
+      resource: 'products',
+      objectHorus: item && item.length && item[0],
+      opts
+    })
 }
 
 module.exports = {

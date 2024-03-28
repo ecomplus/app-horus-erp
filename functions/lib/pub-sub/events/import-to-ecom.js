@@ -14,6 +14,65 @@ const getAppSdk = () => {
       .then(appSdk => resolve(appSdk))
   })
 }
+const queueRetry = (appClient, { action, queue, nextId }, appData, _response) => {
+  const retryKey = `${appClient.storeId}_${action}_${queue}_${nextId}`
+  console.warn(retryKey)
+
+  let queueList = appData[action] && appData[action][queue]
+  if (!Array.isArray(queueList)) {
+    queueList = [nextId]
+  } else if (!queueList.includes(nextId)) {
+    queueList.unshift(nextId)
+  }
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      updateAppData(appClient, {
+        [action]: {
+          ...appData[action],
+          [queue]: queueList
+        }
+      })
+        .then(resolve)
+        .catch(reject)
+    }, 7000)
+  })
+}
+
+const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
+  const {
+    queueEntry,
+    appData
+  } = opts
+  const { action, queue, nextId } = queueEntry
+  let queueList = appData[action][queue]
+  if (Array.isArray(queueList)) {
+    const idIndex = queueList.indexOf(nextId)
+    if (idIndex > -1) {
+      queueList.splice(idIndex, 1)
+    }
+  } else {
+    queueList = []
+  }
+  const data = {
+    [action]: {
+      ...appData[action],
+      [queue]: queueList
+    }
+  }
+  console.log(`#${storeId} ${JSON.stringify(data)}`)
+  return updateAppData({ appSdk, storeId, auth }, data)
+    .then(() => {
+      return { _id }
+    })
+    .catch(async (err) => {
+      if (err.response && (!err.response.status || err.response.status >= 500)) {
+        await queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
+        return { _id }
+      } else {
+        throw err
+      }
+    })
+}
 
 module.exports = async (
   {
@@ -43,81 +102,27 @@ module.exports = async (
 
   const now = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
 
-  const queueRetry = (appSession, { action, queue, nextId }, appData, response) => {
-    const retryKey = `${appSession.storeId}_${action}_${queue}_${nextId}`
-    console.warn(retryKey)
-
-    let queueList = appData[action] && appData[action][queue]
-    if (!Array.isArray(queueList)) {
-      queueList = [nextId]
-    } else if (!queueList.includes(nextId)) {
-      queueList.unshift(nextId)
-    }
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        updateAppData(appSession, {
-          [action]: {
-            ...appData[action],
-            [queue]: queueList
-          }
-        })
-          .then(resolve)
-          .catch(reject)
-      }, 7000)
-    })
-  }
-
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
-      return imports[resource](appClient, objectHorus, opts)
-        .then(async ({ _id }) => {
-          if (isUpdateDate) {
-            const date = new Date(lastUpdate || Date.now())
-            const lastUpdateResource = new Date(date.getTime() + 60 * 1000).toISOString()
+      if (objectHorus) {
+        return imports[resource](appClient, objectHorus, opts)
+          .then(async ({ _id }) => {
+            if (isUpdateDate) {
+              const date = new Date(lastUpdate || Date.now())
+              const lastUpdateResource = new Date(date.getTime() + 60 * 1000).toISOString()
 
-            const body = { [`${field}`]: lastUpdateResource }
-            await docRef.set(body, { merge: true })
-              .catch(console.error)
-          }
-
-          const {
-            queueEntry,
-            appData
-          } = opts
-          if (queueEntry) {
-            const { action, queue, nextId } = queueEntry
-            let queueList = appData[action][queue]
-            if (Array.isArray(queueList)) {
-              const idIndex = queueList.indexOf(nextId)
-              if (idIndex > -1) {
-                queueList.splice(idIndex, 1)
-              }
-            } else {
-              queueList = []
+              const body = { [`${field}`]: lastUpdateResource }
+              await docRef.set(body, { merge: true })
+                .catch(console.error)
             }
-            const data = {
-              [action]: {
-                ...appData[action],
-                [queue]: queueList
-              }
+            if (opts.queueEntry) {
+              return updateApp(appClient, _id, opts)
             }
-            console.log(`#${storeId} ${JSON.stringify(data)}`)
-            return updateAppData({ appSdk, storeId, auth }, data)
-              .then(() => {
-                return { _id }
-              })
-              .catch(async (err) => {
-                if (err.response && (!err.response.status || err.response.status >= 500)) {
-                  await queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
-                  return { _id }
-                } else {
-                  throw err
-                }
-              })
-          }
-          return { _id }
-        })
+            return { _id }
+          })
+      }
+      return updateApp(appClient, 'remove_queue', opts)
     })
     .then(({ _id }) => {
       console.log(`>> Sucess #${logId} import [${resource}: ${_id}]`)
