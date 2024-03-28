@@ -170,7 +170,7 @@ exports.syncResourcesToEcom = functions.pubsub.schedule(eventsCron)
   .onRun(() => handleSyncResources())
 console.log(`-- Sync Resources to E-com'${eventsCron}'`)
 
-exports.syncResourcesToEcom = functions.pubsub.schedule(eventsCron)
+exports.replayPubSub = functions.pubsub.schedule(eventsCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {
       return handlePubSubErrors(appSdk)
