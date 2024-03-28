@@ -1,5 +1,11 @@
 const functions = require('firebase-functions')
+const { firestore } = require('firebase-admin')
 const { PubSub } = require('@google-cloud/pubsub')
+
+const saveFirestore = (idDoc, body) => firestore()
+  .doc(idDoc)
+  .set(body, { merge: true })
+  .catch(console.error)
 
 const getPubSubTopic = (eventName) => {
   return `${eventName}_events`
@@ -42,8 +48,10 @@ const sendMessageTopic = async (eventName, json) => {
     msg += `[${json?.resource}] - COD_ITEM: ${json?.objectHorus?.COD_ITEM}`
     console.log(msg)
   } catch (e) {
-    //
     console.warn('Error send pub/sub')
+    const collectionName = 'pubSubErro'
+    const id = Buffer.from(JSON.stringify(json)).toString('base64')
+    return saveFirestore(`${collectionName}/${id}`, { eventName, json })
   }
 
   return null
