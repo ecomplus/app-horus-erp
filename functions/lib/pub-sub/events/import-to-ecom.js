@@ -55,8 +55,34 @@ module.exports = async (
             await docRef.set(body, { merge: true })
               .catch(console.error)
           }
-          // update appDate check id is equals COD_ITEM
-          console.log('queueEntry ', JSON.stringify(opts.queueEntry))
+
+          const {
+            queueEntry,
+            appData
+          } = opts
+          if (queueEntry) {
+            const { action, queue, nextId } = queueEntry
+            let queueList = appData[action][queue]
+            if (Array.isArray(queueList)) {
+              const idIndex = queueList.indexOf(nextId)
+              if (idIndex > -1) {
+                queueList.splice(idIndex, 1)
+              }
+            } else {
+              queueList = []
+            }
+            const data = {
+              [action]: {
+                ...appData[action],
+                [queue]: queueList
+              }
+            }
+            // const codItem = objectHorus.COD_ITEM
+            // const body = {
+            //   [queueEntry.actions]:
+            // }
+            console.log('> ', data)
+          }
 
           return null
         })
