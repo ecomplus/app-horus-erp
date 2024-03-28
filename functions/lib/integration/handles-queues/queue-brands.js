@@ -24,76 +24,77 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
 
     console.log('>> Sync Brands', storeId, listEditoras.length)
     const promisesSendTopics = []
-    listEditoras.forEach(async (docFirestore, index) => {
-      if (index <= listEditoras.length) {
-        const brandHorusId = docFirestore.id
-        const doc = await getDoc(docFirestore)
-        const brandHorus = doc.data()
-        try {
-          const brand = await getBrands({ appSdk, storeId, auth }, brandHorus)
+    let index = 0
+    while (index <= listEditoras.length - 1) {
+      const docFirestore = listEditoras[index]
+      const brandHorusId = docFirestore.id
+      const doc = await getDoc(docFirestore)
+      const brandHorus = doc.data()
+      try {
+        const brand = await getBrands({ appSdk, storeId, auth }, brandHorus)
 
-          const promisesProducts = []
-          const listProducts = await firestore()
-            .collection(`${collectionName}/${storeId}/${brandHorusId}/products`)
-            .listDocuments()
+        const promisesProducts = []
+        const listProducts = await firestore()
+          .collection(`${collectionName}/${storeId}/${brandHorusId}/products`)
+          .listDocuments()
 
-          if (brand && brand._id) {
-            if (listProducts.length) {
-              listProducts.forEach((docProduct) => {
-                promisesProducts.push(
-                  updateProduct({ appSdk, storeId, auth }, docProduct.id, brand._id)
-                    .then(() => {
-                      console.log('>> Update Product ', docProduct.id)
+        if (brand && brand._id) {
+          if (listProducts.length) {
+            listProducts.forEach((docProduct) => {
+              promisesProducts.push(
+                updateProduct({ appSdk, storeId, auth }, docProduct.id, brand._id)
+                  .then(() => {
+                    console.log('>> Update Product ', docProduct.id)
+                    return docProduct.delete()
+                  }).catch(err => {
+                    if (err.response?.status === 404) {
                       return docProduct.delete()
-                    }).catch(err => {
-                      if (err.response?.status === 404) {
-                        return docProduct.delete()
-                      }
-                      throw err
-                    })
-                )
-              })
-            } else {
-              await docFirestore.delete()
-                .catch()
-            }
+                    }
+                    throw err
+                  })
+              )
+            })
           } else {
-            promisesSendTopics.push(
-              sendMessageTopic(
-                topicResourceToEcom,
-                {
-                  storeId,
-                  resource: 'brands',
-                  objectHorus: brandHorus,
-                  opts: { isCreate: true }
-                })
-            )
+            await docFirestore.delete()
+              .catch()
           }
-          if (promisesSendTopics.length) {
-            await Promise.all(promisesSendTopics)
-          }
-
-          if (promisesProducts.length) {
-            await Promise.all(promisesProducts)
-              .then(async () => {
-                const listDocs = await firestore()
-                  .collection(`${collectionName}/${storeId}/${brandHorusId}/products`)
-                  .listDocuments()
-                if (!listDocs.length) {
-                  console.log('> Remove ', brandHorusId)
-                  return docFirestore.delete()
-                }
-                return null
+        } else {
+          promisesSendTopics.push(
+            sendMessageTopic(
+              topicResourceToEcom,
+              {
+                storeId,
+                resource: 'brands',
+                objectHorus: brandHorus,
+                opts: { isCreate: true }
               })
-              .catch(() => {
-                console.log('> Error Delete ', JSON.stringify(brandHorus))
-              })
-          }
-        } catch (e) {
-          console.log('> Error in ', JSON.stringify(brandHorus))
+          )
         }
+        if (promisesSendTopics.length) {
+          await Promise.all(promisesSendTopics)
+        }
+
+        if (promisesProducts.length) {
+          await Promise.all(promisesProducts)
+            .then(async () => {
+              const listDocs = await firestore()
+                .collection(`${collectionName}/${storeId}/${brandHorusId}/products`)
+                .listDocuments()
+              if (!listDocs.length) {
+                console.log('> Remove ', brandHorusId)
+                return docFirestore.delete()
+              }
+              return null
+            })
+            .catch(() => {
+              console.log('> Error Delete ', JSON.stringify(brandHorus))
+            })
+        }
+      } catch (e) {
+        console.log('> Error in ', JSON.stringify(brandHorus))
       }
-    })
+      index += 1
+    }
   })
 
 const syncBrands = async (appSdk) => {
