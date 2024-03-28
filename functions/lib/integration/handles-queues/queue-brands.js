@@ -1,6 +1,4 @@
 const { firestore } = require('firebase-admin')
-// const { setup } = require('@ecomplus/application-sdk')
-// const getAppData = require('./store-api/get-app-data')
 const getBrands = require('../imports/brands-to-ecom')
 const { sendMessageTopic } = require('../../pub-sub/utils')
 const { topicResourceToEcom } = require('../../utils-variables')
@@ -18,6 +16,86 @@ const getDoc = (doc) => new Promise((resolve) => {
 })
 
 const collectionName = 'sync/brand'
+const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
+  .then(async (auth) => {
+    const listEditoras = await firestore()
+      .collection(`${collectionName}/${storeId}`)
+      .listDocuments()
+
+    console.log('>> Sync Brands', storeId, listEditoras.length)
+    const promisesSendTopics = []
+    listEditoras.forEach(async (docFirestore, index) => {
+      if (index <= listEditoras.length) {
+        const brandHorusId = docFirestore.id
+        const doc = await getDoc(docFirestore)
+        const brandHorus = doc.data()
+        try {
+          const brand = await getBrands({ appSdk, storeId, auth }, brandHorus)
+
+          const promisesProducts = []
+          const listProducts = await firestore()
+            .collection(`${collectionName}/${storeId}/${brandHorusId}/products`)
+            .listDocuments()
+
+          if (brand && brand._id) {
+            if (listProducts.length) {
+              listProducts.forEach((docProduct) => {
+                promisesProducts.push(
+                  updateProduct({ appSdk, storeId, auth }, docProduct.id, brand._id)
+                    .then(() => {
+                      console.log('>> Update Product ', docProduct.id)
+                      return docProduct.delete()
+                    }).catch(err => {
+                      if (err.response?.status === 404) {
+                        return docProduct.delete()
+                      }
+                      throw err
+                    })
+                )
+              })
+            } else {
+              await docFirestore.delete()
+                .catch()
+            }
+          } else {
+            promisesSendTopics.push(
+              sendMessageTopic(
+                topicResourceToEcom,
+                {
+                  storeId,
+                  resource: 'brands',
+                  objectHorus: brandHorus,
+                  opts: { isCreate: true }
+                })
+            )
+          }
+          if (promisesSendTopics.length) {
+            await Promise.all(promisesSendTopics)
+          }
+
+          if (promisesProducts.length) {
+            await Promise.all(promisesProducts)
+              .then(async () => {
+                const listDocs = await firestore()
+                  .collection(`${collectionName}/${storeId}/${brandHorusId}/products`)
+                  .listDocuments()
+                if (!listDocs.length) {
+                  console.log('> Remove ', brandHorusId)
+                  return docFirestore.delete()
+                }
+                return null
+              })
+              .catch(() => {
+                console.log('> Error Delete ', JSON.stringify(brandHorus))
+              })
+          }
+        } catch (e) {
+          console.log('> Error in ', JSON.stringify(brandHorus))
+        }
+      }
+    })
+  })
+
 const syncBrands = async (appSdk) => {
   const listStoreIds = await firestore()
     .collection('sync')
@@ -25,92 +103,16 @@ const syncBrands = async (appSdk) => {
     .listCollections()
 
   console.log('>> Sync Brands: ', listStoreIds.length)
+  const promisesStores = []
   listStoreIds?.forEach(async docStore => {
     const storeId = parseInt(docStore.id, 10)
-    await appSdk.getAuth(storeId)
-      .then(async (auth) => {
-        const listEditoras = await firestore()
-          .collection(`${collectionName}/${storeId}`)
-          .listDocuments()
-
-        // const LIMIT = listGeneroAutor.length
-        console.log('>> ', storeId, listEditoras.length)
-        const promisesSendTopics = []
-        listEditoras.forEach(async (docFirestore, index) => {
-          // console.log('>> ', index, index <= LIMIT)
-          if (index <= listEditoras.length) {
-            const brandHorusId = docFirestore.id
-            const doc = await getDoc(docFirestore)
-            const brandHorus = doc.data()
-            try {
-              const brand = await getBrands({ appSdk, storeId, auth }, brandHorus)
-
-              const promisesProducts = []
-              const listProducts = await firestore()
-                .collection(`${collectionName}/${storeId}/${brandHorusId}/products`)
-                .listDocuments()
-
-              if (brand && brand._id) {
-                console.log('>> try update')
-                if (listProducts.length) {
-                  listProducts.forEach((docProduct) => {
-                    promisesProducts.push(
-                      updateProduct({ appSdk, storeId, auth }, docProduct.id, brand._id)
-                        .then(() => {
-                          console.log('>> Update Product ', docProduct.id)
-                          return docProduct.delete()
-                        }).catch(err => {
-                          if (err.response?.status === 404) {
-                            return docProduct.delete()
-                          }
-                          throw err
-                        })
-                    )
-                  })
-                } else {
-                  await docFirestore.delete()
-                    .catch()
-                }
-              } else {
-                promisesSendTopics.push(
-                  sendMessageTopic(
-                    topicResourceToEcom,
-                    {
-                      storeId,
-                      resource: 'brands',
-                      objectHorus: brandHorus,
-                      opts: { isCreate: true }
-                    })
-                )
-              }
-              if (promisesSendTopics.length) {
-                await Promise.all(promisesSendTopics)
-              }
-
-              if (promisesProducts.length) {
-                await Promise.all(promisesProducts)
-                  .then(async () => {
-                    const listDocs = await firestore()
-                      .collection(`${collectionName}/${storeId}/${brandHorusId}/products`)
-                      .listDocuments()
-                    if (!listDocs.length) {
-                      console.log('> Remove ', brandHorusId)
-                      return docFirestore.delete()
-                    }
-                    return null
-                  })
-                  .catch(() => {
-                    console.log('> Error Delete ', JSON.stringify(brandHorus))
-                  })
-              }
-            } catch (e) {
-              console.log('> Error in ', JSON.stringify(brandHorus))
-            }
-          }
-        })
-      })
+    promisesStores.push(runStore(appSdk, storeId))
   })
-  return null
+
+  return Promise.all(promisesStores)
+    .then(() => {
+      console.log('Finish Sync Brands')
+    })
 }
 
 module.exports = syncBrands
