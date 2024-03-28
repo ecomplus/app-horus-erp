@@ -43,6 +43,7 @@ const sendMessageTopic = async (eventName, json) => {
     console.log(msg)
   } catch (e) {
     //
+    console.warn('Error send pub/sub')
   }
 
   return null
