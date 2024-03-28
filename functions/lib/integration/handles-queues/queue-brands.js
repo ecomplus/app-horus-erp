@@ -15,6 +15,16 @@ const getDoc = (doc) => new Promise((resolve) => {
   })
 })
 
+/*
+  Idea: read Firestore docs, browse stores, browse brands (Horus),
+  for each brand (horus) searches for the same in the API, if found,
+  searches Firestore again for products that use that brand.
+  For each product (api productId) update the product with brand in the API,
+  when there are no more products to update, the Firestore document is deleted,
+  if the brand (horus) does not exist in the API,
+  send it to 'pub /sub' to import the brand in the API
+*/
+
 const collectionName = 'sync/brand'
 const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
   .then(async (auth) => {

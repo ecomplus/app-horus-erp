@@ -4,15 +4,15 @@ const getAppData = require('./../../lib/store-api/get-app-data')
 // const requestHorus = require('../../lib/horus/request')
 // const { topicResourceToEcom } = require('../../lib/utils-variables')
 // const { sendMessageTopic } = require('../../lib/pub-sub/utils')
-const { getItemHorusSendImportProduct } = require('../../lib/integration/imports/utils')
+const { getItemHorusAndSendProductToImport } = require('../../lib/integration/imports/utils')
 const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
 
-const sendImportProdutHorusByCodItem = async (storeId, appData, queueEntry) => {
+const sendHorusProductForImportByCodItem = async (storeId, appData, queueEntry) => {
   console.log('>> Import Products')
-  return getItemHorusSendImportProduct(storeId, queueEntry.nextId, appData, { queueEntry })
+  return getItemHorusAndSendProductToImport(storeId, queueEntry.nextId, appData, { queueEntry })
 }
 
 const integrationHandlers = {
@@ -22,7 +22,7 @@ const integrationHandlers = {
     // order_ids: require('./../../lib/integration/export-order')
   },
   importation: {
-    products: sendImportProdutHorusByCodItem
+    products: sendHorusProductForImportByCodItem
   }
 }
 

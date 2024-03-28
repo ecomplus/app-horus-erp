@@ -2,7 +2,7 @@ const { firestore } = require('firebase-admin')
 const getAppData = require('../../store-api/get-app-data')
 const {
   getProductByCodItem,
-  getItemHorusSendImportProduct
+  getItemHorusAndSendProductToImport
 } = require('../imports/utils')
 
 const updateProduct = async ({ appSdk, storeId, auth }, endpoint, body) => {
@@ -15,6 +15,13 @@ const getDoc = (doc) => new Promise((resolve) => {
     resolve(data)
   })
 })
+/*
+  Idea: read the Firestore documents, browse the stores, browse the products (kit) already created,
+  for each product (kit), look for its other items, check if they are all already created in the API,
+  if yes, update the product (kit) like the other items and update it to 'available: true',
+  if there is non-existing item , search for the item in horus-erp,
+  and send it to pub/sub to be able to import it into the API
+*/
 
 const collectionName = 'sync/kit'
 const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
@@ -28,10 +35,10 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
     let index = 0
     while (index <= listProducts.length - 1) {
       const docFirestore = listProducts[index]
-      const docId = docFirestore.id
+      // const docId = docFirestore.id
       const doc = await getDoc(docFirestore)
       const { items, productId } = doc.data()
-      console.log('>> ', JSON.stringify(items), docId, productId)
+      // console.log('>> ', JSON.stringify(items), docId, productId)
       const promises = []
       const promisesSendProduct = []
       try {
@@ -44,7 +51,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
               })
               .catch(() => {
                 promisesSendProduct.push(
-                  getItemHorusSendImportProduct(storeId, item.codItem, appData)
+                  getItemHorusAndSendProductToImport(storeId, item.codItem, appData)
                 )
               })
           )

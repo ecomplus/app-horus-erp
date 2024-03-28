@@ -34,11 +34,11 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
         const category = await getCategories({ appSdk, storeId, auth }, categoryHorus)
 
         const promisesProducts = []
-        const listProducts = await firestore()
-          .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
-          .listDocuments()
 
         if (category && category._id) {
+          const listProducts = await firestore()
+            .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
+            .listDocuments()
           if (listProducts.length) {
             listProducts.forEach((docProduct) => {
               promisesProducts.push(

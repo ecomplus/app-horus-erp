@@ -102,6 +102,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   }
   console.log('> product ', JSON.stringify(productHorus))
   const price = parsePrice(VLR_CAPA)
+  const quantity = SALDO_DISPONIVEL || 0
   const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)
 
   if (product && !updateProduct) {
@@ -111,10 +112,14 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.price = price
     }
 
+    if (quantity !== product.quantity) {
+      body.quantity = quantity
+    }
+
     if (Object.keys(body).length) {
       return appSdk.apiRequest(storeId, endpoint, 'PATCH', body, auth)
     }
-    return null
+    return product
   } else {
     const body = {
       sku: `COD_ITEM${COD_ITEM}`,
@@ -123,7 +128,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         .replace(/[^a-z0-9-_./]/gi, '_'),
       price,
       status: STATUS_ITEM,
-      quantity: SALDO_DISPONIVEL || 0,
+      quantity,
       dimensions: {
 
         width: {
@@ -276,7 +281,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     })
 
     if (sendSyncKit.length) {
-      console.log('>> Send to queue kit')
       sendForSync.push(
         sendToQueueForSync(storeId, 'kit', { items: sendSyncKit, productId })
       )

@@ -139,7 +139,7 @@ const getHorusKitComposition = async ({ appSdk, storeId, auth }, cod, appData, s
   return categories
 }
 
-const getItemHorusSendImportProduct = async (storeId, codItem, appData, options) => {
+const getItemHorusAndSendProductToImport = async (storeId, codItem, appData, options) => {
   const {
     username,
     password,
@@ -183,5 +183,5 @@ module.exports = {
   getHorusAutores,
   getProductByCodItem,
   getHorusKitComposition,
-  getItemHorusSendImportProduct
+  getItemHorusAndSendProductToImport
 }
