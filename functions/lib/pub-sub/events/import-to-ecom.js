@@ -1,6 +1,7 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 const { collectionHorusEvents } = require('../../utils-variables')
+const updateAppData = require('../../store-api/update-app-data')
 const imports = {
   products: require('../../integration/imports/products-to-ecom'),
   categories: require('../../integration/imports/categories-to-ecom'),
@@ -42,6 +43,30 @@ module.exports = async (
 
   const now = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
 
+  const queueRetry = (appSession, { action, queue, nextId }, appData, response) => {
+    const retryKey = `${appSession.storeId}_${action}_${queue}_${nextId}`
+    console.warn(retryKey)
+
+    let queueList = appData[action] && appData[action][queue]
+    if (!Array.isArray(queueList)) {
+      queueList = [nextId]
+    } else if (!queueList.includes(nextId)) {
+      queueList.unshift(nextId)
+    }
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        updateAppData(appSession, {
+          [action]: {
+            ...appData[action],
+            [queue]: queueList
+          }
+        })
+          .then(resolve)
+          .catch(reject)
+      }, 7000)
+    })
+  }
+
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
@@ -77,15 +102,19 @@ module.exports = async (
                 [queue]: queueList
               }
             }
-            // const codItem = objectHorus.COD_ITEM
-            // const body = {
-            //   [queueEntry.actions]:
-            // }
-            console.log('> ', data)
+            return updateAppData({ appSdk, storeId, auth }, data).catch(err => {
+              if (err.response && (!err.response.status || err.response.status >= 500)) {
+                queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
+              } else {
+                throw err
+              }
+            })
           }
-
           return null
         })
+    })
+    .then(() => {
+      console.log('>> Sucess Import ', resource, JSON.stringify(objectHorus))
     })
     .catch(async (err) => {
       console.error(`>> Error Event #${logId} import: ${resource}`)
