@@ -53,7 +53,6 @@ const productsEvents = async (horus, storeId, opts) => {
   const limit = 100
 
   let total = 0
-  console.log('>>Cron s:', storeId, ' ', query, ' <')
   const promisesSendTopics = []
   while (hasRepeat) {
     // create Object Horus to request api Horus
@@ -88,11 +87,11 @@ const productsEvents = async (horus, storeId, opts) => {
 
     offset += limit
   }
-  console.log('Total imports ', total)
+  console.log(`>>Cron #${storeId} [${query}] total imports ${total}`)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
-      console.log('Finish Exec ', storeId)
+      console.log(`Finish Exec Products in #${storeId}`)
     })
 }
 
@@ -147,6 +146,9 @@ module.exports = context => setup(null, true, firestore())
           // }
           return null
         })
+        .then(() => {
+          console.log(`Finish Exec #${storeId}`)
+        })
     }
     console.log('>>Check Events ', storeIds.length, ' <')
     storeIds?.forEach(async (storeId) => {
@@ -155,7 +157,7 @@ module.exports = context => setup(null, true, firestore())
 
     return Promise.all(promises)
       .then(() => {
-        console.log('> Finish Check Events stores')
+        console.log('> Finish Check Events All Stores')
       })
   })
   .catch(console.error)

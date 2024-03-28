@@ -1,6 +1,8 @@
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
 const getCategories = require('./categories-to-ecom')
+const { sendMessageTopic } = require('../../pub-sub/utils')
+const { topicResourceToEcom } = require('../../utils-variables')
 
 const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, sendSyncCategories) => {
   const {
@@ -137,8 +139,49 @@ const getHorusKitComposition = async ({ appSdk, storeId, auth }, cod, appData, s
   return categories
 }
 
+const getItemHorusSendImportProduct = async (storeId, codItem, appData, options) => {
+  const {
+    username,
+    password,
+    baseURL
+  } = appData
+  const endpoint = `/Busca_Acervo?COD_ITEM=${codItem}&offset=0&limit=1`
+  const horus = new Horus(username, password, baseURL)
+  const item = await requestHorus(horus, endpoint, 'get')
+    .catch((err) => {
+      if (err.response) {
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
+      }
+      return null
+    })
+
+  console.log('>> item', JSON.stringify(item))
+
+  if (item && item.length) {
+    // send
+    const opts = {
+      appData,
+      isUpdateDate: false,
+      ...options
+    }
+    console.log('>> opts', JSON.stringify(opts))
+    await sendMessageTopic(
+      topicResourceToEcom,
+      {
+        storeId,
+        resource: 'products',
+        objectHorus: item[0],
+        opts
+      })
+  }
+  return null
+}
+
 module.exports = {
   getHorusAutores,
   getProductByCodItem,
-  getHorusKitComposition
+  getHorusKitComposition,
+  getItemHorusSendImportProduct
 }

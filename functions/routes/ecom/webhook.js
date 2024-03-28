@@ -1,10 +1,10 @@
 // read configured E-Com Plus app data
 const getAppData = require('./../../lib/store-api/get-app-data')
-const Horus = require('../../lib/horus/client')
-const requestHorus = require('../../lib/horus/request')
-const { topicResourceToEcom } = require('../../lib/utils-variables')
-const { sendMessageTopic } = require('../../lib/pub-sub/utils')
-
+// const Horus = require('../../lib/horus/client')
+// const requestHorus = require('../../lib/horus/request')
+// const { topicResourceToEcom } = require('../../lib/utils-variables')
+// const { sendMessageTopic } = require('../../lib/pub-sub/utils')
+const { getItemHorusSendImportProduct } = require('../../lib/integration/imports/utils')
 const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
@@ -12,44 +12,7 @@ const ECHO_API_ERROR = 'STORE_API_ERR'
 
 const sendImportProdutHorusByCodItem = async (storeId, appData, queueEntry) => {
   console.log('>> Import Products')
-  const {
-    username,
-    password,
-    baseURL
-  } = appData
-
-  const horus = new Horus(username, password, baseURL)
-  const endpoint = `/Busca_Acervo?COD_ITEM=${queueEntry.nextId}&offset=0&limit=1`
-  const item = await requestHorus(horus, endpoint, 'get')
-    .catch((err) => {
-      if (err.response) {
-        console.warn(JSON.stringify(err.response))
-      } else {
-        console.error(err)
-      }
-      return null
-    })
-
-  console.log('>> item', JSON.stringify(item))
-
-  if (item && item.length) {
-    // send
-    const opts = {
-      appData,
-      queueEntry,
-      isUpdateDate: false
-    }
-    console.log('>> opts', JSON.stringify(opts))
-    await sendMessageTopic(
-      topicResourceToEcom,
-      {
-        storeId,
-        resource: 'products',
-        objectHorus: item[0],
-        opts
-      })
-  }
-  return null
+  return getItemHorusSendImportProduct(storeId, queueEntry.nextId, appData, { queueEntry })
 }
 
 const integrationHandlers = {

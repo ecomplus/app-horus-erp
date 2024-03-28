@@ -1,15 +1,19 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
+const getAppData = require('../store-api/get-app-data')
+const {
+  getProductByCodItem,
+  getItemHorusSendImportProduct
+} = require('./imports/utils')
 // const getAppData = require('./store-api/get-app-data')
 // const getCategories = require('./imports/categories-to-ecom')
 // const { sendMessageTopic } = require('../pub-sub/utils')
 // const { topicResourceToEcom } = require('../utils-variables')
 
-// const updateProduct = async ({ appSdk, storeId, auth }, productId, categoryId) => {
-//   const endpoint = `/products/${productId}/categories.json`
-//   await appSdk.apiRequest(storeId, endpoint, 'POST', { _id: categoryId }, auth)
-//     .then(({ response }) => response.data)
-// }
+const updateProduct = async ({ appSdk, storeId, auth }, endpoint, body) => {
+  await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
+    .then(({ response }) => response.data)
+}
 
 const getDoc = (doc) => new Promise((resolve) => {
   doc?.onSnapshot(data => {
@@ -36,7 +40,7 @@ module.exports = context => setup(null, true, firestore())
 
           // const LIMIT = listGeneroAutor.length
           console.log('>> ', storeId, listProducts.length)
-          // const promisesSendTopics = []
+          const promisesProducts = []
           listProducts.forEach(async (docFirestore, index) => {
             // console.log('>> ', index, index <= LIMIT)
             if (index <= listProducts.length) {
@@ -44,70 +48,50 @@ module.exports = context => setup(null, true, firestore())
               const doc = await getDoc(docFirestore)
               const { items, productId } = doc.data()
               console.log('>> ', JSON.stringify(items), docId, productId)
+              const promises = []
+              const promisesSendProduct = []
               try {
-                // const category = await getCategories({ appSdk, storeId, auth }, categoryHorus)
-
-                // const promisesProducts = []
-                // const listProducts = await firestore()
-                //   .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
-                //   .listDocuments()
-
-                // if (category && category._id) {
-                // console.log('>> try update')
-                // if (listProducts.length) {
-                //   listProducts.forEach((docProduct) => {
-                //     promisesProducts.push(
-                //       updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
-                //         .then(() => {
-                //           console.log('>> Update Product ', docProduct.id)
-                //           return docProduct.delete()
-                //         }).catch(err => {
-                //           if (err.response?.status === 404) {
-                //             return docProduct.delete()
-                //           }
-                //           throw err
-                //         })
-                //     )
-                //   })
-                // } else {
-                // await docFirestore.delete()
-                //   .catch()
-                // }
-                // } else {
-                // promisesSendTopics.push(
-                //   sendMessageTopic(
-                //     topicResourceToEcom,
-                //     {
-                //       storeId,
-                //       resource: 'categories',
-                //       objectHorus: categoryHorus,
-                //       opts: { isCreate: true }
-                //     })
-                // )
-                // }
-                // if (promisesSendTopics.length) {
-                //   await Promise.all(promisesSendTopics)
-                // }
-
-                // if (promisesProducts.length) {
-                //   await Promise.all(promisesProducts)
-                //     .then(async () => {
-                //       const listDocs = await firestore()
-                //         .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
-                //         .listDocuments()
-                //       if (!listDocs.length) {
-                //         console.log('> Remove ', categoryHorusId)
-                //         return docFirestore.delete()
-                //       }
-                //       return null
-                //     })
-                //     .catch(() => {
-                //       console.log('> Error Delete ', JSON.stringify(categoryHorus))
-                //     })
-                // }
+                const appData = await getAppData({ appSdk, storeId, auth })
+                items.forEach((item) => {
+                  promises.push(
+                    getProductByCodItem({ appSdk, storeId, auth }, item.codItem)
+                      .then((data) => {
+                        return { _id: data._id }
+                      })
+                      .catch(() => {
+                        promisesSendProduct.push(
+                          getItemHorusSendImportProduct(storeId, item.codItem, appData)
+                        )
+                      })
+                  )
+                })
+                const products = await Promise.all(promises)
+                if (promisesSendProduct.length) {
+                  await Promise.all(promisesSendProduct)
+                } else {
+                  // update products
+                  products.forEach(product => {
+                    if (product._id) {
+                      const endpoint = `/products/${productId}/kit_composition.json`
+                      const body = { _id: product._id, quantity: 1 }
+                      promisesProducts.push(
+                        updateProduct({ appSdk, storeId, auth }, endpoint, body)
+                          .catch(err => {
+                            throw err
+                          })
+                      )
+                    }
+                  })
+                }
               } catch (e) {
-                // console.log('> Error in ', JSON.stringify(categoryHorus))
+                console.log('> Error in ', JSON.stringify(doc))
               }
+            }
+            if (promisesProducts.length) {
+              await Promise.all(promisesProducts)
+                .then(() => {
+                  docFirestore.delete()
+                })
             }
           })
         })
