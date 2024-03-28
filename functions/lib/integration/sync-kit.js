@@ -83,15 +83,25 @@ module.exports = context => setup(null, true, firestore())
                     }
                   })
                 }
+                if (promisesProducts.length) {
+                  await Promise.all(promisesProducts)
+                    .then(async () => {
+                      const endpoint = `/products/${productId}.json`
+                      await updateProduct({ appSdk, storeId, auth }, endpoint, { available: true })
+                        .then(() => {
+                          console.log('>> Update Product ', docFirestore.id)
+                          return docFirestore.delete()
+                        }).catch(err => {
+                          if (err.response?.status === 404) {
+                            return docFirestore.delete()
+                          }
+                          throw err
+                        })
+                    })
+                }
               } catch (e) {
                 console.log('> Error in ', JSON.stringify(doc))
               }
-            }
-            if (promisesProducts.length) {
-              await Promise.all(promisesProducts)
-                .then(() => {
-                  docFirestore.delete()
-                })
             }
           })
         })
