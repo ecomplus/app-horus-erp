@@ -3,7 +3,7 @@ const getBrands = require('../imports/brands-to-ecom')
 const { sendMessageTopic } = require('../../pub-sub/utils')
 const { topicResourceToEcom } = require('../../utils-variables')
 
-const updateProduct = async ({ appSdk, storeId, auth }, productId, brandId) => {
+const addBrandInProduct = async ({ appSdk, storeId, auth }, productId, brandId) => {
   const endpoint = `/products/${productId}/brands.json`
   await appSdk.apiRequest(storeId, endpoint, 'POST', { _id: brandId }, auth)
     .then(({ response }) => response.data)
@@ -52,7 +52,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
           if (listProducts.length) {
             listProducts.forEach((docProduct) => {
               promisesProducts.push(
-                updateProduct({ appSdk, storeId, auth }, docProduct.id, brand._id)
+                addBrandInProduct({ appSdk, storeId, auth }, docProduct.id, brand._id)
                   .then(() => {
                     console.log('>> Update Product ', docProduct.id)
                     return docProduct.delete()
@@ -102,6 +102,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
         }
       } catch (e) {
         console.log('> Error in ', JSON.stringify(brandHorus))
+        console.error(e)
       }
       index += 1
     }

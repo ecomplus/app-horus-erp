@@ -3,7 +3,7 @@ const getCategories = require('../imports/categories-to-ecom')
 const { sendMessageTopic } = require('../../pub-sub/utils')
 const { topicResourceToEcom } = require('../../utils-variables')
 
-const updateProduct = async ({ appSdk, storeId, auth }, productId, categoryId) => {
+const addCategoryInProduct = async ({ appSdk, storeId, auth }, productId, categoryId) => {
   const endpoint = `/products/${productId}/categories.json`
   await appSdk.apiRequest(storeId, endpoint, 'POST', { _id: categoryId }, auth)
     .then(({ response }) => response.data)
@@ -15,6 +15,15 @@ const getDoc = (doc) => new Promise((resolve) => {
   })
 })
 
+/*
+  Idea: read Firestore docs, browse stores, browse categories (Horus),
+  for each category (horus) searches for the same in the API, if found,
+  searches Firestore again for products that use that category.
+  For each product (api productId) update the product with category in the API,
+  when there are no more products to update, the Firestore document is deleted,
+  if the category (horus) does not exist in the API,
+  send it to 'pub /sub' to import the category in the API
+*/
 const collectionName = 'sync/category'
 const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
   .then(async (auth) => {
@@ -42,7 +51,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
           if (listProducts.length) {
             listProducts.forEach((docProduct) => {
               promisesProducts.push(
-                updateProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
+                addCategoryInProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
                   .then(() => {
                     console.log('>> Update Product ', docProduct.id)
                     return docProduct.delete()
@@ -87,6 +96,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
         }
       } catch (e) {
         console.log('> Error in ', JSON.stringify(categoryHorus))
+        console.error(e)
       }
       index += 1
     }
