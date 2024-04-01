@@ -5,8 +5,8 @@ const {
   getItemHorusAndSendProductToImport
 } = require('../imports/utils')
 
-const updateProduct = async ({ appSdk, storeId, auth }, endpoint, body) => {
-  await appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
+const updateProduct = async ({ appSdk, storeId, auth }, endpoint, method, body) => {
+  await appSdk.apiRequest(storeId, endpoint, method, body, auth)
     .then(({ response }) => response.data)
 }
 
@@ -66,7 +66,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
               const endpoint = `/products/${productId}/kit_composition.json`
               const body = { _id: product._id, quantity: 1 }
               promisesProducts.push(
-                updateProduct({ appSdk, storeId, auth }, endpoint, body)
+                updateProduct({ appSdk, storeId, auth }, endpoint, 'POST', body)
                   .catch(err => {
                     throw err
                   })
@@ -80,7 +80,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
             .then(async () => {
               console.log('>> Update')
               const endpoint = `/products/${productId}.json`
-              await updateProduct({ appSdk, storeId, auth }, endpoint, { available: true })
+              await updateProduct({ appSdk, storeId, auth }, endpoint, 'PATCH', { available: true })
                 .then(() => {
                   console.log('>> Update Product ', docFirestore.id)
                   return docFirestore.delete()
