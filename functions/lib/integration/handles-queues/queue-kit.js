@@ -75,8 +75,10 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
           })
         }
         if (promisesProducts.length) {
+          // TODO: checar pq não está atualizando
           await Promise.all(promisesProducts)
             .then(async () => {
+              console.log('>> Update')
               const endpoint = `/products/${productId}.json`
               await updateProduct({ appSdk, storeId, auth }, endpoint, { available: true })
                 .then(() => {
@@ -86,6 +88,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
                   if (err.response?.status === 404) {
                     return docFirestore.delete()
                   }
+                  console.error(err)
                   throw err
                 })
             })
@@ -111,7 +114,7 @@ const syncKit = async (appSdk) => {
   })
   return Promise.all(promisesStores)
     .then(() => {
-      console.log('Finish Sync Categories')
+      console.log('Finish Sync Kit')
     })
 }
 module.exports = syncKit
