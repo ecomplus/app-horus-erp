@@ -95,6 +95,7 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
         }
       } catch (e) {
         console.log('> Error in ', JSON.stringify(doc))
+        console.error(e)
       }
       index += 1
     }
