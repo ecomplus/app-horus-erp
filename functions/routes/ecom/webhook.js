@@ -10,8 +10,7 @@ const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
 
-const sendHorusProductForImportByCodItem = async (storeId, appData, queueEntry) => {
-  console.log('>> Import Products')
+const sendHorusProductForImportByCodItem = async ({ _appSdk, storeId, _auth }, appData, queueEntry) => {
   return getItemHorusAndSendProductToImport(storeId, queueEntry.nextId, appData, { queueEntry })
 }
 
@@ -55,11 +54,26 @@ exports.post = ({ appSdk }, req, res) => {
           console.log(`> Webhook #${storeId} ${resourceId} [${trigger.resource}]`)
           let integrationConfig
           // const actionsQueue = []
+          // let canCreateNew = false
 
           if (trigger.resource === 'applications') {
-            // actionsQueue.push(...Object.keys(trigger.body))
             integrationConfig = appData
-            // canCreateNew = true
+          } else if (trigger.authentication_id !== auth.myId) {
+            switch (trigger.resource) {
+              case 'orders':
+                if (trigger.body) {
+                  // canCreateNew = appData.new_orders ? undefined : false
+                  integrationConfig = {
+                    _exportation: {
+                      order_ids: [resourceId]
+                    }
+                  }
+                }
+                break
+
+              default:
+                break
+            }
           }
           if (integrationConfig) {
             const actions = Object.keys(integrationHandlers)
@@ -87,7 +101,7 @@ exports.post = ({ appSdk }, req, res) => {
                     const nextId = ids[0]
                     console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId, queue.toLowerCase())
                     const queueEntry = { action, queue, nextId, mustUpdateAppQueue }
-                    return handler(storeId, appData, queueEntry)
+                    return handler({ appSdk, storeId, auth }, appData, queueEntry)
                       .then(() => ({ appData, action, queue }))
                   }
                   j += 1

@@ -5,7 +5,7 @@ const {
   collectionHorusEvents,
   topicResourceToEcom
 } = require('./utils-variables')
-const { parseDate } = require('./parsers/parse-to-ecom')
+const { parseDate } = require('./parsers/parse-to-horus')
 const Horus = require('./horus/client')
 const requestHorus = require('./horus/request')
 const { sendMessageTopic } = require('./pub-sub/utils')

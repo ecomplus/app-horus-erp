@@ -169,47 +169,161 @@ const app = {
       },
       hide: true
     },
-    new_orders: {
+    company_code: {
       schema: {
-        type: 'boolean',
-        default: true,
-        title: 'Exportar novos pedidos',
-        description: 'Criar novos pedidos automaticamente'
-      }
-    },
-    approved_order_only: {
-      schema: {
-        type: 'boolean',
-        default: false,
-        title: 'Apenas pedidos aprovados',
-        description: 'Criar pedidos após aprovação'
-      }
-    },
-    update_quantity: {
-      schema: {
-        type: 'boolean',
-        defaut: false,
-        title: 'Atualização de estoque',
-        description: 'Atualizar estoque automaticamente na E-com'
+        type: 'number',
+        "minimum": 1,
+        "maximum": 999999,
+        "default": 1,
+        title: 'Código da Empresa',
+        description: 'Código da Empresa cadastrado no ERP. (Padrão: 1)'
       },
-      hide: true
+      hide: false
     },
-    update_product: {
+    subsidiary_code: {
       schema: {
-        type: 'boolean',
-        default: false,
-        title: 'Sobrescrever produto',
-        description: 'Atualizar cadastro (não apenas estoque) de produtos importados já existentes na plataforma'
+        type: 'number',
+        minimum: 1,
+        maximum: 999999,
+        default: 1,
+        title: 'Código da Empresa',
+        description: 'Código da Filial cadastrado no ERP. (Padrão: 1)'
       },
-      hide: true
+      hide: false
     },
-    update_price: {
+    sale_code: {
       schema: {
-        type: 'boolean',
-        default: false,
-        title: 'Atualização de preço',
-        description: 'Atualizar preço automaticamente na E-com'
-      }
+        type: 'number',
+        minimum: 1,
+        maximum: 999999,
+        default: 1,
+        title: 'Código do Método de Venda',
+        description: 'Código do Método de Venda usado nos pedidos para classificação no ERP HORUS. (Padrão: 1)'
+      },
+      hide: false
+    },
+    products: {
+      schema: {
+        title: 'Produtos',
+        description: 'Configurações para importações de produtos para E-com',
+        type: 'object',
+        properties: {
+          update_quantity: {
+            schema: {
+              type: 'boolean',
+              defaut: false,
+              title: 'Atualização de estoque',
+              description: 'Atualizar estoque automaticamente na E-com'
+            },
+            hide: true
+          },
+          update_product: {
+            schema: {
+              type: 'boolean',
+              default: false,
+              title: 'Sobrescrever produto',
+              description: 'Atualizar cadastro (não apenas estoque) de produtos importados já existentes na E-com'
+            },
+            hide: true
+          },
+          update_price: {
+            schema: {
+              type: 'boolean',
+              default: false,
+              title: 'Atualização de preço',
+              description: 'Atualizar preço automaticamente na E-com'
+            }
+          },
+        }
+      },
+      hide: false
+    },
+    orders: {
+      schema: {
+        title: 'Pedidos',
+        description: 'Configuração para exportar pedidos para o ERP',
+        type: 'object',
+        properties: {
+          new_orders: {
+            schema: {
+              type: 'boolean',
+              default: true,
+              title: 'Exportar novos pedidos',
+              description: 'Criar novos pedidos automaticamente'
+            }
+          },
+          approved_order_only: {
+            schema: {
+              type: 'boolean',
+              default: false,
+              title: 'Apenas pedidos aprovados',
+              description: 'Criar pedidos após aprovação'
+            }
+          },
+          payments: {
+            schema: {
+              title: 'Formas de Pagamento',
+              description: 'Mapear formas de pagamento cadastradas no ERP. (Padrão: 1 -se não informado)',
+              type: "array",
+              maxItems: 5,
+              items: {
+                title: "Forma de Pagamento",
+                type: "object",
+                minProperties: 1,
+                properties: {
+                  name : {
+                    type: "string",
+                    enum: [
+                      "Crédito",
+                      "Boleto",
+                      "Pix",
+                      "Débito",
+                      "Pontos",
+                    ],
+                    default: "Crédito",
+                    title: "Forma de Pagamento",
+                  },
+                  code: {
+                    type: 'number',
+                    minimum: 1,
+                    maximum: 999999,
+                    default: 1,
+                    title: 'Código da Forma de Pagamento no ERP',
+                  }
+                }
+              }
+            }
+
+          },
+          responsible: {
+            schema: {
+              title: 'Responsável cadastro cliente',
+              description: 'Informações utilizadas para cadastro de cliente.',
+              type: 'object',
+              properties: {
+                code: {
+                  schema: {
+                    type: 'number',
+                    minimum: 1,
+                    maximum: 999999,
+                    default: 1,
+                    title: 'Código do responsável no ERP. (Padrão: 1)',
+                  }
+                },
+                name : {
+                  schema: {
+                    type: 'string',
+                    maxLength: 255,
+                    default: 'ecomplus',
+                    title: 'Nome do responsável no ERP. (Padrão: ecomplus)',
+                  }
+                }
+              }
+            }
+          },
+        }
+      },
+      hide: false
     },
     importation: {
       schema: {

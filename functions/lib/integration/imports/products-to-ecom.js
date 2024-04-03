@@ -46,8 +46,9 @@ const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => 
 module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const {
     update_product: updateProduct,
-    update_price: updatePrice
-  } = opts.appData
+    update_price: updatePrice,
+    update_quantity: updateStock
+  } = opts.appData.products
 
   const {
     COD_ITEM,
@@ -112,7 +113,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.price = price
     }
 
-    if (quantity !== product.quantity) {
+    if (quantity !== product.quantity && updateStock) {
       body.quantity = quantity
     }
 
@@ -148,7 +149,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         value: PESO_ITEM || 0,
         unit: 'mg'
       }
-
     }
 
     if (SUBTITULO) {

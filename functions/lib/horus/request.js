@@ -1,5 +1,5 @@
 const requestHorus = (horus, endpoint, method = 'get', isRetry) => new Promise((resolve, reject) => {
-  horus[method](endpoint)
+  horus[method.toLowerCase()](endpoint)
     .then((resp) => {
       const { data } = resp
       if (data && data.length && !data[0].Mensagem) {

@@ -164,7 +164,7 @@ const getItemHorusAndSendProductToImport = async (storeId, codItem, appData, opt
     isUpdateDate: false,
     ...options
   }
-  console.log('>> opts', JSON.stringify(opts))
+  // console.log('>> opts', JSON.stringify(opts))
   return sendMessageTopic(
     topicResourceToEcom,
     {

@@ -78,11 +78,11 @@ const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
           // TODO: checar pq não está atualizando
           await Promise.all(promisesProducts)
             .then(async () => {
-              console.log('>> Update')
+              // console.log('>> Update')
               const endpoint = `/products/${productId}.json`
               await updateProduct({ appSdk, storeId, auth }, endpoint, 'PATCH', { available: true })
                 .then(() => {
-                  console.log('>> Update Product ', docFirestore.id)
+                  // console.log('>> Update Product ', docFirestore.id)
                   return docFirestore.delete()
                 }).catch(err => {
                   if (err.response?.status === 404) {
