@@ -49,8 +49,8 @@ const parsePaymentMethod = (paymentMethod) => {
   }
 }
 
-const getCodePayment = (paymentMethod, appDataOrders) => {
-  if (!appDataOrders.payments?.length || !paymentMethod) {
+const getCodePayment = (paymentMethod, appDataPayments) => {
+  if (!appDataPayments?.length || !paymentMethod) {
     return 1
   }
   const methodName = parsePaymentMethod(paymentMethod)
@@ -58,7 +58,7 @@ const getCodePayment = (paymentMethod, appDataOrders) => {
     return 1
   }
 
-  const method = appDataOrders.payments
+  const method = appDataPayments
     .find(payment => payment.name === methodName)
 
   return method ? method.code : 1

@@ -41,7 +41,7 @@ exports.get = async ({ appSdk }, req, res) => {
     .then((auth) => {
       return getAppData({ appSdk, storeId, auth })
         .then(appData => {
-          const resp = getCodePayment(transaction, appData.orders)
+          const resp = getCodePayment(transaction, appData.payments)
           res.send({ resp })
         })
     })
