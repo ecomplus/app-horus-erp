@@ -45,7 +45,8 @@ exports.get = async ({ appSdk }, req, res) => {
           res.send({ resp })
         })
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error(err)
       res.send({ error: '' })
     })
 }
