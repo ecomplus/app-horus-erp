@@ -2,11 +2,27 @@ const { firestore } = require('firebase-admin')
 // const getAppData = require('../../lib/store-api/get-app-data')
 // const { getCodePayment, getCodeDelivery } = require('../../lib/parsers/parse-to-horus')
 
+const getDoc = (doc) => new Promise((resolve) => {
+  doc?.onSnapshot(data => {
+    resolve(data)
+  })
+})
 exports.get = async ({ appSdk }, req, res) => {
   const listStoreIds = await firestore()
     .collection('sync')
     .listDocuments()
-  console.log('>> ', JSON.stringify(listStoreIds))
+  // console.log('>> ', JSON.stringify(listStoreIds))
+  // listStoreIds.forEach(store => {
+  //   storeId.id
+  // })
+  let i = 0
+  while (i <= listStoreIds.length - 1) {
+    const docFirestore = listStoreIds[i]
+    const docId = docFirestore.id
+    const doc = await getDoc(docFirestore)
+    console.log('>> ', doc && JSON.stringify(doc), ' id: ', docId)
+    i += 1
+  }
   res.send('ok')
   // const storeId = 1173
   // appSdk.getAuth(storeId)
