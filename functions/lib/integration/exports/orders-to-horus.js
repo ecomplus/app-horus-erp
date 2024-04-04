@@ -1,32 +1,20 @@
 const url = require('url')
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
-const { getClientByCustomer } = require('./utils')
+const {
+  getClientByCustomer,
+  getClientAddressByZipCode
+} = require('./utils')
 const {
   parsePrice,
   parseDate,
   parseFinancialStatus,
   getCodePayment,
-  getCodeDelivery
+  getCodeDelivery,
+  parseZipCode
 } = require('../../parsers/parse-to-horus')
+const createAddress = require('./address-to-horus')
 const getOrderById = require('../../store-api/get-resource-by-id')
-
-// const getOneInErp = (horus, endpoint) => requestHorus(horus, endpoint)
-//   .then((data) => {
-//     return data && data.length ? data[0] : null
-//   })
-//   .catch((err) => {
-//     if (err.response) {
-//       console.warn(JSON.stringify(err.response))
-//     } else {
-//       console.error(err)
-//     }
-//     return null
-//   })
-
-// const transport = transportsHorus.find(i => i.NOM_TRANSP.includes(shipping_method_label.toUpperCase()))
-// payment_method cartão // boleto // pix
-// const payment = payments.find(i => i.NOM_FORMA.includes())
 
 module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   const {
@@ -40,14 +28,27 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
   return getOrderById({ appSdk, storeId, auth }, 'orders', orderId)
     .then(async (order) => {
-      // const order = response.data
-      const customer = order.buyers
+      const logHead = `#${storeId} ${orderId}`
+      const customer = order.buyers && order.buyers.length && order.buyers[0]
+      if (!customer) {
+        console.log(`${logHead} skipped, customer not found`)
+        return null
+      }
       const {
         amount,
         number
       } = order
 
-      const logHead = `#${storeId} ${orderId}`
+      const transaction = order.transactions && order.transactions.length && order.transactions[0]
+      const paymentMethodCode = transaction && transaction.payment_method.code
+      const shippingLine = order.shipping_lines && order.shipping_lines.length && order.shipping_lines[0]
+      const shippingApp = shippingLine && shippingLine.app
+
+      const isBillingAddress = !shippingLine?.to?.zip
+      const customerAddress = isBillingAddress
+        ? shippingLine?.to
+        : transaction?.billing_address
+
       if (!order.financial_status) {
         console.log(`${logHead} skipped with no financial status`)
         return null
@@ -73,24 +74,27 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       if (!customerHorus) {
         // TODO:
         // send to queue to create client in erp
+        // send create address client in erp (createAddress billing)
         // add order in queue to export for erp
       }
+      const customerCodeHorus = customerHorus.COD_CLI
 
-      const transaction = order.transactions && order.transactions.length && order.transactions[0]
-      const paymentMethodCode = transaction && transaction.payment_method.code
-      const shippingLine = order.shipping_lines && order.shipping_lines.length && order.shipping_lines[0]
-      const shippingApp = shippingLine && shippingLine.app
+      const zipCode = parseZipCode(customerAddress.zip)
+      let addressCustomerHorus = await getClientAddressByZipCode(horus, customerCodeHorus, zipCode)
+      if (!addressCustomerHorus) {
+        addressCustomerHorus = await createAddress(horus, customerCodeHorus, customerAddress, isBillingAddress)
+      }
 
       const body = {
         COD_PEDIDO_ORIGEM: orderId,
         COD_EMPRESA: companyCode,
         COD_FILIAL: subsidiaryCode,
         TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
-        COD_CLI: customerHorus.COD_CLI, // Código do Cliente - Parâmetro obrigatório!
+        COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
         OBS_PEDIDO: `Pedido #${number}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
         COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
         COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
-        // COD_TPO_END // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
+        COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
         FRETE_EMIT_DEST: amount.freight ? 2 : 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
         COD_FORMA: getCodePayment(paymentMethodCode, appData.payments), // Informar o código da forma de pagamento - Parâmetro Obrigatório
         QTD_PARCELAS: 'ZERO', // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório

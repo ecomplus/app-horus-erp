@@ -26,37 +26,24 @@ const getClientByCustomer = (storeId, horus, customer) => {
     })
 }
 
-// const findTransportCompany = async (horus, companyCode, subsidiaryCode) => {
-//   let hasRepeat = true
-//   let offset = 0
-//   const limit = 100
+const getClientAddressByZipCode = (horus, customerCodeHorus, zipCode) => {
+  const endpoint = `/Busca_EndCliente?COD_CLI=${customerCodeHorus}&CEP=${zipCode || 0}&OFFSET=0&LIMIT=1`
 
-//   const promisesSendTopics = []
-//   while (hasRepeat) {
-//     // create Object Horus to request api Horus
-//     // const endpoint = `/Busca_Acervo_kit?COD_ITEM=${cod}&offset=${offset}&limit=${limit}`
-//     const endpoint = `Busca_Transportadora?COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
-//       `&OFFSET=${offset}&LIMIT=${limit}`
-
-//     // console.log('>> endpoint: ', endpoint)
-//     const items = await requestHorus(horus, endpoint)
-//       .catch((err) => {
-//         if (err.response) {
-//           console.warn(JSON.stringify(err.response))
-//         } else {
-//           console.error(err)
-//         }
-//         return null
-//       })
-//     if (items && Array.isArray(items)) {
-//       //
-//     } else {
-//       hasRepeat = false
-//     }
-//     offset += limit
-//   }
-// }
+  return requestHorus(horus, endpoint)
+    .then((data) => {
+      return data && data.length ? data[0] : null
+    })
+    .catch((err) => {
+      if (err.response) {
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
+      }
+      return null
+    })
+}
 
 module.exports = {
-  getClientByCustomer
+  getClientByCustomer,
+  getClientAddressByZipCode
 }

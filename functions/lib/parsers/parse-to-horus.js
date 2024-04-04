@@ -84,12 +84,14 @@ const getCodeDelivery = (shippingApp, appDataDelivery) => {
 
 const parsePrice = (value) => value
   .toFixed(2)
-  // .replace('.', ',')
+
+const parseZipCode = zip => zip && zip.replace(/\D/g, '').padStart(8, '0')
 
 module.exports = {
   parseDate,
   parsePrice,
   parseFinancialStatus,
   getCodePayment,
-  getCodeDelivery
+  getCodeDelivery,
+  parseZipCode
 }

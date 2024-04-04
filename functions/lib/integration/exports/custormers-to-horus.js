@@ -2,7 +2,7 @@ const url = require('url')
 const { getClientByCustomer } = require('./utils')
 const getCustomerById = require('../../store-api/get-resource-by-id')
 const Horus = require('../../horus/client')
-// const requestHorus = require('../../horus/request')
+const requestHorus = require('../../horus/request')
 
 module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
   const { isCreate, appData } = opts
@@ -65,11 +65,9 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
     const params = new url.URLSearchParams(body)
     const endpoint = `/InsAltCliente?${params.toString()}`
     console.log('>> Insert Client', endpoint, method)
-    // TODO:
-    // return requestHorus(horus, endpoint, method)
+
+    return requestHorus(horus, endpoint, method)
   }
   console.log(`> ${logHead} ignored with don't create or update client`)
-  return null
-// }
-// })
+  return customerHorus || null
 }
