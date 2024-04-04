@@ -15,7 +15,7 @@ const saveFirestore = (idDoc, body) => firestore()
   .catch(console.error)
 
 const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => {
-  const docFirestore = `sync/${resource}/${storeId}`
+  const docFirestore = `sync/${storeId}/${resource}`
   let resouceId
   if (objectHorus.codGenero) {
     resouceId = `COD_GENERO${objectHorus.codGenero}`
