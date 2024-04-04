@@ -76,6 +76,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
 
       const transaction = order.transactions.length && order.transactions[0]
+      const paymentMethodCode = transaction && transaction.payment_method.code
 
       const body = {
         COD_PEDIDO_ORIGEM: orderId,
@@ -88,7 +89,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
         // COD_TPO_END // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
         FRETE_EMIT_DEST: amount.freight ? 2 : 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
-        COD_FORMA: getCodePayment(transaction, appData.payments), // Informar o código da forma de pagamento - Parâmetro Obrigatório
+        COD_FORMA: getCodePayment(paymentMethodCode, appData.payments), // Informar o código da forma de pagamento - Parâmetro Obrigatório
         QTD_PARCELAS: 'ZERO', // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
         VLR_FRETE: parsePrice(amount.freight || 0), // Informar valor do Frete quando existir - Parâmetro opcional!
         VLR_OUTRAS_DESP: parsePrice((amount.tax || 0) + (amount.extra || 0)), // Informar o valor de Outras despesas, essa informação sairá na Nota Fiscal - Parâmetro opcional!

@@ -49,11 +49,11 @@ const parsePaymentMethod = (paymentMethod) => {
   }
 }
 
-const getCodePayment = (paymentMethod, appDataPayments) => {
-  if (!appDataPayments?.length || !paymentMethod) {
+const getCodePayment = (paymentMethodCode, appDataPayments) => {
+  if (!appDataPayments?.length || !paymentMethodCode) {
     return 1
   }
-  const methodName = parsePaymentMethod(paymentMethod)
+  const methodName = parsePaymentMethod(paymentMethodCode)
   if (!methodName) {
     return 1
   }

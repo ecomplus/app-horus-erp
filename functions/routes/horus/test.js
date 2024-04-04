@@ -37,12 +37,14 @@ exports.get = async ({ appSdk }, req, res) => {
     transaction.payment_method.code = code
   }
 
+  const paymentMethodCode = transaction && transaction.payment_method.code
+
   appSdk.getAuth(storeId)
     .then((auth) => {
       return getAppData({ appSdk, storeId, auth })
         .then(appData => {
-          const resp = getCodePayment(transaction, appData.payments)
-          res.send({ resp })
+          const resp = getCodePayment(paymentMethodCode, appData.payments)
+          res.send({ resp, appData, paymentMethodCode })
         })
     })
     .catch((err) => {
