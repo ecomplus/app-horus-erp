@@ -35,7 +35,7 @@ exports.get = async ({ appSdk }, req, res) => {
     const docId = `sync/${storeId}`
     const doc = await getDocInFirestore(docId)
     console.log('>> ', doc, ' ', doc && JSON.stringify(doc.data()))
-    const listCollections = await doc.ref.listCollections
+    const listCollections = await doc.ref.listCollections()
     listCollections?.forEach(element => {
       const id = element.id
       console.log('>> ', id)
