@@ -73,7 +73,7 @@ const getCodeDelivery = (shippingApp, appDataDelivery) => {
     if (!mapApp.label || mapApp.label === '') {
       return true
     }
-    return mapApp.label === shippingApp.label
+    return mapApp.label.toLowerCase().trim() === shippingApp.label.toLowerCase().trim()
   }
 
   const delivey = appDataDelivery
