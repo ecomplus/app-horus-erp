@@ -22,7 +22,12 @@ exports.get = async ({ appSdk }, req, res) => {
     const docFirestore = listStoreIds[i]
     const storeId = docFirestore.id
     const doc = await getDoc(docFirestore)
-    console.log('>> ', doc && JSON.stringify(doc.data()), ' id: ', storeId)
+    console.log('>> id: ', storeId)
+    const listCollections = await doc.listCollections()
+    listCollections?.forEach(element => {
+      const id = element.id
+      console.log('>> ', id)
+    })
     i += 1
   }
   res.send('ok')
