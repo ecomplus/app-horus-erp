@@ -342,7 +342,7 @@ const app = {
               type: "string",
               maxLength: 50,
               title: "Rótulo",
-              description: "Nome do serviço de entrega e cadastrados como transportadoras diferentes no ERP. [Ex.: PAC, SEDEX] (Opcional)"
+              description: "Nome do serviço de entrega, cadastrados como transportadoras diferentes no ERP. [Ex.: PAC, SEDEX] (Opcional)"
             },
           }
         }
