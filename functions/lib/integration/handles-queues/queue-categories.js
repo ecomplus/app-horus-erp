@@ -24,97 +24,87 @@ const getDoc = (doc) => new Promise((resolve) => {
   if the category (horus) does not exist in the API,
   send it to 'pub /sub' to import the category in the API
 */
-const collectionName = 'sync/category'
-const runStore = (appSdk, storeId) => appSdk.getAuth(storeId)
-  .then(async (auth) => {
-    const listGeneroAutor = await firestore()
-      .collection(`${collectionName}/${storeId}`)
-      .listDocuments()
+// const collectionName = 'sync/category'
+const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
+  const listGeneroAutor = await firestore()
+    .collection(`${collectionName}`)
+    .listDocuments()
 
-    console.log('>> Sync Categories ', storeId, listGeneroAutor.length)
-    const promisesSendTopics = []
-    let index = 0
-    while (index <= listGeneroAutor.length - 1) {
-      const docFirestore = listGeneroAutor[index]
-      const categoryHorusId = docFirestore.id
-      const doc = await getDoc(docFirestore)
-      const categoryHorus = doc.data()
-      try {
-        const category = await getCategories({ appSdk, storeId, auth }, categoryHorus)
+  console.log('>> Sync Categories ', storeId, listGeneroAutor.length)
+  const promisesSendTopics = []
+  let index = 0
+  while (index <= listGeneroAutor.length - 1) {
+    const docFirestore = listGeneroAutor[index]
+    const categoryHorusId = docFirestore.id
+    const doc = await getDoc(docFirestore)
+    const categoryHorus = doc.data()
+    try {
+      const category = await getCategories({ appSdk, storeId, auth }, categoryHorus)
 
-        const promisesProducts = []
+      const promisesProducts = []
 
-        if (category && category._id) {
-          const listProducts = await firestore()
-            .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
-            .listDocuments()
-          if (listProducts.length) {
-            listProducts.forEach((docProduct) => {
-              promisesProducts.push(
-                addCategoryInProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
-                  .then(() => {
-                    console.log('>> Update Product ', docProduct.id)
-                    return docProduct.delete()
-                  })
-              )
-            })
-          } else {
-            await docFirestore.delete()
-              .catch()
-          }
+      if (category && category._id) {
+        const listProducts = await firestore()
+          .collection(`${collectionName}/${categoryHorusId}/products`)
+          .listDocuments()
+        if (listProducts.length) {
+          listProducts.forEach((docProduct) => {
+            promisesProducts.push(
+              addCategoryInProduct({ appSdk, storeId, auth }, docProduct.id, category._id)
+                .then(() => {
+                  console.log('>> Update Product ', docProduct.id)
+                  return docProduct.delete()
+                })
+            )
+          })
         } else {
-          promisesSendTopics.push(
-            sendMessageTopic(
-              topicResourceToEcom,
-              {
-                storeId,
-                resource: 'categories',
-                objectHorus: categoryHorus,
-                opts: { isCreate: true }
-              })
-          )
+          await docFirestore.delete()
+            .catch()
         }
-        if (promisesSendTopics.length) {
-          await Promise.all(promisesSendTopics)
-        }
-
-        if (promisesProducts.length) {
-          await Promise.all(promisesProducts)
-            .then(async () => {
-              const listDocs = await firestore()
-                .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
-                .listDocuments()
-              if (!listDocs.length) {
-                console.log('> Remove ', categoryHorusId)
-                return docFirestore.delete()
-              }
-              return null
+      } else {
+        promisesSendTopics.push(
+          sendMessageTopic(
+            topicResourceToEcom,
+            {
+              storeId,
+              resource: 'categories',
+              objectHorus: categoryHorus,
+              opts: { isCreate: true }
             })
-            .catch(() => {
-              console.log('> Error Delete ', JSON.stringify(categoryHorus))
-            })
-        }
-      } catch (e) {
-        console.log('> Error in ', JSON.stringify(categoryHorus))
-        console.error(e)
+        )
       }
-      index += 1
+      if (promisesSendTopics.length) {
+        await Promise.all(promisesSendTopics)
+      }
+
+      if (promisesProducts.length) {
+        await Promise.all(promisesProducts)
+          .then(async () => {
+            const listDocs = await firestore()
+              .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
+              .listDocuments()
+            if (!listDocs.length) {
+              console.log('> Remove ', categoryHorusId)
+              return docFirestore.delete()
+            }
+            return null
+          })
+          .catch(() => {
+            console.log('> Error Delete ', JSON.stringify(categoryHorus))
+          })
+      }
+    } catch (e) {
+      console.log('> Error in ', JSON.stringify(categoryHorus))
+      console.error(e)
     }
-  })
+    index += 1
+  }
+}
 
-const syncCategories = async (appSdk) => {
-  const listStoreIds = await firestore()
-    .collection('sync')
-    .doc('category')
-    .listCollections()
+const syncCategories = async ({ appSdk, storeId, auth }, collectionName) => {
+  console.log('>> Sync Categories: ')
 
-  console.log('>> Sync Categories: ', listStoreIds.length)
-  const promisesStores = []
-  listStoreIds?.forEach(async docStore => {
-    const storeId = parseInt(docStore.id, 10)
-    promisesStores.push(runStore(appSdk, storeId))
-  })
-  return Promise.all(promisesStores)
+  return Promise.all(runStore({ appSdk, storeId, auth }, collectionName))
     .then(() => {
       console.log('Finish Sync Categories')
     })

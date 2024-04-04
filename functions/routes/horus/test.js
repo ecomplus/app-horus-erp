@@ -16,32 +16,42 @@ const getDocInFirestore = (documentId) => new Promise((resolve, reject) => {
     })
     .catch(reject)
 })
+
+const runStore = async ({ appSdk, storeId, auth }) => {
+  const docId = `sync/${storeId}`
+  const doc = await getDocInFirestore(docId)
+  //   console.log('>> ', doc, ' ', doc && JSON.stringify(doc.data()))
+  const promisesResources = []
+  const listResources = await doc.ref.listCollections()
+  listResources?.forEach(resourceDoc => {
+    const resource = resourceDoc.id
+    const collectionName = `${docId}/${resource}`
+    console.log('>> ', collectionName)
+    // promisesResources.push(handle[resource]({ appSdk, storeId, auth }, collectionName))
+  })
+  return Promise.all(promisesResources)
+}
 exports.get = async ({ appSdk }, req, res) => {
   const listStoreIds = await firestore()
     .collection('sync')
     .listDocuments()
-  // console.log('>> ', JSON.stringify(listStoreIds))
-  // listStoreIds.forEach(store => {
-  //   storeId.id
-  // })
-  // appSdk.getAuth(storeId)
-  // .then(async (auth) => {})
   let i = 0
+  const promisesStore = []
   while (i <= listStoreIds.length - 1) {
     const docFirestore = listStoreIds[i]
     const storeId = docFirestore.id
     // const doc = await getDoc(docFirestore)
     console.log('>> id: ', storeId)
-    const docId = `sync/${storeId}`
-    const doc = await getDocInFirestore(docId)
-    console.log('>> ', doc, ' ', doc && JSON.stringify(doc.data()))
-    const listCollections = await doc.ref.listCollections()
-    listCollections?.forEach(element => {
-      const id = element.id
-      console.log('>> ', id)
-    })
+    promisesStore.push(
+      appSdk.getAuth(storeId)
+        .then(async (auth) => runStore({ appSdk, storeId, auth }))
+    )
     i += 1
   }
+  await Promise.all(promisesStore)
+    .then(() => {
+      console.log('OKKK')
+    })
   res.send('ok')
   // const storeId = 1173
   // appSdk.getAuth(storeId)
