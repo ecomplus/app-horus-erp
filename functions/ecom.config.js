@@ -171,7 +171,7 @@ const app = {
     },
     company_code: {
       schema: {
-        type: 'number',
+        type: 'integer',
         "minimum": 1,
         "maximum": 999999,
         "default": 1,
@@ -182,7 +182,7 @@ const app = {
     },
     subsidiary_code: {
       schema: {
-        type: 'number',
+        type: 'integer',
         minimum: 1,
         maximum: 999999,
         default: 1,
@@ -193,7 +193,7 @@ const app = {
     },
     sale_code: {
       schema: {
-        type: 'number',
+        type: 'integer',
         minimum: 1,
         maximum: 999999,
         default: 1,
@@ -255,7 +255,7 @@ const app = {
             properties: {
               code: {
                 schema: {
-                  type: 'number',
+                  type: 'integer',
                   minimum: 1,
                   maximum: 999999,
                   default: 1,
@@ -279,7 +279,7 @@ const app = {
     payments: {
       schema: {
         title: 'Formas de Pagamento',
-        description: 'Mapear formas de pagamento cadastradas no ERP. (Padrão: 1 -se não informado)',
+        description: 'Mapear formas de pagamento cadastradas no ERP. (Padrão: 1, se não informado)',
         type: "array",
         maxItems: 5,
         items: {
@@ -300,12 +300,50 @@ const app = {
               title: "Forma de Pagamento",
             },
             code: {
-              type: 'number',
+              type: 'integer',
               minimum: 1,
               maximum: 999999,
               default: 1,
               title: 'Código da Forma de Pagamento no ERP',
             }
+          }
+        }
+      },
+      hide: true
+    },
+    delivery: {
+      schema: {
+        title: 'Frete',
+        description: 'Mapear Transportadoras cadastradas no ERP. (Padrão: 1, se não informado)',
+        type: "array",
+        // maxItems: 5,
+        items: {
+          title: "Transportadoras",
+          type: "object",
+          minProperties: 1,
+          required: [
+            'app_id',
+            'code'
+          ],
+          properties: {
+            app_id : {
+              type: 'string',
+              pattern: '^[a-f0-9]{24}$',
+              title: 'ID do aplicativo de entrega instalado'
+            },
+            code: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 999999,
+              default: 1,
+              title: 'Código da Transportadora no ERP',
+            },
+            label: {
+              type: "string",
+              maxLength: 50,
+              title: "Rótulo",
+              description: "Nome do serviço de entrega e cadastrados como transportadoras diferentes no ERP. [Ex.: PAC, SEDEX] (Opcional)"
+            },
           }
         }
       },

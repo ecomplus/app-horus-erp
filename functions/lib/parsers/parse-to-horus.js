@@ -64,6 +64,24 @@ const getCodePayment = (paymentMethodCode, appDataPayments) => {
   return method ? method.code : 1
 }
 
+const getCodeDelivery = (shippingApp, appDataDelivery) => {
+  if (!appDataDelivery?.length || !shippingApp) {
+    return 1
+  }
+
+  const checkLabel = (mapApp, shippingApp) => {
+    if (!mapApp.label || mapApp.label === '') {
+      return true
+    }
+    return mapApp.label === shippingApp.label
+  }
+
+  const delivey = appDataDelivery
+    .find(app => app.app_id === shippingApp._id && checkLabel(app, shippingApp))
+
+  return delivey ? delivey.code : 1
+}
+
 const parsePrice = (value) => value
   .toFixed(2)
   // .replace('.', ',')
@@ -72,5 +90,6 @@ module.exports = {
   parseDate,
   parsePrice,
   parseFinancialStatus,
-  getCodePayment
+  getCodePayment,
+  getCodeDelivery
 }

@@ -6,7 +6,8 @@ const {
   parsePrice,
   parseDate,
   parseFinancialStatus,
-  getCodePayment
+  getCodePayment,
+  getCodeDelivery
 } = require('../../parsers/parse-to-horus')
 const getOrderById = require('../../store-api/get-resource-by-id')
 
@@ -75,8 +76,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         // add order in queue to export for erp
       }
 
-      const transaction = order.transactions.length && order.transactions[0]
+      const transaction = order.transactions && order.transactions.length && order.transactions[0]
       const paymentMethodCode = transaction && transaction.payment_method.code
+      const shippingLine = order.shipping_lines && order.shipping_lines.length && order.shipping_lines[0]
+      const shippingApp = shippingLine && shippingLine.app
 
       const body = {
         COD_PEDIDO_ORIGEM: orderId,
@@ -85,7 +88,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
         COD_CLI: customerHorus.COD_CLI, // Código do Cliente - Parâmetro obrigatório!
         OBS_PEDIDO: `Pedido #${number}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
-        // COD_TRANSP // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
+        COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
         COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
         // COD_TPO_END // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
         FRETE_EMIT_DEST: amount.freight ? 2 : 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
