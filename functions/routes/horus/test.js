@@ -126,13 +126,13 @@ exports.get = async ({ appSdk }, req, res) => {
       return getAppData({ appSdk, storeId, auth })
         .then(appData => {
           const payment = getCodePayment(paymentMethodCode, appData.payments)
-          const delivey = getCodeDelivery(shippingApp, appData.delivey)
+          const delivey = getCodeDelivery(shippingApp, appData.delivery)
           res.send({
             payment,
             appDataPayments: appData.payments,
             paymentMethodCode,
             delivey,
-            appDataDelivery: appData.delivey,
+            appDataDelivery: appData.delivery,
             shippingApp
           })
         })
