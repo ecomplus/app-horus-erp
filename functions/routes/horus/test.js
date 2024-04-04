@@ -2,15 +2,18 @@ const { firestore } = require('firebase-admin')
 // const getAppData = require('../../lib/store-api/get-app-data')
 // const { getCodePayment, getCodeDelivery } = require('../../lib/parsers/parse-to-horus')
 
-const getDoc = (doc) => new Promise((resolve) => {
-  doc?.onSnapshot(data => {
-    resolve(data)
-  })
-})
+// const getDoc = (doc) => new Promise((resolve) => {
+//   doc?.onSnapshot(data => {
+//     resolve(data)
+//   })
+// })
 
 const getDocInFirestore = (documentId) => new Promise((resolve, reject) => {
   firestore().doc(documentId).get()
-    .then((doc) => resolve(doc))
+    .then((doc) => {
+      // const t = doc.ref.listCollections()
+      resolve(doc)
+    })
     .catch(reject)
 })
 exports.get = async ({ appSdk }, req, res) => {
@@ -32,11 +35,11 @@ exports.get = async ({ appSdk }, req, res) => {
     const docId = `sync/${storeId}`
     const doc = await getDocInFirestore(docId)
     console.log('>> ', doc, ' ', doc && JSON.stringify(doc.data()))
-    // const listCollections = await doc.listCollections()
-    // listCollections?.forEach(element => {
-    //   const id = element.id
-    //   console.log('>> ', id)
-    // })
+    const listCollections = await doc.ref.listCollections
+    listCollections?.forEach(element => {
+      const id = element.id
+      console.log('>> ', id)
+    })
     i += 1
   }
   res.send('ok')
