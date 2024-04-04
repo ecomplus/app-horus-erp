@@ -17,8 +17,8 @@ class Horus {
         'Content-Type': 'application/json',
         Authorization: 'Basic ' +
           Buffer.from(`${username}:${password}`, 'utf8').toString('base64')
-      }
-      // timeout: 60000
+      },
+      timeout: 120000
     })
   }
 

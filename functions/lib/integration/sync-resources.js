@@ -9,7 +9,8 @@ module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     const listStoreIds = await firestore()
       .collection('sync')
-      .listDocuments()
+      .get()
+
     // return Promise.all([
     //   syncBrands(appSdk),
     //   syncCategories(appSdk),
