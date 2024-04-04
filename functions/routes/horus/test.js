@@ -7,6 +7,12 @@ const getDoc = (doc) => new Promise((resolve) => {
     resolve(data)
   })
 })
+
+const getDocInFirestore = (documentId) => new Promise((resolve, reject) => {
+  firestore().doc(documentId).get()
+    .then((doc) => resolve(doc))
+    .catch(reject)
+})
 exports.get = async ({ appSdk }, req, res) => {
   const listStoreIds = await firestore()
     .collection('sync')
@@ -21,13 +27,16 @@ exports.get = async ({ appSdk }, req, res) => {
   while (i <= listStoreIds.length - 1) {
     const docFirestore = listStoreIds[i]
     const storeId = docFirestore.id
-    const doc = await getDoc(docFirestore)
+    // const doc = await getDoc(docFirestore)
     console.log('>> id: ', storeId)
-    const listCollections = await doc.listCollections()
-    listCollections?.forEach(element => {
-      const id = element.id
-      console.log('>> ', id)
-    })
+    const docId = `sync/${storeId}`
+    const doc = await getDocInFirestore(docId)
+    console.log('>> ', doc, ' ', doc && JSON.stringify(doc.data()))
+    // const listCollections = await doc.listCollections()
+    // listCollections?.forEach(element => {
+    //   const id = element.id
+    //   console.log('>> ', id)
+    // })
     i += 1
   }
   res.send('ok')
