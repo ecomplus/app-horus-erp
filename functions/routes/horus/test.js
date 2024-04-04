@@ -15,12 +15,14 @@ exports.get = async ({ appSdk }, req, res) => {
   // listStoreIds.forEach(store => {
   //   storeId.id
   // })
+  // appSdk.getAuth(storeId)
+  // .then(async (auth) => {})
   let i = 0
   while (i <= listStoreIds.length - 1) {
     const docFirestore = listStoreIds[i]
-    const docId = docFirestore.id
+    const storeId = docFirestore.id
     const doc = await getDoc(docFirestore)
-    console.log('>> ', doc && JSON.stringify(doc), ' id: ', docId)
+    console.log('>> ', doc && JSON.stringify(doc.data()), ' id: ', storeId)
     i += 1
   }
   res.send('ok')
