@@ -94,7 +94,7 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
             }
             return null
           })
-          .catch(() => {
+          .catch((_err) => {
             console.log('> Error Delete ', JSON.stringify(brandHorus))
           })
       }

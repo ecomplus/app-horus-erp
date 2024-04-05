@@ -91,9 +91,9 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
               })
           })
       }
-    } catch (e) {
+    } catch (err) {
       console.log('> Error in ', JSON.stringify(doc))
-      console.error(e)
+      // console.error(e)
     }
     index += 1
   }

@@ -9,7 +9,8 @@ const requestStoreApi = axios.create({
 exports.post = async ({ appSdk }, req, res) => {
   const headers = req.headers
   const url = '/authentications/me.json'
-  requestStoreApi.post(url, {}, { headers })
+  console.log('>> ', JSON.stringify(headers))
+  requestStoreApi.get(url, {}, { headers })
     .then(() => {
       res.send('ok')
     })
