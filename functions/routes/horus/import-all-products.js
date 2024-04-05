@@ -70,8 +70,8 @@ exports.post = async ({ appSdk }, req, res) => {
       'x-access-token': headers['x-access-token']
     }
   })
-    .then(() => {
-      res.send({ body })
+    .then((data) => {
+      res.send({ body, data })
     })
     .catch(err => {
       let message = err.name
