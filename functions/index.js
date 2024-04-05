@@ -156,7 +156,7 @@ exports.onResourceToEcomEvent = require('./lib/pub-sub/utils')
 
 // cron jobs
 const handleEventsHorus = require('./lib/cron-events-horus')
-// const handleSyncResources = require('./lib/integration/sync-resources')
+const handleSyncResources = require('./lib/integration/sync-resources')
 const handlePubSubErrors = require('./lib/pub-sub/replay-errors')
 const eventsCron = '*/1 * * * *'
 
@@ -166,9 +166,9 @@ exports.horusEvents = functions
   .onRun(() => handleEventsHorus())
 console.log(`-- Check Events in Horus ERP'${eventsCron}'`)
 
-// exports.syncResourcesToEcom = functions.pubsub.schedule(eventsCron)
-//   .onRun(() => handleSyncResources())
-// console.log(`-- Sync Resources to E-com'${eventsCron}'`)
+exports.syncResourcesToEcom = functions.pubsub.schedule(eventsCron)
+  .onRun(() => handleSyncResources())
+console.log(`-- Sync Resources to E-com'${eventsCron}'`)
 
 exports.replayPubSub = functions.pubsub.schedule(eventsCron)
   .onRun(() => {
