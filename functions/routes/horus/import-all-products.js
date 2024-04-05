@@ -70,7 +70,7 @@ exports.post = async ({ appSdk }, req, res) => {
       if (err.response) {
         status = err.response.status || status
         // message = err.response.data ? JSON.stringify(err.response.data) : message
-        console.warn(JSON.stringify(err.response))
+        console.error(err.response)
       } else {
         console.error(err)
       }
