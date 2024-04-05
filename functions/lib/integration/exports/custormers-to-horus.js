@@ -3,9 +3,10 @@ const { getClientByCustomer } = require('./utils')
 const getCustomerById = require('../../store-api/get-resource-by-id')
 const Horus = require('../../horus/client')
 const requestHorus = require('../../horus/request')
+const createAddress = require('./address-to-horus')
 
 module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
-  const { isCreate, appData } = opts
+  const { isCreate, appData, address } = opts
   const customer = await getCustomerById({ appSdk, storeId, auth }, 'customers', customerId)
   const logHead = `#${storeId} ${customer._id}`
   if (!customer) {
@@ -67,7 +68,19 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
     console.log('>> Insert Client', endpoint, method)
 
     return requestHorus(horus, endpoint, method)
+      .then(async (data) => {
+        if (data && data.length) {
+          const customerCodeHorus = data[0].Cliente
+          if (address) {
+            return createAddress(horus, customerCodeHorus, address, true)
+              .then(() => customerId)
+              .catch(() => null)
+          }
+          return customerId
+        }
+        return null
+      })
   }
   console.log(`> ${logHead} ignored with don't create or update client`)
-  return customerHorus || null
+  return customerHorus ? customerId : null
 }

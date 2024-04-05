@@ -1,9 +1,19 @@
 const url = require('url')
+const {
+  getClientAddressByZipCode
+} = require('./utils')
 const requestHorus = require('../../horus/request')
 const { parseZipCode } = require('../../parsers/parse-to-horus')
 
 module.exports = async (horus, customerCodeHorus, customerAddress, isBillingAddress) => {
   const zipCode = parseZipCode(customerAddress.zip) || 0
+
+  const addressCustomerHorus = await getClientAddressByZipCode(horus, customerCodeHorus, zipCode)
+
+  if (addressCustomerHorus) {
+    return addressCustomerHorus
+  }
+
   const body = {
     COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório
     COD_TPO_END: isBillingAddress ? 1 : 2, // Código do tipo de endereço - Parâmetro obrigatório.

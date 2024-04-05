@@ -1,4 +1,5 @@
 const url = require('url')
+const { firestore } = require('firebase-admin')
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
 const {
@@ -15,12 +16,17 @@ const {
 } = require('../../parsers/parse-to-horus')
 const createAddress = require('./address-to-horus')
 const getOrderById = require('../../store-api/get-resource-by-id')
+const { sendMessageTopic } = require('../../pub-sub/utils')
+const { topicExportToHorus } = require('../../utils-variables')
+
+const skipCreate = 'SKIP_CREATE'
 
 module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   const {
     appData
     // isCreate
   } = opts
+  const logHead = `#${storeId} ${orderId}`
   const { username, password, baseURL, sale_code: saleCode } = appData
   const horus = new Horus(username, password, baseURL)
   const companyCode = appData.company_code || 1
@@ -28,7 +34,17 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
   return getOrderById({ appSdk, storeId, auth }, 'orders', orderId)
     .then(async (order) => {
-      const logHead = `#${storeId} ${orderId}`
+      if (appData?.orders?.approved_order_only) {
+        if (order.status !== 'cancelled') {
+          if (order.financial_status !== 'paid') {
+            console.log(`${logHead} skipped, setting approved_order_only activate and financial_status unpaid`)
+            throw new Error(skipCreate)
+          }
+        } else {
+          console.log(`${logHead} skipped, order cancelled`)
+          throw new Error(skipCreate)
+        }
+      }
       const customer = order.buyers && order.buyers.length && order.buyers[0]
       if (!customer) {
         console.log(`${logHead} skipped, customer not found`)
@@ -72,10 +88,26 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       ])
 
       if (!customerHorus) {
-        // TODO:
-        // send to queue to create client in erp
-        // send create address client in erp (createAddress billing)
-        // add order in queue to export for erp
+        const opts = {
+          isCreate: true,
+          appData,
+          address: transaction?.billing_address
+        }
+        const bodyDoc = {
+          storeId,
+          resource: 'customers',
+          resourceId: customer._id,
+          opts,
+          created_at: new Date().toISOString()
+        }
+        await firestore()
+          .doc(`sync/${storeId}/customers/${customer._id}`)
+          .set(bodyDoc, { merge: true })
+          .then(() => {
+            return sendMessageTopic(topicExportToHorus, bodyDoc)
+          })
+          .catch(console.error)
+        return null
       }
       const customerCodeHorus = customerHorus.COD_CLI
 
@@ -85,46 +117,52 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         addressCustomerHorus = await createAddress(horus, customerCodeHorus, customerAddress, isBillingAddress)
       }
 
-      const body = {
-        COD_PEDIDO_ORIGEM: orderId,
-        COD_EMPRESA: companyCode,
-        COD_FILIAL: subsidiaryCode,
-        TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
-        COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
-        OBS_PEDIDO: `Pedido #${number}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
-        COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
-        COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
-        COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
-        FRETE_EMIT_DEST: amount.freight ? 2 : 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
-        COD_FORMA: getCodePayment(paymentMethodCode, appData.payments), // Informar o código da forma de pagamento - Parâmetro Obrigatório
-        QTD_PARCELAS: 'ZERO', // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
-        VLR_FRETE: parsePrice(amount.freight || 0), // Informar valor do Frete quando existir - Parâmetro opcional!
-        VLR_OUTRAS_DESP: parsePrice((amount.tax || 0) + (amount.extra || 0)), // Informar o valor de Outras despesas, essa informação sairá na Nota Fiscal - Parâmetro opcional!
-        // DADOS_ADICIONAIS_NF Informar os dados adicionais que deverão sair impresso na Nota Fiscal - Parâmetro opcional!
-        DAT_PEDIDO_ORIGEM: parseDate(new Date(order.created_at)), // Poderá ser preenchido nesta coluna a data original que o cliente registrou o pedido no e-commerce ou demais plataformas. Usar o formato DD/MM/AAAA hh:mm:ss. Servirá como estatística de tempo total de atendimento do pedido para facilitar o controle e as pesquisas - Parâmetro opcional, porém, recomendado seu uso.
-        // DATA_EST_ENTREGA // Data estimada para entrega - Informar nesta coluna quando o pedido possuir alguma data pré-estipulada para entrega da mercadoria, usar o formato DD/MM/AAAA - Parâmetro opcional!
-        VALOR_CUPOM_DESCONTO: parsePrice(amount.discount || 0), // Informar nesta coluna o valor do cupom de desconto do pedido, esse valor será usado para atribuir um desconto adicional e rateado em nota fiscal. Parâmetro opcional!
-        NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
-      }
-
       if (!orderHorus) {
+        const body = {
+          COD_PEDIDO_ORIGEM: orderId,
+          COD_EMPRESA: companyCode,
+          COD_FILIAL: subsidiaryCode,
+          TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
+          COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
+          OBS_PEDIDO: `Pedido #${number}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
+          COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
+          COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
+          COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
+          FRETE_EMIT_DEST: amount.freight ? 2 : 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
+          COD_FORMA: getCodePayment(paymentMethodCode, appData.payments), // Informar o código da forma de pagamento - Parâmetro Obrigatório
+          QTD_PARCELAS: 'ZERO', // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
+          VLR_FRETE: parsePrice(amount.freight || 0), // Informar valor do Frete quando existir - Parâmetro opcional!
+          VLR_OUTRAS_DESP: parsePrice((amount.tax || 0) + (amount.extra || 0)), // Informar o valor de Outras despesas, essa informação sairá na Nota Fiscal - Parâmetro opcional!
+          // DADOS_ADICIONAIS_NF Informar os dados adicionais que deverão sair impresso na Nota Fiscal - Parâmetro opcional!
+          DAT_PEDIDO_ORIGEM: parseDate(new Date(order.created_at)), // Poderá ser preenchido nesta coluna a data original que o cliente registrou o pedido no e-commerce ou demais plataformas. Usar o formato DD/MM/AAAA hh:mm:ss. Servirá como estatística de tempo total de atendimento do pedido para facilitar o controle e as pesquisas - Parâmetro opcional, porém, recomendado seu uso.
+          // DATA_EST_ENTREGA // Data estimada para entrega - Informar nesta coluna quando o pedido possuir alguma data pré-estipulada para entrega da mercadoria, usar o formato DD/MM/AAAA - Parâmetro opcional!
+          VALOR_CUPOM_DESCONTO: parsePrice(amount.discount || 0), // Informar nesta coluna o valor do cupom de desconto do pedido, esse valor será usado para atribuir um desconto adicional e rateado em nota fiscal. Parâmetro opcional!
+          NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
+        }
+
+        if (order.status === 'cancelled') {
+          console.log(`${logHead} skipped, order cancelled`)
+          throw new Error(skipCreate)
+        }
+
         const params = new url.URLSearchParams(body)
         const endpoint = `/InsPedidoVenda?${params.toString()}`
         console.log('>> Insert Order', endpoint)
-        /*
+        // /* // TODO:
         return requestHorus(horus, endpoint, 'POST')
           .then(response => {
             if (response && response.length) {
               return {
                 order,
                 saleCodeHorus: response[0].COD_PED_VENDA,
-                customerCodeHorus: customerHorus.COD_CLI
+                customerCodeHorus: customerHorus.COD_CLI,
                 isNew: true
               }
             }
           })
-        */
+        // */
       }
+
       return {
         order,
         saleCodeHorus: orderHorus.COD_PED_VENDA,
@@ -149,7 +187,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
       const promisesAddItemOrderHorus = []
       const errorAddItem = []
-      if (isNew && order.items && order.items.length) {
+      if (order.items && order.items.length) {
         const queryHorus = `/Busca_ItensPedidosVenda?COD_PED_VENDA=${saleCodeHorus}` +
           `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}&OFFSET=0&LIMIT=${order.items.length}`
         const itemsHorus = await requestHorus(horus, queryHorus)
@@ -188,7 +226,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         }
 
         if (errorAddItem.length) {
-          // não proseguir
           return null
         }
 
@@ -209,7 +246,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         order,
         saleCodeHorus,
         customerCodeHorus
-        // isNew
       } = data
 
       const body = {
@@ -227,16 +263,21 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const endpoint = `/AltStatus_Pedido?${params.toString()}`
       console.log('>> Update Status Order', endpoint)
 
-      /*
-        return requestHorus(horus, endpoint, 'POST')
-          .then(response => {
-            if (response && response.length) {
-              return orderId
-            }
-          })
-        */
+      // /* // TODO:
+      return requestHorus(horus, endpoint, 'POST')
+        .then(response => {
+          if (response && response.length) {
+            return orderId
+          }
+          return null
+        })
+        // */
     })
     .catch((err) => {
+      if (err.message === skipCreate) {
+        return orderId
+      }
+
       if (err.response) {
         console.warn(JSON.stringify(err.response))
       } else {

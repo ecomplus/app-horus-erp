@@ -147,16 +147,20 @@ exports.updateTokens = functions.pubsub.schedule(cron).onRun(() => {
 console.log(`-- Sheduled update E-Com Plus tokens '${cron}'`)
 
 // topics pub/sub
-const { topicResourceToEcom } = require('./lib/utils-variables')
+const { topicResourceToEcom /* topicExportToHorus */ } = require('./lib/utils-variables')
 
 const handleResourceToEcomEvent = require('./lib/pub-sub/events/import-to-ecom')
 
 exports.onResourceToEcomEvent = require('./lib/pub-sub/utils')
   .createEventsFunction(topicResourceToEcom, handleResourceToEcomEvent)
 
+// const handleExportToHorusEvent = require('./lib/pub-sub/events/export-to-horus')
+// exports.onExportToHorusEvent = require('./lib/pub-sub/utils')
+//   .createEventsFunction(topicExportToHorus, handleExportToHorusEvent)
+
 // cron jobs
 const handleEventsHorus = require('./lib/cron-events-horus')
-const handleSyncResources = require('./lib/integration/sync-resources')
+const handleSyncEcomHorus = require('./lib/integration/sync-ecom-horus')
 const handlePubSubErrors = require('./lib/pub-sub/replay-errors')
 const eventsCron = '*/1 * * * *'
 
@@ -166,8 +170,8 @@ exports.horusEvents = functions
   .onRun(() => handleEventsHorus())
 console.log(`-- Check Events in Horus ERP'${eventsCron}'`)
 
-exports.syncResourcesToEcom = functions.pubsub.schedule(eventsCron)
-  .onRun(() => handleSyncResources())
+exports.syncEcomHorus = functions.pubsub.schedule(eventsCron)
+  .onRun(() => handleSyncEcomHorus())
 console.log(`-- Sync Resources to E-com'${eventsCron}'`)
 
 exports.replayPubSub = functions.pubsub.schedule(eventsCron)

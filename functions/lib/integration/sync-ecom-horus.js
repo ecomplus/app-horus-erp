@@ -4,22 +4,9 @@ const handle = {
   brand: require('./handles-queues/queue-brands'),
   category: require('./handles-queues/queue-categories'),
   kit: require('./handles-queues/queue-kit')
+  // orders exports to horus
+  // customers exports to horus
 }
-
-// const collectionName = 'sync'
-// module.exports = context => setup(null, true, firestore())
-//   .then(async (appSdk) => {
-//     const listStoreIds = await firestore()
-//       .collection('sync')
-//       .get()
-
-//     // return Promise.all([
-//     //   syncBrands(appSdk),
-//     //   syncCategories(appSdk),
-//     //   syncKits(appSdk)
-//     // ])
-//   })
-//   .catch(console.error)
 
 const getDocInFirestore = (documentId) => new Promise((resolve, reject) => {
   firestore().doc(documentId).get()
