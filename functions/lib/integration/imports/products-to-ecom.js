@@ -16,20 +16,20 @@ const saveFirestore = (idDoc, body) => firestore()
 
 const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => {
   const docFirestore = `sync/${storeId}/${resource}`
-  let resouceId
+  let resourceId
   if (objectHorus.codGenero) {
-    resouceId = `COD_GENERO${objectHorus.codGenero}`
+    resourceId = `COD_GENERO${objectHorus.codGenero}`
   } else if (objectHorus.codAutor) {
-    resouceId = `COD_AUTOR${objectHorus.codAutor}`
+    resourceId = `COD_AUTOR${objectHorus.codAutor}`
   } else if (objectHorus.codEditora) {
-    resouceId = `COD_EDITORA${objectHorus.codEditora}`
+    resourceId = `COD_EDITORA${objectHorus.codEditora}`
   } else if (objectHorus.productId) {
-    resouceId = `${objectHorus.productId}`
+    resourceId = `${objectHorus.productId}`
   }
 
-  if (resouceId) {
+  if (resourceId) {
     const createdAt = new Date().toISOString()
-    const docFirestoreId = docFirestore + `/${resouceId}`
+    const docFirestoreId = docFirestore + `/${resourceId}`
     const bodyResource = { ...objectHorus, createdAt }
     const promises = []
     if (!objectHorus.productId) {

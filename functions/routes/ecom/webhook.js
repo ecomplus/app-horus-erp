@@ -22,9 +22,7 @@ const exportOrder = async ({ _appSdk, storeId, _auth }, appData, queueEntry) => 
 }
 
 const integrationHandlers = {
-  // init_store: require('../../lib/integration/int-store'),
   exportation: {
-    // product_ids: require('./../../lib/integration/export-product'),
     orders: exportOrder
   },
   importation: {

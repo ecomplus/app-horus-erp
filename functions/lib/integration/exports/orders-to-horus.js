@@ -90,7 +90,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       if (!customerHorus) {
         const opts = {
           isCreate: true,
-          appData,
           address: transaction?.billing_address
         }
         const bodyDoc = {
@@ -104,6 +103,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           .doc(`sync/${storeId}/customers/${customer._id}`)
           .set(bodyDoc, { merge: true })
           .then(() => {
+            bodyDoc.opts.appData = appData
             return sendMessageTopic(topicExportToHorus, bodyDoc)
           })
           .catch(console.error)
