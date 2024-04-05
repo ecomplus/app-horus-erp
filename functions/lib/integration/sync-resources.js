@@ -44,7 +44,7 @@ const runStore = async ({ appSdk, storeId, auth }) => {
   return Promise.all(promisesResources)
 }
 
-module.exports = context => setup(null, true, firestore)
+module.exports = context => setup(null, true, firestore())
   .then(async (appSdk) => {
     const listStoreIds = await firestore()
       .collection('sync')
