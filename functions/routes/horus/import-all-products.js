@@ -66,7 +66,7 @@ exports.post = async ({ appSdk }, req, res) => {
   requestStoreApi.get(url, {
     headers: {
       'x-store-id': headers['x-store-id'],
-      'x-my-id': headers['x-store-id'],
+      'x-my-id': headers['x-my-id'],
       'x-access-token': headers['x-access-token']
     }
   })
