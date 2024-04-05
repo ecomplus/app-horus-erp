@@ -63,7 +63,13 @@ exports.post = async ({ appSdk }, req, res) => {
   } = req
   const url = '/authentications/me.json'
   console.log('>> ', JSON.stringify(headers))
-  requestStoreApi.get(url, {}, { headers })
+  requestStoreApi.get(url, {
+    headers: {
+      'x-store-id': headers['x-store-id'],
+      'x-my-id': headers['x-store-id'],
+      'x-access-token': headers['x-access-token']
+    }
+  })
     .then(() => {
       res.send({ body })
     })
@@ -72,7 +78,7 @@ exports.post = async ({ appSdk }, req, res) => {
       let status = 400
       if (err.response) {
         status = err.response.status || status
-        // message = err.response.data ? JSON.stringify(err.response.data) : message
+        message = err.response.statusText || message
         console.error(err.response)
       } else {
         console.error(err)
