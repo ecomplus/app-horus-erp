@@ -109,7 +109,7 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
 const syncBrands = async ({ appSdk, storeId, auth }, collectionName) => {
   console.log('>> Sync Brands')
 
-  return Promise.all(runStore({ appSdk, storeId, auth }, collectionName))
+  return runStore({ appSdk, storeId, auth }, collectionName)
     .then(() => {
       console.log('Finish Sync Brands')
     })

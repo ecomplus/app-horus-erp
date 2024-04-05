@@ -101,7 +101,7 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
 }
 
 const syncKit = async ({ appSdk, storeId, auth }, collectionName) => {
-  return Promise.all(runStore({ appSdk, storeId, auth }, collectionName))
+  return runStore({ appSdk, storeId, auth }, collectionName)
     .then(() => {
       console.log('Finish Sync Kit')
     })

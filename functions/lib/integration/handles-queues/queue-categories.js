@@ -104,7 +104,7 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
 const syncCategories = async ({ appSdk, storeId, auth }, collectionName) => {
   console.log('>> Sync Categories: ')
 
-  return Promise.all(runStore({ appSdk, storeId, auth }, collectionName))
+  return runStore({ appSdk, storeId, auth }, collectionName)
     .then(() => {
       console.log('Finish Sync Categories')
     })
