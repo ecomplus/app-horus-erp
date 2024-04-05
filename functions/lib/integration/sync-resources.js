@@ -24,7 +24,6 @@ const handle = {
 const getDocInFirestore = (documentId) => new Promise((resolve, reject) => {
   firestore().doc(documentId).get()
     .then((doc) => {
-      // const t = doc.ref.listCollections()
       resolve(doc)
     })
     .catch(reject)

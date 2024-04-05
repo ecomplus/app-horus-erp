@@ -81,7 +81,7 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
         await Promise.all(promisesProducts)
           .then(async () => {
             const listDocs = await firestore()
-              .collection(`${collectionName}/${storeId}/${categoryHorusId}/products`)
+              .collection(`${collectionName}/${categoryHorusId}/products`)
               .listDocuments()
             if (!listDocs.length) {
               console.log('> Remove ', categoryHorusId)
