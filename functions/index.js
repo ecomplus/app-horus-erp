@@ -159,21 +159,21 @@ exports.onResourceToEcomEvent = require('./lib/pub-sub/utils')
 //   .createEventsFunction(topicExportToHorus, handleExportToHorusEvent)
 
 // cron jobs
-const handleEventsHorus = require('./lib/cron-events-horus')
+// const handleEventsHorus = require('./lib/cron-events-horus')
 const handleSyncEcomHorus = require('./lib/integration/sync-ecom-horus')
-const handlePubSubErrors = require('./lib/pub-sub/replay-errors')
+// const handlePubSubErrors = require('./lib/pub-sub/replay-errors')
 const eventsCron = '*/1 * * * *'
-
+/*
 exports.horusEvents = functions
   .runWith({ memory: '512MB' })
   .pubsub.schedule(eventsCron)
   .onRun(() => handleEventsHorus())
 console.log(`-- Check Events in Horus ERP'${eventsCron}'`)
-
+// */
 exports.syncEcomHorus = functions.pubsub.schedule(eventsCron)
   .onRun(() => handleSyncEcomHorus())
 console.log(`-- Sync Resources to E-com'${eventsCron}'`)
-
+/*
 exports.replayPubSub = functions.pubsub.schedule(eventsCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {
@@ -181,3 +181,4 @@ exports.replayPubSub = functions.pubsub.schedule(eventsCron)
     })
   })
 console.log(`-- Replay Pub/Sub'${eventsCron}'`)
+// */

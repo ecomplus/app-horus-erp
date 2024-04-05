@@ -24,7 +24,7 @@ const getDoc = (doc) => new Promise((resolve) => {
   if the category (horus) does not exist in the API,
   send it to 'pub /sub' to import the category in the API
 */
-// const collectionName = 'sync/category'
+
 const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
   const listGeneroAutor = await firestore()
     .collection(`${collectionName}`)

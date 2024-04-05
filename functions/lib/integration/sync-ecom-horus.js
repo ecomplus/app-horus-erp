@@ -3,9 +3,10 @@ const { setup } = require('@ecomplus/application-sdk')
 const handle = {
   brand: require('./handles-queues/queue-brands'),
   category: require('./handles-queues/queue-categories'),
-  kit: require('./handles-queues/queue-kit')
-  // orders exports to horus
-  // customers exports to horus
+  kit: require('./handles-queues/queue-kit'),
+  // Export To Horus
+  orders: require('./handles-queues/queue-exports'),
+  customers: require('./handles-queues/queue-exports')
 }
 
 const getDocInFirestore = (documentId) => new Promise((resolve, reject) => {

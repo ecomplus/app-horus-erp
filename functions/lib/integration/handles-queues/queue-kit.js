@@ -23,7 +23,6 @@ const getDoc = (doc) => new Promise((resolve) => {
   and send it to pub/sub to be able to import it into the API
 */
 
-// const collectionName = 'sync/kit'
 const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
   const listProducts = await firestore()
     .collection(`${collectionName}`)
