@@ -1,24 +1,92 @@
 // read configured E-Com Plus app data
 const getAppData = require('./../../lib/store-api/get-app-data')
+const updateAppData = require('./../../lib/store-api/update-app-data')
 // const Horus = require('../../lib/horus/client')
 // const requestHorus = require('../../lib/horus/request')
 // const { topicResourceToEcom } = require('../../lib/utils-variables')
 // const { sendMessageTopic } = require('../../lib/pub-sub/utils')
 const { getItemHorusAndSendProductToImport } = require('../../lib/integration/imports/utils')
-const { exportOrderToHorus } = require('../../lib/integration/exports/utils')
+const { saveAndSendExportOrderToHorus } = require('../../lib/integration/exports/utils')
 const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
+
+const queueRetry = (appClient, { action, queue, nextId }, appData) => {
+  const retryKey = `${appClient.storeId}_${action}_${queue}_${nextId}`
+  console.warn(retryKey)
+
+  let queueList = appData[action] && appData[action][queue]
+  if (!Array.isArray(queueList)) {
+    queueList = [nextId]
+  } else if (!queueList.includes(nextId)) {
+    queueList.unshift(nextId)
+  }
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      updateAppData(appClient, {
+        [action]: {
+          ...appData[action],
+          [queue]: queueList
+        }
+      })
+        .then(resolve)
+        .catch(reject)
+    }, 7000)
+  })
+}
+
+const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
+  const {
+    queueEntry,
+    appData
+  } = opts
+  const { action, queue, nextId } = queueEntry
+  let queueList = appData[action][queue]
+  if (Array.isArray(queueList)) {
+    const idIndex = queueList.indexOf(nextId)
+    if (idIndex > -1) {
+      queueList.splice(idIndex, 1)
+    }
+  } else {
+    queueList = []
+  }
+  const data = {
+    [action]: {
+      ...appData[action],
+      [queue]: queueList
+    }
+  }
+  console.log(`#${storeId} ${JSON.stringify(data)}`)
+  return updateAppData({ appSdk, storeId, auth }, data)
+    .then(() => {
+      return { _id }
+    })
+    .catch(async (err) => {
+      if (err.response && (!err.response.status || err.response.status >= 500)) {
+        await queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
+        return { _id }
+      } else {
+        throw err
+      }
+    })
+}
 
 const sendHorusProductForImportByCodItem = async ({ _appSdk, storeId, _auth }, appData, queueEntry) => {
   // console.log('>> Import Products')
   return getItemHorusAndSendProductToImport(storeId, queueEntry.nextId, appData, { queueEntry })
 }
 
-const exportOrder = async ({ _appSdk, storeId, _auth }, appData, queueEntry) => {
+const exportOrder = async ({ appSdk, storeId, auth }, appData, queueEntry) => {
   console.log('>> Exports Orders: ', JSON.stringify(queueEntry))
-  return exportOrderToHorus(storeId, queueEntry.nextId, appData, { queueEntry })
+  return saveAndSendExportOrderToHorus(storeId, queueEntry.nextId, appData, { queueEntry })
+    .then(() => {
+      const opts = {
+        queueEntry,
+        appData
+      }
+      return updateApp({ appSdk, storeId, auth }, queueEntry.nextId, opts)
+    })
 }
 
 const integrationHandlers = {
@@ -100,11 +168,11 @@ exports.post = ({ appSdk }, req, res) => {
                   const ids = actionQueues[queue]
                   const handlerName = action.replace(/^_+/, '')
                   if (Array.isArray(ids) && ids.length) {
-                    const isHiddenQueue = action.charAt(0) === '_'
+                    // const isHiddenQueue = action.charAt(0) === '_'
                     const mustUpdateAppQueue = trigger.resource === 'applications'
                     const handler = integrationHandlers[handlerName][queue.toLowerCase()]
                     const nextId = ids[0]
-                    console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId, queue.toLowerCase())
+                    // console.log('>> ', isHiddenQueue, ' ', mustUpdateAppQueue, ' ', handlerName, ' ', nextId, queue.toLowerCase())
                     const queueEntry = { action, queue, nextId, mustUpdateAppQueue }
                     return handler({ appSdk, storeId, auth }, appData, queueEntry)
                       .then(() => ({ appData, action, queue }))

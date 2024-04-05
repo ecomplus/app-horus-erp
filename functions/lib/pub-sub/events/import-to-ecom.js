@@ -14,7 +14,7 @@ const getAppSdk = () => {
       .then(appSdk => resolve(appSdk))
   })
 }
-const queueRetry = (appClient, { action, queue, nextId }, appData, _response) => {
+const queueRetry = (appClient, { action, queue, nextId }, appData) => {
   const retryKey = `${appClient.storeId}_${action}_${queue}_${nextId}`
   console.warn(retryKey)
 

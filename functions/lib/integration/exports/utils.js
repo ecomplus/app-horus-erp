@@ -45,13 +45,7 @@ const getClientAddressByZipCode = (horus, customerCodeHorus, zipCode) => {
     })
 }
 
-const exportOrderToHorus = async (storeId, orderId, appData, options) => {
-  // const opts = {
-  //   appData,
-  //   isUpdateDate: false,
-  //   ...options
-  // }
-
+const saveAndSendExportOrderToHorus = async (storeId, orderId, _appData, _options) => {
   const body = {
     storeId,
     resource: 'orders',
@@ -64,6 +58,11 @@ const exportOrderToHorus = async (storeId, orderId, appData, options) => {
     .set(body, { merge: true })
     .then(() => {
       // TODO:
+      // const opts = {
+      //   appData,
+      //   isUpdateDate: false,
+      //   ...options
+      // }
       // return sendMessageTopic(topicExportToHorus, { ...body, opts })
     })
 }
@@ -71,5 +70,5 @@ const exportOrderToHorus = async (storeId, orderId, appData, options) => {
 module.exports = {
   getClientByCustomer,
   getClientAddressByZipCode,
-  exportOrderToHorus
+  saveAndSendExportOrderToHorus
 }
