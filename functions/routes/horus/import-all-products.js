@@ -71,7 +71,8 @@ exports.post = async ({ appSdk }, req, res) => {
     }
   })
     .then((data) => {
-      res.send({ body, data })
+      console.log('>> ', data)
+      res.send({ body })
     })
     .catch(err => {
       let message = err.name
