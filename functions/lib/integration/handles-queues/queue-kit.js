@@ -81,7 +81,6 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
             const endpoint = `/products/${productId}.json`
             await updateProduct({ appSdk, storeId, auth }, endpoint, 'PATCH', { available: true })
               .then(() => {
-                // console.log('>> Update Product ', docFirestore.id)
                 return docFirestore.delete()
               }).catch(err => {
                 if (err.response?.status === 404) {

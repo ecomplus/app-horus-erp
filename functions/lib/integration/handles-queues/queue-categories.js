@@ -55,6 +55,12 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
                   console.log('>> Update Product ', docProduct.id)
                   return docProduct.delete()
                 })
+                .catch(err => {
+                  if (err.response?.status === 404) {
+                    return docProduct.delete()
+                  }
+                  throw err
+                })
             )
           })
         } else {

@@ -9,4 +9,24 @@ const requestStoreApi = axios.create({
 exports.post = async ({ appSdk }, req, res) => {
   const headers = req.headers
   const url = '/authentications/me.json'
+  requestStoreApi.post(url, {}, { headers })
+    .then(() => {
+      res.send('ok')
+    })
+    .catch(err => {
+      let message = err.name
+      let status = 400
+      if (err.response) {
+        status = err.response.status || status
+        message = err.response.data ? JSON.stringify(err.response.data) : message
+        console.warn(JSON.stringify(err.response))
+      } else {
+        console.error(err)
+      }
+
+      res.status(status).send({
+        statusCode: status,
+        message
+      })
+    })
 }
