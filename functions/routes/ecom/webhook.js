@@ -5,6 +5,8 @@ const getAppData = require('./../../lib/store-api/get-app-data')
 // const { topicResourceToEcom } = require('../../lib/utils-variables')
 // const { sendMessageTopic } = require('../../lib/pub-sub/utils')
 const { getItemHorusAndSendProductToImport } = require('../../lib/integration/imports/utils')
+const { exportOrderToHorus } = require('../../lib/integration/exports/utils')
+const apiApp = require('@ecomplus/application-sdk/lib/methods/api-app')
 const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
@@ -15,15 +17,16 @@ const sendHorusProductForImportByCodItem = async ({ _appSdk, storeId, _auth }, a
   return getItemHorusAndSendProductToImport(storeId, queueEntry.nextId, appData, { queueEntry })
 }
 
-const exportOrder = async ({ _appSdk, storeId, _auth }, _appData, queueEntry) => {
+const exportOrder = async ({ _appSdk, storeId, _auth }, appData, queueEntry) => {
   console.log('>> Orders: ', JSON.stringify(queueEntry))
+  return exportOrderToHorus(storeId, queueEntry.nextId, appData, { queueEntry })
 }
 
 const integrationHandlers = {
   // init_store: require('../../lib/integration/int-store'),
   exportation: {
     // product_ids: require('./../../lib/integration/export-product'),
-    // order_ids: require('./../../lib/integration/export-order')
+    order_ids: exportOrder
   },
   importation: {
     products: sendHorusProductForImportByCodItem
