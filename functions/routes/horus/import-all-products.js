@@ -73,9 +73,9 @@ exports.post = async ({ appSdk }, req, res) => {
       'x-access-token': headers['x-access-token']
     }
   })
-    .then(({ response }) => {
+    .then(({ data }) => {
       // const opts = { appData }
-      console.log('>> ', response.data)
+      console.log('>> ', data)
       res.send({ body })
     })
     .catch(err => {
