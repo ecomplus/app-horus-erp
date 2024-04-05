@@ -39,12 +39,16 @@ exports.get = async ({ appSdk }, req, res) => {
   const promisesStore = []
   while (i <= listStoreIds.length - 1) {
     const docFirestore = listStoreIds[i]
-    const storeId = docFirestore.id
+    const storeId = parseInt(docFirestore.id, 10)
     // const doc = await getDoc(docFirestore)
     console.log('>> id: ', storeId)
     promisesStore.push(
       appSdk.getAuth(storeId)
         .then(async (auth) => runStore({ appSdk, storeId, auth }))
+        .catch(err => {
+          console.error(err)
+          throw err
+        })
     )
     i += 1
   }

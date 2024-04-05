@@ -1,9 +1,9 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 const handle = {
-  brands: require('./handles-queues/queue-brands'),
-  categories: require('./handles-queues/queue-categories'),
-  kits: require('./handles-queues/queue-kit')
+  brand: require('./handles-queues/queue-brands'),
+  category: require('./handles-queues/queue-categories'),
+  kit: require('./handles-queues/queue-kit')
 }
 
 // const collectionName = 'sync'
