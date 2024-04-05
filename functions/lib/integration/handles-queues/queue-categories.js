@@ -89,8 +89,9 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
             }
             return null
           })
-          .catch(() => {
+          .catch((err) => {
             console.log('> Error Delete ', JSON.stringify(categoryHorus))
+            console.error(err)
           })
       }
     } catch (e) {
