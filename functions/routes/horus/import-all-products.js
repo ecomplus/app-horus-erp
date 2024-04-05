@@ -1,9 +1,9 @@
 const axios = require('axios')
-// const getAppData = require('../../lib/store-api/get-app-data')
+const getAppData = require('../../lib/store-api/get-app-data')
 const {
   topicResourceToEcom
 } = require('../../lib/utils-variables')
-// const Horus = require('../../lib/horus/client')
+const Horus = require('../../lib/horus/client')
 const requestHorus = require('../../lib/horus/request')
 const { sendMessageTopic } = require('../../lib/pub-sub/utils')
 
@@ -23,7 +23,7 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
   const promisesSendTopics = []
   while (hasRepeat) {
     // create Object Horus to request api Horus
-    const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
+    const endpoint = `/Busca_Acervo${query}offset=${offset}&limit=${limit}`
     const products = await requestHorus(horus, endpoint, 'get')
       .catch((err) => {
         if (err.response) {
@@ -57,6 +57,9 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
 
   console.log(`>> import all #${storeId} [${query}] total imports ${total}`)
   return Promise.all(promisesSendTopics)
+    .then(() => {
+      console.log('>> Finish send import Products')
+    })
 }
 
 exports.post = async ({ appSdk }, req, res) => {
@@ -73,10 +76,33 @@ exports.post = async ({ appSdk }, req, res) => {
       'x-access-token': headers['x-access-token']
     }
   })
-    .then(({ data }) => {
-      // const opts = { appData }
-      console.log('>> ', data)
-      res.send({ body })
+    .then(({ data }) => data)
+
+    .then(async (data) => {
+      const storeId = data.store_id
+      const auth = await appSdk.getAuth(storeId)
+      const appData = await getAppData({ appSdk, storeId, auth }, true)
+
+      const {
+        username,
+        password,
+        baseURL
+      } = appData
+
+      const horus = new Horus(username, password, baseURL)
+      const opts = { appData }
+
+      let query = '?'
+      if (body.cod_init || body.cod_end) {
+        const codInit = body.cod_init || 1
+        const codEnd = body.cod_end || (codInit + 100)
+        query += `COD_ITEM_INI=${codInit}&COD_ITEM_FIM=${codEnd}&`
+      }
+
+      return getAndSendProdcutToQueue(horus, storeId, query, opts)
+    })
+    .then(() => {
+      res.status(201)
     })
     .catch(err => {
       let message = err.name
