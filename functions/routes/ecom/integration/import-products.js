@@ -1,11 +1,11 @@
 const axios = require('axios')
-const getAppData = require('../../lib/store-api/get-app-data')
+const getAppData = require('../../../lib/store-api/get-app-data')
 const {
   topicResourceToEcom
-} = require('../../lib/utils-variables')
-const Horus = require('../../lib/horus/client')
-const requestHorus = require('../../lib/horus/request')
-const { sendMessageTopic } = require('../../lib/pub-sub/utils')
+} = require('../../../lib/utils-variables')
+const Horus = require('../../../lib/horus/client')
+const requestHorus = require('../../../lib/horus/request')
+const { sendMessageTopic } = require('../../../lib/pub-sub/utils')
 
 const requestStoreApi = axios.create({
   baseURL: 'https://api.e-com.plus/v1',
@@ -68,7 +68,7 @@ exports.post = async ({ appSdk }, req, res) => {
     body
   } = req
   const url = '/authentications/me.json'
-  console.log('>> ', JSON.stringify(headers))
+
   requestStoreApi.get(url, {
     headers: {
       'x-store-id': headers['x-store-id'],
