@@ -57,9 +57,6 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
 
   console.log(`>> import all #${storeId} [${query}] total imports ${total}`)
   return Promise.all(promisesSendTopics)
-    .then(() => {
-      console.log('>> Finish send import Products')
-    })
 }
 
 exports.post = async ({ appSdk }, req, res) => {
@@ -102,6 +99,7 @@ exports.post = async ({ appSdk }, req, res) => {
       return getAndSendProdcutToQueue(horus, storeId, query, opts)
     })
     .then(() => {
+      console.log('>> Finish send import Products')
       res.status(201)
     })
     .catch(err => {
