@@ -99,8 +99,9 @@ exports.post = async ({ appSdk }, req, res) => {
       return getAndSendProdcutToQueue(horus, storeId, query, opts)
     })
     .then(() => {
-      console.log('>> Finish send import Products')
+      // console.log('>> Finish send import Products')
       res.status(201)
+        .send('Importing Products')
     })
     .catch(err => {
       let message = err.name
