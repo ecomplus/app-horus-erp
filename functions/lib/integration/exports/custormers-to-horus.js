@@ -7,6 +7,8 @@ const createAddress = require('./address-to-horus')
 
 module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
   const { isCreate, appData, address } = opts
+  console.log('> Customer => ', customerId)
+
   const customer = await getCustomerById({ appSdk, storeId, auth }, 'customers', customerId)
   const logHead = `#${storeId} ${customer._id}`
   if (!customer) {

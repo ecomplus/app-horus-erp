@@ -7,6 +7,7 @@ const { parseZipCode } = require('../../parsers/parse-to-horus')
 
 module.exports = async (horus, customerCodeHorus, customerAddress, isBillingAddress) => {
   const zipCode = parseZipCode(customerAddress.zip) || 0
+  console.log('> Address Customer => CLI: ', customerCodeHorus, ' ZipCode: ', zipCode)
 
   const addressCustomerHorus = await getClientAddressByZipCode(horus, customerCodeHorus, zipCode)
 

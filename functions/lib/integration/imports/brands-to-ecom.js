@@ -48,6 +48,8 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus, opts = {}) => {
     nomeEditora
   } = brandHorus
 
+  console.log('> Brand => ', JSON.stringify(brandHorus))
+
   let endpoint = 'brands.json?metafields.namespace=horus-erp'
   if (codEditora) {
     endpoint += `&metafields.field=COD_EDITORA&metafields.value=${codEditora}`

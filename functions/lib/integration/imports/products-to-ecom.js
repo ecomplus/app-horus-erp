@@ -101,7 +101,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   if (!COD_ITEM) {
     throw new Error(productHorus.Mensagem)
   }
-  console.log('> product ', JSON.stringify(productHorus))
+  console.log('> Product => COD_ITEM', COD_ITEM)
   const price = parsePrice(VLR_CAPA)
   const quantity = SALDO_DISPONIVEL || 0
   const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)

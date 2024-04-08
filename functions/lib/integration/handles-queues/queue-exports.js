@@ -1,7 +1,7 @@
 const { firestore } = require('firebase-admin')
 // const getAppData = require('../../store-api/get-app-data')
-// const { sendMessageTopic } = require('../../pub-sub/utils')
-// const { topicExportToHorus } = require('../../utils-variables')
+const { sendMessageTopic } = require('../../pub-sub/utils')
+const { topicExportToHorus } = require('../../utils-variables')
 // const {
 //   getProductByCodItem,
 //   getItemHorusAndSendProductToImport
@@ -37,11 +37,12 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
       resourceId
       // opts
     }
-    console.log('>> ', JSON.stringify(body))
-    // TODO:
-    // promisesResources.push(
-    //   sendMessageTopic(topicExportToHorus, body)
-    // )
+    // console.log('>> ', JSON.stringify(body))
+    // /* // TODO:
+    promisesResources.push(
+      sendMessageTopic(topicExportToHorus, body)
+    )
+    // */
 
     index += 1
   }

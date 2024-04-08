@@ -45,7 +45,27 @@ const sendMessageTopic = async (eventName, json) => {
       .publishMessage({ json })
 
     let msg = `>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - `
-    msg += `[${json?.resource}] - COD_ITEM: ${json?.objectHorus?.COD_ITEM}`
+    msg += `[${json?.resource}]`
+
+    if (json?.objectHorus?.COD_ITEM) {
+      msg += ` COD_ITEM: ${json?.objectHorus?.COD_ITEM}`
+    } else if (json?.objectHorus) {
+      let resource
+      if (json.objectHorus.codGenero) {
+        resource = 'codGenero'
+      } else if (json.objectHorus.codAutor) {
+        resource = 'codAutor'
+      } else if (json.objectHorus.codEditora) {
+        resource = 'codEditora'
+      }
+      if (resource) {
+        msg += ` ${resource}: ${json.objectHorus[resource]}`
+      } else {
+        msg += ` ${JSON.stringify(json.objectHorus)}`
+      }
+    } else if (json.resourceId) {
+      msg += ` ${json.resourceId}`
+    }
     console.log(msg)
   } catch (e) {
     console.warn('Error send pub/sub')

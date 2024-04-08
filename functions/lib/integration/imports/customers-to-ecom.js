@@ -86,6 +86,8 @@ module.exports = async ({ appSdk, storeId, auth }, customerHorus, opts = {}) => 
     // DATA_STA_APROV_FIN
   } = customerHorus
 
+  console.log('> Customer => COD_CLI', COD_CLI)
+
   const registryType = TPO_PESSOA === 'J' ? 'j' : 'p'
 
   const names = NOM_CLI.split(' ')
