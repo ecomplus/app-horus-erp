@@ -38,6 +38,7 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
       // opts
     }
     console.log('>> ', JSON.stringify(body))
+    // TODO:
     // promisesResources.push(
     //   sendMessageTopic(topicExportToHorus, body)
     // )

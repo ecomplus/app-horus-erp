@@ -108,7 +108,8 @@ module.exports = async (
               {
                 resource,
                 resourceId,
-                opts
+                opts,
+                updated_at: new Date().toISOString()
               },
               { merge: true }
             )

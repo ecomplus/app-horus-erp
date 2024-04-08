@@ -73,7 +73,6 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
         })
       }
       if (promisesProducts.length) {
-        // TODO: checar pq não está atualizando
         await Promise.all(promisesProducts)
           .then(async () => {
             // console.log('>> Update')

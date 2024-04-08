@@ -1,23 +1,23 @@
 const url = require('url')
-const { firestore } = require('firebase-admin')
+// const { firestore } = require('firebase-admin')
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
-const {
-  getClientByCustomer,
-  getClientAddressByZipCode
-} = require('./utils')
+// const {
+//   getClientByCustomer,
+//   getClientAddressByZipCode
+// } = require('./utils')
 const {
   parsePrice,
   parseDate,
   parseFinancialStatus,
   getCodePayment,
-  getCodeDelivery,
-  parseZipCode
+  getCodeDelivery
+  // parseZipCode
 } = require('../../parsers/parse-to-horus')
-const createAddress = require('./address-to-horus')
+// const createAddress = require('./address-to-horus')
 const getOrderById = require('../../store-api/get-resource-by-id')
-const { sendMessageTopic } = require('../../pub-sub/utils')
-const { topicExportToHorus } = require('../../utils-variables')
+// const { sendMessageTopic } = require('../../pub-sub/utils')
+// const { topicExportToHorus } = require('../../utils-variables')
 
 const skipCreate = 'SKIP_CREATE'
 
@@ -59,10 +59,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const shippingLine = order.shipping_lines && order.shipping_lines.length && order.shipping_lines[0]
       const shippingApp = shippingLine && shippingLine.app
 
-      const isBillingAddress = !shippingLine?.to?.zip
-      const customerAddress = isBillingAddress
-        ? shippingLine?.to
-        : transaction?.billing_address
+      // const isBillingAddress = !shippingLine?.to?.zip
+      // const customerAddress = isBillingAddress
+      //   ? shippingLine?.to
+      //   : transaction?.billing_address
 
       if (!order.financial_status) {
         console.log(`${logHead} skipped with no financial status`)
@@ -70,7 +70,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
       const queryHorus = `/Busca_Cliente?COD_PEDIDO_ORIGEM=${orderId}&OFFSET=0&LIMIT=1`
 
-      const [orderHorus, customerHorus] = await Promise.all([
+      const [
+        orderHorus
+        // customerHorus
+      ] = await Promise.all([
         requestHorus(horus, queryHorus)
           .then((data) => {
             return data && data.length ? data[0] : null
@@ -82,10 +85,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               console.error(err)
             }
             return null
-          }),
-        getClientByCustomer(storeId, horus, customer)
+          })
+        // getClientByCustomer(storeId, horus, customer)
       ])
 
+      /*
       if (!customerHorus) {
         const opts = {
           isCreate: true,
@@ -108,6 +112,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           .catch(console.error)
         return null
       }
+      // */
+      /*
       const customerCodeHorus = customerHorus.COD_CLI
 
       const zipCode = parseZipCode(customerAddress.zip)
@@ -115,6 +121,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       if (!addressCustomerHorus) {
         addressCustomerHorus = await createAddress(horus, customerCodeHorus, customerAddress, isBillingAddress)
       }
+      // */
 
       if (!orderHorus) {
         const body = {
@@ -122,11 +129,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_EMPRESA: companyCode,
           COD_FILIAL: subsidiaryCode,
           TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
-          COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
+          // COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
           OBS_PEDIDO: `Pedido #${number}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
           COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
           COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
-          COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
+          // COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
           FRETE_EMIT_DEST: amount.freight ? 2 : 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
           COD_FORMA: getCodePayment(paymentMethodCode, appData.payments), // Informar o código da forma de pagamento - Parâmetro Obrigatório
           QTD_PARCELAS: 'ZERO', // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
@@ -147,7 +154,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         const params = new url.URLSearchParams(body)
         const endpoint = `/InsPedidoVenda?${params.toString()}`
         console.log('>> Insert Order', endpoint)
-        // /* // TODO:
+        /* // TODO:
         return requestHorus(horus, endpoint, 'POST')
           .then(response => {
             if (response && response.length) {
@@ -164,8 +171,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       return {
         order,
-        saleCodeHorus: orderHorus.COD_PED_VENDA,
-        customerCodeHorus: customerHorus.COD_CLI
+        saleCodeHorus: orderHorus.COD_PED_VENDA
+        // customerCodeHorus: customerHorus.COD_CLI
       }
     })
     .then(async data => {
@@ -175,13 +182,13 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const {
         order,
         saleCodeHorus,
-        customerCodeHorus,
+        // customerCodeHorus,
         isNew
       } = data
       const body = {
         COD_EMPRESA: companyCode,
         COD_FILIAL: subsidiaryCode,
-        COD_CLI: customerCodeHorus,
+        // COD_CLI: customerCodeHorus,
         COD_PED_VENDA: saleCodeHorus
       }
       const promisesAddItemOrderHorus = []
@@ -207,7 +214,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           }
           if (isImport) {
             const params = new url.URLSearchParams(body)
-            const endpoint = `/InsItensPedidoVenda?${params.toString()}`
+            console.log('>>item add: ', params)
+            // const endpoint = `/InsItensPedidoVenda?${params.toString()}`
+            /*
             promisesAddItemOrderHorus.push(
               requestHorus(horus, endpoint)
                 .then(() => {
@@ -217,11 +226,12 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
                   errorAddItem.push(endpoint)
                 })
             )
+            // */
           }
         })
 
         if (promisesAddItemOrderHorus.length) {
-          await Promise.all(promisesAddItemOrderHorus)
+          // await Promise.all(promisesAddItemOrderHorus)
         }
 
         if (errorAddItem.length) {
@@ -231,7 +241,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         return {
           order,
           saleCodeHorus,
-          customerCodeHorus,
+          // customerCodeHorus,
           isNew
         }
       }
@@ -262,7 +272,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const endpoint = `/AltStatus_Pedido?${params.toString()}`
       console.log('>> Update Status Order', endpoint)
 
-      // /* // TODO:
+      /* // TODO:
       return requestHorus(horus, endpoint, 'POST')
         .then(response => {
           if (response && response.length) {
