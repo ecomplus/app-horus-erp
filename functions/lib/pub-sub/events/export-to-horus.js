@@ -2,7 +2,7 @@ const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 const updateAppData = require('../../store-api/update-app-data')
 const getAppData = require('../../store-api/get-app-data')
-const exports = {
+const handleExports = {
   orders: require('../../integration/exports/orders-to-horus'),
   customers: require('../../integration/exports/custormers-to-horus')
 }
@@ -101,7 +101,7 @@ module.exports = async (
           Object.assign(opts, { queueEntry })
         }
       }
-      return exports[resource](appClient, resourceId, opts)
+      return handleExports[resource](appClient, resourceId, opts)
         .then(async (responseId) => {
           if (!responseId) {
             await docRef.set(

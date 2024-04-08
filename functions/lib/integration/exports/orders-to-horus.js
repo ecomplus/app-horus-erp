@@ -24,7 +24,6 @@ const skipCreate = 'SKIP_CREATE'
 module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   const {
     appData
-    // isCreate
   } = opts
   const logHead = `#${storeId} ${orderId}`
   const { username, password, baseURL, sale_code: saleCode } = appData
