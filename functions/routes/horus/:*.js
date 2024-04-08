@@ -11,7 +11,7 @@ exports.all = async ({ appSdk }, req, res) => {
     const horus = new Horus(user, pass, baseUrl)
 
     const { data, status } = await horus[method.toLowerCase()](urlRequest, body)
-    console.log(' ', data, ' ', status) // TODO
+    console.log('> ', urlRequest, '=> ', JSON.stringify(data), ' ', status) // TODO
     res.send(data)
   } catch (error) {
     console.error('Error response ', error.response)

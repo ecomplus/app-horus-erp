@@ -23,7 +23,6 @@ class Horus {
   }
 
   get (url) {
-    console.log('BASE ', this._baseURL)
     return this._request({
       method: 'get',
       url
