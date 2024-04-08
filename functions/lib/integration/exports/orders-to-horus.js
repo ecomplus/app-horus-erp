@@ -186,14 +186,14 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const {
         order,
         saleCodeHorus,
-        // customerCodeHorus,
+        customerCodeHorus,
         isNew
       } = data
       const body = {
         COD_EMPRESA: companyCode,
-        COD_FILIAL: subsidiaryCode
-        // COD_CLI: customerCodeHorus,
-        // COD_PED_VENDA: saleCodeHorus
+        COD_FILIAL: subsidiaryCode,
+        COD_CLI: customerCodeHorus,
+        COD_PED_VENDA: saleCodeHorus
       }
       const promisesAddItemOrderHorus = []
       const errorAddItem = []
@@ -220,7 +220,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             const params = new url.URLSearchParams(body)
             console.log('>>item add: ', params)
             // const endpoint = `/InsItensPedidoVenda?${params.toString()}`
-            /*
+            /* TODO:
             promisesAddItemOrderHorus.push(
               requestHorus(horus, endpoint)
                 .then(() => {
@@ -245,7 +245,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         return {
           order,
           saleCodeHorus,
-          // customerCodeHorus,
+          customerCodeHorus,
           isNew
         }
       }
