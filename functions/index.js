@@ -132,9 +132,9 @@ recursiveReadDir(routesDir).filter(filepath => filepath.endsWith('.js')).forEach
 
 server.use(router)
 
-exports[functionName] = functions.runWith({
-  vpcConnector: 'serverless-horus-connect'
-}).https.onRequest(server)
+exports[functionName] = functions
+  // .runWith({ vpcConnector: 'serverless-horus-connect' })
+  .https.onRequest(server)
 console.log(`-- Starting '${app.title}' E-Com Plus app with Function '${functionName}'`)
 
 // schedule update tokens job
