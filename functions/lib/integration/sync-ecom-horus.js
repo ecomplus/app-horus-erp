@@ -18,7 +18,7 @@ const getDocInFirestore = (documentId) => new Promise((resolve, reject) => {
 })
 
 const runStore = async ({ appSdk, storeId, auth }) => {
-  console.log('>> Run Sync ', storeId)
+  // console.log('>> Run Sync ', storeId)
   const docId = `sync/${storeId}`
   const doc = await getDocInFirestore(docId)
   const promisesResources = []
@@ -41,7 +41,7 @@ module.exports = context => setup(null, true, firestore())
     while (i <= listStoreIds.length - 1) {
       const docFirestore = listStoreIds[i]
       const storeId = parseInt(docFirestore.id, 10)
-      console.log('>> Sync: ', storeId)
+      // console.log('>> Sync: ', storeId)
       promisesStore.push(
         appSdk.getAuth(storeId)
           .then(async (auth) => runStore({ appSdk, storeId, auth }))

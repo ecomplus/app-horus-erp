@@ -170,12 +170,14 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           })
         // */
       }
-
+      return null
+      /* TODO:
       return {
         order,
-        saleCodeHorus: orderHorus.COD_PED_VENDA
-        // customerCodeHorus: customerHorus.COD_CLI
+        saleCodeHorus: orderHorus.COD_PED_VENDA,
+        customerCodeHorus: customerHorus.COD_CLI
       }
+      // */
     })
     .then(async data => {
       if (!data) {
@@ -189,9 +191,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       } = data
       const body = {
         COD_EMPRESA: companyCode,
-        COD_FILIAL: subsidiaryCode,
+        COD_FILIAL: subsidiaryCode
         // COD_CLI: customerCodeHorus,
-        COD_PED_VENDA: saleCodeHorus
+        // COD_PED_VENDA: saleCodeHorus
       }
       const promisesAddItemOrderHorus = []
       const errorAddItem = []
