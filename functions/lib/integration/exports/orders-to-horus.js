@@ -295,7 +295,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
 
       if (err.response) {
-        console.warn(JSON.stringify(err.response))
+        console.warn(JSON.stringify(err.response.data))
+        console.error(err.response)
       } else {
         console.error(err)
       }
