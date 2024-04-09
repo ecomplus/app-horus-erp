@@ -1,7 +1,7 @@
 const { firestore } = require('firebase-admin')
 const requestHorus = require('../../horus/request')
-// const { sendMessageTopic } = require('../../pub-sub/utils')
-// const { topicExportToHorus } = require('../../utils-variables')
+const { sendMessageTopic } = require('../../pub-sub/utils')
+const { topicExportToHorus } = require('../../utils-variables')
 
 const getClientByCustomer = (storeId, horus, customer) => {
   const logHead = `#${storeId} ${customer._id}`
@@ -45,7 +45,7 @@ const getClientAddressByZipCode = (horus, customerCodeHorus, zipCode) => {
     })
 }
 
-const saveAndSendExportOrderToHorus = async (storeId, orderId, _appData, _options) => {
+const saveAndSendExportOrderToHorus = async (storeId, orderId, appData, options) => {
   const body = {
     storeId,
     resource: 'orders',
@@ -57,13 +57,14 @@ const saveAndSendExportOrderToHorus = async (storeId, orderId, _appData, _option
     .doc(`sync/${storeId}/orders/${orderId}`)
     .set(body, { merge: true })
     .then(() => {
-      // TODO:
-      // const opts = {
-      //   appData,
-      //   isUpdateDate: false,
-      //   ...options
-      // }
-      // return sendMessageTopic(topicExportToHorus, { ...body, opts })
+      // /* TODO:
+      const opts = {
+        appData,
+        isUpdateDate: false,
+        ...options
+      }
+      return sendMessageTopic(topicExportToHorus, { ...body, opts })
+      // */
     })
 }
 
