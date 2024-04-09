@@ -6,7 +6,7 @@ const requestHorus = (horus, endpoint, method = 'get', isRetry) => new Promise((
         resolve(data)
       }
       if (data[0].Mensagem) {
-        console.error(data[0])
+        console.error(data[0], ` endpoint: ${endpoint}`)
         throw new Error(data[0].Mensagem)
       }
       resolve(null)
