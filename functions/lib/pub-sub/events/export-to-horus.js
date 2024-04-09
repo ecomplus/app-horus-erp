@@ -66,18 +66,20 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
       console.error(err)
       //
     }
-    return updateAppData({ appSdk, storeId, auth }, data)
-      .then(() => {
-        return { _id }
-      })
-      .catch(async (err) => {
-        if (err.response && (!err.response.status || err.response.status >= 500)) {
-          await queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
+    if (data) {
+      return updateAppData({ appSdk, storeId, auth }, data)
+        .then(() => {
           return { _id }
-        } else {
-          throw err
-        }
-      })
+        })
+        .catch(async (err) => {
+          if (err.response && (!err.response.status || err.response.status >= 500)) {
+            await queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
+            return { _id }
+          } else {
+            throw err
+          }
+        })
+    }
   }
   return null
 }
