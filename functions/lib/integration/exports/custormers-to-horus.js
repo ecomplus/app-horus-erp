@@ -23,7 +23,7 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
     const method = customerHorus && customerHorus?.COD_CLI ? 'PUT' : 'POST'
     const body = {
       COD_CLI: customerHorus?.COD_CLI || 'NOVO',
-      COD_RESPONSAVEL: appData.orders?.responsible.code || 1,
+      COD_RESPONSAVEL: appData.orders?.responsible?.code || 1,
       NOM_RESP: appData.orders?.responsible?.name || 'ecomplus',
       EMAIL: customer.main_email,
       NOM_REDUZIDO: customer.display_name,
