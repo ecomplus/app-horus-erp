@@ -53,7 +53,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
       const {
         amount,
-        number
+        number,
+        created_at: createdAt
       } = order
 
       const transaction = order.transactions && order.transactions.length && order.transactions[0]
@@ -70,7 +71,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         console.log(`${logHead} skipped with no financial status`)
         return null
       }
-      const queryHorus = `/Busca_Cliente?COD_PEDIDO_ORIGEM=${number}&OFFSET=0&LIMIT=1`
+      const codOriginal = new Date(createdAt).getTime()
+      const queryHorus = `/Busca_Cliente?COD_PEDIDO_ORIGEM=${codOriginal}&OFFSET=0&LIMIT=1`
 
       const [
         orderHorus,
@@ -127,12 +129,12 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       if (!orderHorus) {
         const body = {
-          COD_PEDIDO_ORIGEM: number,
+          COD_PEDIDO_ORIGEM: codOriginal,
           COD_EMPRESA: companyCode,
           COD_FILIAL: subsidiaryCode,
           TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
           COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
-          OBS_PEDIDO: `Pedido id: ${orderId}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
+          OBS_PEDIDO: `Pedido #${number} id: ${orderId}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
           COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
           COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
