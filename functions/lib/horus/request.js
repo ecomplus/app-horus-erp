@@ -5,6 +5,10 @@ const requestHorus = (horus, endpoint, method = 'get', isRetry) => new Promise((
       if (data && data.length && !data[0].Mensagem) {
         resolve(data)
       }
+      if (data[0].Mensagem) {
+        console.error(data[0])
+        throw new Error(data[0].Mensagem)
+      }
       resolve(null)
     })
     .catch((err) => {
