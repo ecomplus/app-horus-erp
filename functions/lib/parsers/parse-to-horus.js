@@ -84,7 +84,7 @@ const getCodeDelivery = (shippingApp, appDataDelivery) => {
 
 const parsePrice = (value) => value
   .toFixed(2)
-  .replace('.', ',')
+  // .replace('.', ',')
 
 const parseZipCode = zip => zip && zip.replace(/\D/g, '').padStart(8, '0')
 
