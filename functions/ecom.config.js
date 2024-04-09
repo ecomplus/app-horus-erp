@@ -429,6 +429,10 @@ procedures.push({
       resource: 'orders',
       field: 'fulfillment_status',
     },
+    {
+      resource: 'orders',
+      field: 'status',
+    },
 
     // Receive notifications when products/variations prices changes:
     {
@@ -442,16 +446,16 @@ procedures.push({
     },
 
     // Receive notifications when new product is created:
-    {
-      resource: 'products',
-      action: 'create',
-    },
+    // {
+    //   resource: 'products',
+    //   action: 'create',
+    // },
 
     // Receive notifications when customer is deleted:
-    {
-      resource: 'customers',
-      action: 'create',
-    },
+    // {
+    //   resource: 'customers',
+    //   action: 'create',
+    // },
 
     // Feel free to create custom combinations with any Store API resource, subresource, action and field.
   ],

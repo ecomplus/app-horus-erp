@@ -174,6 +174,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         // */
       }
 
+      if (orderHorus.STATUS_PEDIDO_VENDA && orderHorus.STATUS_PEDIDO_VENDA === 'CAN') {
+        console.log(`${logHead} skipped, order cancelled in ERP`)
+        throw new Error(skipCreate)
+      }
+
       // /* TODO:
       return {
         order,
