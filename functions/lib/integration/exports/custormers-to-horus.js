@@ -82,6 +82,10 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
         }
         return null
       })
+      .catch(err => {
+        console.error(err)
+        throw err
+      })
   }
   console.log(`> ${logHead} ignored with don't create or update client`)
   return customerHorus ? customerId : null
