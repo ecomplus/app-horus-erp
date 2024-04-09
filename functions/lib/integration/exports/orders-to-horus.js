@@ -203,6 +203,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       if (order.items && order.items.length) {
         const queryHorus = `/Busca_ItensPedidosVenda?COD_PED_VENDA=${saleCodeHorus}` +
           `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}&OFFSET=0&LIMIT=${order.items.length}`
+        console.log('>>Busca ', queryHorus)
         const itemsHorus = await requestHorus(horus, queryHorus)
           .catch(() => null)
 
@@ -212,6 +213,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           body.VLR_LIQUIDO = parsePrice(item.final_price || item.price)
           body.QTD_PEDIDA = item.quantity
 
+          console.log('>> i:', itemsHorus && JSON.stringify(itemsHorus), '=>', codItem)
           const itemHorus = itemsHorus?.find(itemFind => itemFind.COD_ITEM === codItem)
           let isImport = !itemHorus
 
@@ -221,9 +223,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           }
           if (isImport) {
             const params = new url.URLSearchParams(body)
-            console.log('>>item add: ', params)
             const endpoint = `/InsItensPedidoVenda?${params.toString()}`
-            // /* TODO:
+            console.log('>>item add: ', endpoint)
+            /* TODO:
             promisesAddItemOrderHorus.push(
               requestHorus(horus, endpoint)
                 .then(() => {
