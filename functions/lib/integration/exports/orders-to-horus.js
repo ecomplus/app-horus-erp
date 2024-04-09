@@ -91,6 +91,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         getClientByCustomer(storeId, horus, customer)
       ])
 
+      console.log('>> Address ', JSON.stringify(transaction), ' ', JSON.stringify(shippingLine))
       // /*
       if (!customerHorus) {
         const opts = {

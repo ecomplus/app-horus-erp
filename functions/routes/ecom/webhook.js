@@ -55,7 +55,7 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
       [queue]: queueList
     }
   }
-  console.log(`#${storeId} ${JSON.stringify(data)}`)
+  console.log(`Update App #${storeId} ${JSON.stringify(data)}`)
   return updateAppData({ appSdk, storeId, auth }, data)
     .then(() => {
       return { _id }
