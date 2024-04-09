@@ -117,7 +117,9 @@ module.exports = async (
           }
           return updateApp(appClient, 'remove_queue', opts)
             .then(() => {
-              return docRef.delete()
+              if (responseId) {
+                return docRef.delete()
+              }
             })
         })
     })
