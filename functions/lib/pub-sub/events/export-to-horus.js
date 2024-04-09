@@ -42,7 +42,7 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
     queueEntry,
     appData
   } = opts
-  if (queueEntry && queueEntry.action && queueEntry.queue) {
+  if (appData && queueEntry && queueEntry.action && queueEntry.queue) {
     let data
     try {
       const { action, queue, nextId } = queueEntry
