@@ -61,10 +61,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const shippingLine = order.shipping_lines && order.shipping_lines.length && order.shipping_lines[0]
       const shippingApp = shippingLine && shippingLine.app
 
-      const isBillingAddress = !shippingLine?.to?.zip
+      const isBillingAddress = transaction?.billing_address?.zip
       const customerAddress = isBillingAddress
-        ? shippingLine?.to
-        : transaction?.billing_address
+        ? transaction?.billing_address
+        : shippingLine?.to
 
       if (!order.financial_status) {
         console.log(`${logHead} skipped with no financial status`)
@@ -91,12 +91,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         getClientByCustomer(storeId, horus, customer)
       ])
 
-      console.log('>> Address ', JSON.stringify(transaction), ' ', JSON.stringify(shippingLine))
       // /*
       if (!customerHorus) {
         const opts = {
           isCreate: true,
-          address: transaction?.billing_address
+          address: customerAddress
         }
         const bodyDoc = {
           storeId,
