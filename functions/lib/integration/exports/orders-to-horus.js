@@ -53,8 +53,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
       const {
         amount,
-        number,
-        created_at: createdAt
+        number
+        // created_at: createdAt
       } = order
 
       const transaction = order.transactions && order.transactions.length && order.transactions[0]
