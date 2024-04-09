@@ -43,23 +43,29 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
     appData
   } = opts
   if (queueEntry && queueEntry.action && queueEntry.queue) {
-    const { action, queue, nextId } = queueEntry
-    let queueList = appData[action][queue]
-    if (Array.isArray(queueList)) {
-      const idIndex = queueList.indexOf(nextId)
-      if (idIndex > -1) {
-        queueList.splice(idIndex, 1)
+    let data
+    try {
+      const { action, queue, nextId } = queueEntry
+      let queueList = appData[action][queue]
+      if (Array.isArray(queueList)) {
+        const idIndex = queueList.indexOf(nextId)
+        if (idIndex > -1) {
+          queueList.splice(idIndex, 1)
+        }
+      } else {
+        queueList = []
       }
-    } else {
-      queueList = []
-    }
-    const data = {
-      [action]: {
-        ...appData[action],
-        [queue]: queueList
+      data = {
+        [action]: {
+          ...appData[action],
+          [queue]: queueList
+        }
       }
+      console.log(`> Update app #${storeId} ${JSON.stringify(data)}`)
+    } catch (err) {
+      console.error(err)
+      //
     }
-    console.log(`> Update app #${storeId} ${JSON.stringify(data)}`)
     return updateAppData({ appSdk, storeId, auth }, data)
       .then(() => {
         return { _id }
