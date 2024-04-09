@@ -71,8 +71,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         console.log(`${logHead} skipped with no financial status`)
         return null
       }
-      const codOriginal = new Date(createdAt).getTime()
-      const queryHorus = `/Busca_Cliente?COD_PEDIDO_ORIGEM=${codOriginal}&OFFSET=0&LIMIT=1`
+      // const codOriginal = new Date(createdAt).getTime()
+      const queryHorus = `/Busca_PedidosVenda?COD_PEDIDO_ORIGEM=${orderId}&OFFSET=0&LIMIT=1` +
+        `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}`
 
       const [
         orderHorus,
@@ -129,7 +130,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       if (!orderHorus) {
         const body = {
-          COD_PEDIDO_ORIGEM: codOriginal,
+          COD_PEDIDO_ORIGEM: orderId,
           COD_EMPRESA: companyCode,
           COD_FILIAL: subsidiaryCode,
           TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
