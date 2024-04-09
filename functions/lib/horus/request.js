@@ -8,8 +8,6 @@ const requestHorus = (horus, endpoint, method = 'get', isRetry) => new Promise((
       if (data && data.length && data[0].Falha) {
         console.error(data[0], ` endpoint: ${endpoint}`)
         throw new Error(data[0].Mensagem)
-      } else {
-        console.warn(`>Warn: ${typeof data === 'object' ? JSON.stringify(data) : data}`)
       }
       resolve(null)
     })

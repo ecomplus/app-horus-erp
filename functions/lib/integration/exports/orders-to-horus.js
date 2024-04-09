@@ -224,8 +224,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           if (isImport) {
             const params = new url.URLSearchParams(body)
             const endpoint = `/InsItensPedidoVenda?${params.toString()}`
-            console.log('>>item add: ', endpoint)
-            /* TODO:
+            // console.log('>>item add: ', endpoint)
+            // /* TODO:
             promisesAddItemOrderHorus.push(
               requestHorus(horus, endpoint)
                 .then(() => {
