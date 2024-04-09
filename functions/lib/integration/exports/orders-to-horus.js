@@ -216,8 +216,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           console.log('>> i:', itemsHorus && JSON.stringify(itemsHorus), '=>', codItem)
           const itemHorus = itemsHorus?.find(itemFind => itemFind.COD_ITEM === codItem)
           let isImport = !itemHorus
+          console.log('>> i:', itemsHorus && JSON.stringify(itemsHorus), '=>', codItem, JSON.stringify(itemHorus))
 
-          if (itemHorus && itemHorus.QTD_PEDIDA < item.quantity) {
+          if (itemHorus && itemHorus.QT_PEDIDA < item.quantity) {
             body.QTD_PEDIDA = item.quantity - itemHorus.QTD_PEDIDA
             isImport = true
           }
