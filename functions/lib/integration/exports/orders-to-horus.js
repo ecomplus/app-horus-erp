@@ -213,7 +213,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           body.VLR_LIQUIDO = parsePrice(item.final_price || item.price)
           body.QTD_PEDIDA = item.quantity
 
-          console.log('>> i:', itemsHorus && JSON.stringify(itemsHorus), '=>', codItem)
           const itemHorus = itemsHorus?.find(itemFind => itemFind.COD_ITEM === codItem)
           let isImport = !itemHorus
           console.log('>> i:', itemsHorus && JSON.stringify(itemsHorus), '=>', codItem, JSON.stringify(itemHorus))
