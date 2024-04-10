@@ -18,6 +18,7 @@ const parseDate = (date = new Date(), isComplete) => {
 }
 
 const parseFinancialStatus = (status) => {
+  console.log('>>Status ', status)
   if (status) {
     switch (status) {
       case 'authorized':
