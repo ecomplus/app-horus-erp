@@ -26,22 +26,12 @@ exports.post = ({ appSdk }, req, res) => {
           authentication_id: authenticationId
         })
          */
-        const endpoint = 'categories.json?name=Autores&limit=1'
-        const authorsCategory = await getCategory({ appSdk, storeId, auth }, endpoint)
-        if (!authorsCategory) {
-          const name = 'Autores'
-          const body = {
-            name,
-            slug: 'autores'
-          }
-          return createCategory({ appSdk, storeId, auth }, 'categories.json', body, true)
-        }
         return true
       }
 
       // not new store, just refreshing access token
       if (procedures.length) {
-        return appSdk.getAuth(storeId, authenticationId).then(auth => {
+        return appSdk.getAuth(storeId, authenticationId).then(async auth => {
           const { row, docRef } = auth
           if (!row.setted_up) {
             console.log(`Try saving procedures for store #${storeId}`)
@@ -71,6 +61,17 @@ exports.post = ({ appSdk }, req, res) => {
               })
 
                */
+          }
+          const endpoint = 'categories.json?name=Autores&limit=1'
+          const authorsCategory = await getCategory({ appSdk, storeId, auth }, endpoint)
+          if (!authorsCategory) {
+            const name = 'Autores'
+            const body = {
+              name,
+              slug: 'autores'
+            }
+            console.log(`Try create category 'Autores' for store #${storeId}`)
+            return createCategory({ appSdk, storeId, auth }, 'categories.json', body, true)
           }
         })
       }
