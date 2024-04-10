@@ -14,10 +14,8 @@ exports.post = ({ appSdk }, req, res) => {
   // https://github.com/ecomplus/application-sdk
   appSdk.handleCallback(storeId, req.body)
     .then(async ({ isNew, authenticationId }) => {
-      let auth
       if (isNew) {
         console.log(`Installing store #${storeId}`)
-        auth = await appSdk.getAuth(storeId, authenticationId)
         /**
          * You may also want to send request to external server here:
 
@@ -26,7 +24,20 @@ exports.post = ({ appSdk }, req, res) => {
           authentication_id: authenticationId
         })
          */
-        return true
+        return appSdk.getAuth(storeId, authenticationId).then(async auth => {
+          const endpoint = 'categories.json?name=Autores&limit=1'
+          const authorsCategory = await getCategory({ appSdk, storeId, auth }, endpoint)
+          if (!authorsCategory) {
+            const name = 'Autores'
+            const body = {
+              name,
+              slug: 'autores'
+            }
+            console.log(`Try create category 'Autores' for store #${storeId}`)
+            return createCategory({ appSdk, storeId, auth }, 'categories.json', body, true)
+          }
+          return true
+        })
       }
 
       // not new store, just refreshing access token
@@ -61,17 +72,6 @@ exports.post = ({ appSdk }, req, res) => {
               })
 
                */
-          }
-          const endpoint = 'categories.json?name=Autores&limit=1'
-          const authorsCategory = await getCategory({ appSdk, storeId, auth }, endpoint)
-          if (!authorsCategory) {
-            const name = 'Autores'
-            const body = {
-              name,
-              slug: 'autores'
-            }
-            console.log(`Try create category 'Autores' for store #${storeId}`)
-            return createCategory({ appSdk, storeId, auth }, 'categories.json', body, true)
           }
         })
       }
