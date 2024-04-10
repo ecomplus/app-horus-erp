@@ -24,20 +24,8 @@ exports.post = ({ appSdk }, req, res) => {
           authentication_id: authenticationId
         })
          */
-        return appSdk.getAuth(storeId, authenticationId).then(async auth => {
-          const endpoint = 'categories.json?name=Autores&limit=1'
-          const authorsCategory = await getCategory({ appSdk, storeId, auth }, endpoint)
-          if (!authorsCategory) {
-            const name = 'Autores'
-            const body = {
-              name,
-              slug: 'autores'
-            }
-            console.log(`Try create category 'Autores' for store #${storeId}`)
-            return createCategory({ appSdk, storeId, auth }, 'categories.json', body, true)
-          }
-          return true
-        })
+
+        return true
       }
 
       // not new store, just refreshing access token
@@ -60,18 +48,19 @@ exports.post = ({ appSdk }, req, res) => {
             // must save procedures once only
             return appSdk.saveProcedures(storeId, procedures, auth)
               .then(() => docRef.set({ setted_up: true }, { merge: true }))
-              /**
-               * You may want additional request to your server with tokens after store setup:
-
-              .then(() => {
-                return require('axios').post(`https://yourserver.com/ecom-store-setup?store_id=${storeId}`, {
-                  store_id: storeId,
-                  authentication_id: authenticationId,
-                  access_token: auth.accessToken
-                })
+              .then(async () => {
+                const endpoint = 'categories.json?name=Autores&limit=1'
+                const authorsCategory = await getCategory({ appSdk, storeId, auth }, endpoint)
+                if (!authorsCategory) {
+                  const name = 'Autores'
+                  const body = {
+                    name,
+                    slug: 'autores'
+                  }
+                  console.log(`Try create category 'Autores' for store #${storeId}`)
+                  return createCategory({ appSdk, storeId, auth }, 'categories.json', body, true)
+                }
               })
-
-               */
           }
         })
       }
