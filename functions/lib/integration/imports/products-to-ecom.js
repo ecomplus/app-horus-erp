@@ -119,6 +119,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
     if (Object.keys(body).length) {
       return appSdk.apiRequest(storeId, endpoint, 'PATCH', body, auth)
+        .then(() => true)
     }
     return product
   } else {
