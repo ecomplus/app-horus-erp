@@ -58,12 +58,12 @@ const productsEvents = async (horus, storeId, opts) => {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
     const products = await requestHorus(horus, endpoint, 'get')
-      .catch((err) => {
-        if (err.response) {
-          console.warn(JSON.stringify(err.response))
-        } else {
-          console.error(err)
-        }
+      .catch((_err) => {
+        // if (_err.response) {
+        //   console.warn(JSON.stringify(_err.response))
+        // } else {
+        //   console.error(_err)
+        // }
         return null
       })
 
