@@ -58,7 +58,7 @@ const productsEvents = async (horus, storeId, opts) => {
   while (hasRepeat) {
     // create Object Horus to request api Horus
     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
-    const products = await requestHorus(horus, endpoint, 'get')
+    const products = await requestHorus(horus, endpoint, 'get', true)
       .catch((_err) => {
         // if (_err.response) {
         //   console.warn(JSON.stringify(_err.response))

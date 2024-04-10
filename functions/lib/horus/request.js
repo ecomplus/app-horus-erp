@@ -13,7 +13,7 @@ const requestHorus = (horus, endpoint, method = 'get', isRetry) => new Promise((
     })
     .catch((err) => {
       if (!isRetry) {
-        setTimeout(() => requestHorus(horus, endpoint, method, true), 1000)
+        setTimeout(() => requestHorus(horus, endpoint, method, true), 700)
       }
       reject(err)
     })
