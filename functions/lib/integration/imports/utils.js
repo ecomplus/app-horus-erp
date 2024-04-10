@@ -24,7 +24,7 @@ const getHorusAutores = async ({ appSdk, storeId, auth }, codItem, appData, send
     const autores = await requestHorus(horus, endpoint)
       .catch((err) => {
         if (err.response) {
-          console.warn(JSON.stringify(err.response))
+          console.warn(JSON.stringify(err.response?.data))
         } else {
           console.error(err)
         }
@@ -77,7 +77,7 @@ const getProductByCodItem = async ({ appSdk, storeId, auth }, codItem) => {
     })
     .catch((err) => {
       if (err.response) {
-        console.warn(JSON.stringify(err.response))
+        console.warn(JSON.stringify(err.response?.data))
       } else {
         console.error(err)
       }
@@ -105,7 +105,7 @@ const getHorusKitComposition = async ({ appSdk, storeId, auth }, cod, appData, s
     const items = await requestHorus(horus, endpoint)
       .catch((err) => {
         if (err.response) {
-          console.warn(JSON.stringify(err.response))
+          console.warn(JSON.stringify(err.response?.data))
         } else {
           console.error(err)
         }
@@ -150,7 +150,7 @@ const getItemHorusAndSendProductToImport = async (storeId, codItem, appData, opt
   const item = await requestHorus(horus, endpoint, 'get')
     .catch((err) => {
       if (err.response) {
-        console.warn(JSON.stringify(err.response))
+        console.warn(JSON.stringify(err.response?.data))
       } else {
         console.error(err)
       }

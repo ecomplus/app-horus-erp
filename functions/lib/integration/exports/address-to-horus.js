@@ -57,7 +57,7 @@ module.exports = async (horus, customerCodeHorus, customerAddress, isBillingAddr
     })
     .catch((err) => {
       if (err.response) {
-        console.warn(JSON.stringify(err.response))
+        console.warn(JSON.stringify(err.response?.data))
       } else {
         console.error(err)
       }

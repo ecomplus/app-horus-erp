@@ -20,7 +20,7 @@ const getClientByCustomer = (storeId, horus, customer) => {
     })
     .catch((err) => {
       if (err.response) {
-        console.warn(JSON.stringify(err.response))
+        console.warn(JSON.stringify(err.response?.data))
       } else {
         console.error(err)
       }
@@ -37,7 +37,7 @@ const getClientAddressByZipCode = (horus, customerCodeHorus, zipCode) => {
     })
     .catch((err) => {
       if (err.response) {
-        console.warn(JSON.stringify(err.response))
+        console.warn(JSON.stringify(err.response?.data))
       } else {
         console.error(err)
       }

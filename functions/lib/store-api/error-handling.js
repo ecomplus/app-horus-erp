@@ -32,7 +32,7 @@ module.exports = err => {
         // ignore client error
         return
       }
-      err.responseJSON = JSON.stringify(err.response.data)
+      console.warn(JSON.stringify(err.response?.data))
     }
 
     // debug unexpected response

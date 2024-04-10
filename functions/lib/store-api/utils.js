@@ -9,7 +9,7 @@ const getResource = ({ appSdk, storeId, auth }, endpoint, isReplay) => {
     })
     .catch((err) => {
       if (err.response) {
-        console.warn(JSON.stringify(err.response))
+        console.warn(JSON.stringify(err.response?.data))
       } else {
         console.error(err)
       }

@@ -27,7 +27,7 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
     const products = await requestHorus(horus, endpoint, 'get')
       .catch((err) => {
         if (err.response) {
-          console.warn(JSON.stringify(err.response))
+          console.warn(JSON.stringify(err.response?.data))
         } else {
           console.error(err)
         }
