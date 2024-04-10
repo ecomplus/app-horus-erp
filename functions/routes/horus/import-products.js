@@ -17,7 +17,7 @@ const requestStoreApi = axios.create({
 const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
   let hasRepeat = true
   let offset = 0
-  const limit = 100
+  const limit = 50
 
   let total = 0
   const promisesSendTopics = []

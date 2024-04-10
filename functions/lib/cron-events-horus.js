@@ -50,7 +50,7 @@ const productsEvents = async (horus, storeId, opts) => {
 
   let hasRepeat = true
   let offset = 0
-  const limit = 100
+  const limit = 50
 
   let total = 0
   const init = Date.now()
