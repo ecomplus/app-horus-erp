@@ -280,7 +280,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       body.STA_PEDIDO = order.status === 'cancelled'
         ? 'CAN'
-        : parseFinancialStatus(order.financial_status)
+        : parseFinancialStatus(order.financial_status?.current)
 
       const params = new url.URLSearchParams(body)
       const endpoint = `/AltStatus_Pedido?${params.toString()}`
