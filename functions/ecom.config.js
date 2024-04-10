@@ -263,13 +263,15 @@ const app = {
             minimum: 1,
             maximum: 999999,
             default: 1,
-            title: 'Código do responsável pelo cadastros de clientes no ERP. (Padrão: 1)',
+            title: 'Código do responsável',
+            description: 'Código do responsável pelo cadastros de clientes no ERP. (Padrão: 1)',
           },
           responsible_name : {
             type: 'string',
             maxLength: 255,
             default: 'ecomplus',
-            title: 'Nome do responsável pelo cadastros de clientes no ERP. (Padrão: ecomplus)',
+            title: 'Nome do responsável',
+            description: 'Nome do responsável pelo cadastros de clientes no ERP. (Padrão: ecomplus)',
           },
         }
       },
