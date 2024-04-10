@@ -94,7 +94,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         getClientByCustomer(storeId, horus, customer)
       ])
 
-      // /*
       if (!customerHorus) {
         const opts = {
           isCreate: true,
@@ -117,8 +116,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           .catch(console.error)
         return null
       }
-      // */
-      // /*
+
       const customerCodeHorus = customerHorus.COD_CLI
 
       const zipCode = parseZipCode(customerAddress.zip)
@@ -126,7 +124,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       if (!addressCustomerHorus) {
         addressCustomerHorus = await createAddress(horus, customerCodeHorus, customerAddress, isBillingAddress)
       }
-      // */
 
       if (!orderHorus) {
         const body = {
@@ -140,7 +137,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
           FRETE_EMIT_DEST: amount.freight ? 2 : 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
-          COD_FORMA: getCodePayment(paymentMethodCode, appData.payments), // Informar o código da forma de pagamento - Parâmetro Obrigatório
+          COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction), // Informar o código da forma de pagamento - Parâmetro Obrigatório
           QTD_PARCELAS: 0, // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
           VLR_FRETE: parsePrice(amount.freight || 0), // Informar valor do Frete quando existir - Parâmetro opcional!
           VLR_OUTRAS_DESP: parsePrice((amount.tax || 0) + (amount.extra || 0)), // Informar o valor de Outras despesas, essa informação sairá na Nota Fiscal - Parâmetro opcional!
@@ -159,7 +156,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         const params = new url.URLSearchParams(body)
         const endpoint = `/InsPedidoVenda?${params.toString()}`
         console.log('>> Insert Order', endpoint)
-        // /* // TODO:
         return requestHorus(horus, endpoint, 'POST')
           .then(response => {
             if (response && response.length) {
@@ -171,7 +167,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               }
             }
           })
-        // */
       }
 
       if (orderHorus.STATUS_PEDIDO_VENDA && orderHorus.STATUS_PEDIDO_VENDA === 'CAN') {
@@ -179,13 +174,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         throw new Error(skipCreate)
       }
 
-      // /* TODO:
       return {
         order,
         saleCodeHorus: orderHorus.COD_PED_VENDA,
         customerCodeHorus: customerHorus.COD_CLI
       }
-      // */
     })
     .then(async data => {
       if (!data) {
@@ -230,7 +223,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             const params = new url.URLSearchParams(body)
             const endpoint = `/InsItensPedidoVenda?${params.toString()}`
             // console.log('>>item add: ', endpoint)
-            // /* TODO:
             promisesAddItemOrderHorus.push(
               requestHorus(horus, endpoint)
                 .then(() => {
@@ -240,7 +232,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
                   errorAddItem.push(endpoint)
                 })
             )
-            // */
           }
         })
 

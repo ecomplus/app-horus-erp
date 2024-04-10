@@ -50,17 +50,23 @@ const parsePaymentMethod = (paymentMethod) => {
   }
 }
 
-const getCodePayment = (paymentMethodCode, appDataPayments) => {
+const getCodePayment = (paymentMethodCode, appDataPayments, transaction) => {
   if (!appDataPayments?.length || !paymentMethodCode) {
     return 1
   }
   const methodName = parsePaymentMethod(paymentMethodCode)
-  if (!methodName) {
+  if (!methodName || transaction.app) {
     return 1
+  }
+  const checkAppId = (mapApp, transactionApp) => {
+    if (!mapApp.app_id || mapApp.app_id === '') {
+      return true
+    }
+    return mapApp.app_id === transactionApp._id
   }
 
   const method = appDataPayments
-    .find(payment => payment.name === methodName)
+    .find(payment => payment.name === methodName && checkAppId(payment, transaction.app))
 
   return method ? method.code : 1
 }

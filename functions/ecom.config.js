@@ -249,8 +249,8 @@ const app = {
             description: 'Criar pedidos após aprovação'
           },
           responsible: {
-            title: 'Responsável cadastro cliente',
-            description: 'Informações utilizadas para cadastro de cliente.',
+            title: 'Responsável pelo cadastro cliente no ERP',
+            description: 'Informações utilizadas para cadastro de cliente no ERP.',
             type: 'object',
             properties: {
               code: {
@@ -279,14 +279,24 @@ const app = {
     payments: {
       schema: {
         title: 'Formas de Pagamento',
-        description: 'Mapear formas de pagamento cadastradas no ERP. (Padrão: 1, se não informado)',
+        description: 'Mapear formas de pagamento cadastradas no ERP, com apps de pagamentos instalados. (Padrão: 1, se não informado)',
         type: "array",
-        maxItems: 5,
+        // maxItems: 5,
         items: {
           title: "Forma de Pagamento",
           type: "object",
           minProperties: 1,
+          required: [
+            'name',
+            'code',
+            'app_id'
+          ],
           properties: {
+            app_id : {
+              type: 'string',
+              pattern: '^[a-f0-9]{24}$',
+              title: 'ID do aplicativo de pagamento instalado.'
+            },
             name : {
               type: "string",
               enum: [
@@ -314,7 +324,7 @@ const app = {
     delivery: {
       schema: {
         title: 'Frete',
-        description: 'Mapear Transportadoras cadastradas no ERP. (Padrão: 1, se não informado)',
+        description: 'Mapear Transportadoras cadastradas no ERP, com apps de entrega instalados. (Padrão: 1, se não informado)',
         type: "array",
         // maxItems: 5,
         items: {
