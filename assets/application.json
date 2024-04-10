@@ -167,29 +167,32 @@
             "default": false,
             "title": "Apenas pedidos aprovados",
             "description": "Criar pedidos após aprovação"
+          }
+        }
+      },
+      "hide": true
+    },
+    "customers": {
+      "schema": {
+        "title": "Clientes",
+        "description": "Configuração para exportar clientes para o ERP",
+        "type": "object",
+        "properties": {
+          "responsible_code": {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 999999,
+              "default": 1,
+              "title": "Código do responsável pelo cadastros de clientes no ERP. (Padrão: 1)"
+            }
           },
-          "responsible": {
-            "title": "Responsável pelo cadastro cliente no ERP",
-            "description": "Informações utilizadas para cadastro de cliente no ERP.",
-            "type": "object",
-            "properties": {
-              "code": {
-                "schema": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 999999,
-                  "default": 1,
-                  "title": "Código do responsável no ERP. (Padrão: 1)"
-                }
-              },
-              "name": {
-                "schema": {
-                  "type": "string",
-                  "maxLength": 255,
-                  "default": "ecomplus",
-                  "title": "Nome do responsável no ERP. (Padrão: ecomplus)"
-                }
-              }
+          "responsible_name": {
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "default": "ecomplus",
+              "title": "Nome do responsável pelo cadastros de clientes no ERP. (Padrão: ecomplus)"
             }
           }
         }
