@@ -259,21 +259,17 @@ const app = {
         type: 'object',
         properties: {
           responsible_code: {
-            schema: {
-              type: 'integer',
-              minimum: 1,
-              maximum: 999999,
-              default: 1,
-              title: 'Código do responsável pelo cadastros de clientes no ERP. (Padrão: 1)',
-            }
+            type: 'integer',
+            minimum: 1,
+            maximum: 999999,
+            default: 1,
+            title: 'Código do responsável pelo cadastros de clientes no ERP. (Padrão: 1)',
           },
           responsible_name : {
-            schema: {
-              type: 'string',
-              maxLength: 255,
-              default: 'ecomplus',
-              title: 'Nome do responsável pelo cadastros de clientes no ERP. (Padrão: ecomplus)',
-            }
+            type: 'string',
+            maxLength: 255,
+            default: 'ecomplus',
+            title: 'Nome do responsável pelo cadastros de clientes no ERP. (Padrão: ecomplus)',
           },
         }
       },
