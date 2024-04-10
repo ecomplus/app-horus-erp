@@ -53,6 +53,7 @@ const productsEvents = async (horus, storeId, opts) => {
   const limit = 100
 
   let total = 0
+  const init = Date.now()
   const promisesSendTopics = []
   while (hasRepeat) {
     // create Object Horus to request api Horus
@@ -81,6 +82,12 @@ const productsEvents = async (horus, storeId, opts) => {
             })
         )
       })
+      const now = Date.now()
+      const time = now - init
+      if (time >= 50000) {
+        hasRepeat = false
+      }
+      //
     } else {
       hasRepeat = false
     }
