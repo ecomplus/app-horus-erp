@@ -2,6 +2,10 @@
 const { procedures } = require('./../../ecom.config')
 // handle Store API errors
 const errorHandling = require('./../../lib/store-api/error-handling')
+const {
+  getResource: getCategory,
+  createResource: createCategory
+} = require('../../lib/store-api/utils')
 
 exports.post = ({ appSdk }, req, res) => {
   const { storeId } = req
@@ -9,9 +13,11 @@ exports.post = ({ appSdk }, req, res) => {
   // handle callback with E-Com Plus app SDK
   // https://github.com/ecomplus/application-sdk
   appSdk.handleCallback(storeId, req.body)
-    .then(({ isNew, authenticationId }) => {
+    .then(async ({ isNew, authenticationId }) => {
+      let auth
       if (isNew) {
         console.log(`Installing store #${storeId}`)
+        auth = await appSdk.getAuth(storeId, authenticationId)
         /**
          * You may also want to send request to external server here:
 
@@ -19,11 +25,17 @@ exports.post = ({ appSdk }, req, res) => {
           store_id: storeId,
           authentication_id: authenticationId
         })
-
          */
-
-        // TODO:
-        // Frist routine import products
+        const endpoint = 'categories.json?name=Autores&limit=1'
+        const authorsCategory = await getCategory({ appSdk, storeId, auth }, endpoint)
+        if (!authorsCategory) {
+          const name = 'Autores'
+          const body = {
+            name,
+            slug: 'autores'
+          }
+          return createCategory({ appSdk, storeId, auth }, 'categories.json', body, true)
+        }
         return true
       }
 

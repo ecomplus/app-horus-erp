@@ -45,7 +45,7 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
   if (appData && queueEntry && queueEntry.action && queueEntry.queue) {
     let data
     try {
-      console.log('>> ', JSON.stringify(queueEntry))
+      // console.log('>> ', JSON.stringify(queueEntry))
       const { action, queue, nextId } = queueEntry
       if (appData[action]) {
         let queueList = appData[action][queue]
@@ -66,7 +66,7 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
         console.log(`> Update app #${storeId} ${JSON.stringify(data)}`)
       }
     } catch (err) {
-      console.error(err)
+      // console.error(err)
       //
     }
     if (data) {
