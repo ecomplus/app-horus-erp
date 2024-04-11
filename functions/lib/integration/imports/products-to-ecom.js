@@ -307,6 +307,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         throw err
       })
 
-    return newProduct
+    return { _id: productId }
   }
 }
