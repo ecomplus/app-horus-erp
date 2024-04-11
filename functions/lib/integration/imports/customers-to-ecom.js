@@ -156,7 +156,7 @@ module.exports = async ({ appSdk, storeId, auth }, customerHorus, opts = {}) => 
     }
   }
 
-  const customer = await findCustomer(
+  const custormer = await findCustomer(
     { appSdk, storeId, auth },
     COD_CLI,
     {
@@ -165,7 +165,9 @@ module.exports = async ({ appSdk, storeId, auth }, customerHorus, opts = {}) => 
     }
   )
 
-  const method = customer ? 'PATCH' : 'POST'
-  const endpoint = '/custormers.json'
+  const method = custormer ? 'PATCH' : 'POST'
+
+  let endpoint = 'custormers'
+  endpoint += !custormer ? '.json' : `/${custormer._id}.json`
   return appSdk.apiRequest(storeId, endpoint, method, body, auth)
 }

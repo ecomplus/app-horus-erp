@@ -267,8 +267,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.available = false
     }
 
-    const endpoint = 'products.json'
     const method = !product ? 'POST' : 'PATCH'
+    let endpoint = 'products'
+    endpoint += !product ? '.json' : `/${product._id}.json`
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
       .then(({ response }) => response.data)
       .catch(err => {
