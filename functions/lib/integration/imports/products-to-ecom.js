@@ -101,7 +101,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   if (!COD_ITEM) {
     throw new Error(productHorus.Mensagem)
   }
-  console.log('> Product => COD_ITEM', COD_ITEM)
   const price = parsePrice(VLR_CAPA)
   const quantity = SALDO_DISPONIVEL || 0
   const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)
@@ -271,7 +270,12 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     let endpoint = 'products'
     endpoint += !product ? '.json' : `/${product._id}.json`
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
-      .then(({ response }) => response.data)
+      .then(({ response }) => {
+        if (method === 'POST') {
+          console.log('> Product created => COD_ITEM', COD_ITEM)
+        }
+        return response.data
+      })
       .catch(err => {
         console.error('>> error create product: ', err?.response?.data && JSON.stringify(err.response.data))
         // throw err

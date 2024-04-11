@@ -21,6 +21,9 @@ const createResource = async ({ appSdk, storeId, auth }, endpoint, body, isThrow
   return appSdk.apiRequest(storeId, endpoint, 'POST', body, auth)
     .then(({ response }) => {
       const data = response.data
+      if (data) {
+        console.log(` > ${endpoint.replace('.json', '')} created`)
+      }
       return data ? { _id: data._id, name: body.name } : data
     })
     .catch((err) => {

@@ -19,7 +19,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus, opts = {}) =
     nomeAutor
   } = categoriesHorus
 
-  console.log('> Category => ', JSON.stringify(categoriesHorus))
+  // console.log('> Category => ', JSON.stringify(categoriesHorus))
 
   const name = codGenero ? nomeGenero : nomeAutor
   const body = {

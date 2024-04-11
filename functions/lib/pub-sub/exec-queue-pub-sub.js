@@ -4,12 +4,12 @@ const { sendMessageTopic } = require('./utils')
 const collectionName = 'queuePubSub'
 
 const replayPubSub = async (appSdk) => {
-  const listErrors = await firestore()
+  const listPubSubs = await firestore()
     .collection(collectionName)
-    .limit(10)
+    .limit(50)
     .get()
   const promises = []
-  listErrors.forEach((doc) => {
+  listPubSubs.forEach((doc) => {
     const docRef = doc.ref
     const { eventName, json } = doc.data()
     const run = async () => {
