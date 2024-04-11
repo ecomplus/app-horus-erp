@@ -107,7 +107,14 @@ module.exports = async (
       const appClient = { appSdk, storeId, auth }
       if (objectHorus) {
         return imports[resource](appClient, objectHorus, opts)
-          .then(async ({ _id }) => {
+          .then(async (response) => {
+            const _id = response._id
+            if (!_id) {
+              console.log('>>context ', JSON.stringify(context))
+              return { _id: 'error' }
+              // const collectionName = 'pubSubErro'
+              // return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
+            }
             if (isUpdateDate) {
               const date = new Date(lastUpdate || Date.now())
               const lastUpdateResource = new Date(date.getTime() + 60 * 1000).toISOString()

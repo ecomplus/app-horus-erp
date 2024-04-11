@@ -75,12 +75,12 @@ const getProductByCodItem = async ({ appSdk, storeId, auth }, codItem) => {
       }
       throw new Error('not found')
     })
-    .catch((err) => {
-      if (err.response) {
-        console.warn(JSON.stringify(err.response?.data))
-      } else {
-        console.error(err)
-      }
+    .catch((_err) => {
+      // if (err.response) {
+      //   console.warn(JSON.stringify(err.response?.data))
+      // } else {
+      //   console.error(err)
+      // }
       return null
     })
 }
