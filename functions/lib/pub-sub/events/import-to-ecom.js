@@ -1,5 +1,6 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
+const { saveFirestore } = require('../utils')
 const { collectionHorusEvents } = require('../../utils-variables')
 const updateAppData = require('../../store-api/update-app-data')
 const imports = {
@@ -74,6 +75,16 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
     })
 }
 
+const checkAndUpdateLastUpdateDate = async (isUpdateDate, lastUpdate, field, now, docRef) => {
+  if (isUpdateDate) {
+    const date = new Date(lastUpdate || Date.now())
+    const lastUpdateResource = new Date(date.getTime() + 60 * 1000).toISOString()
+    const body = { [`${field}`]: lastUpdateResource, updated_at: now.toISOString() }
+    await docRef.set(body, { merge: true })
+      .catch(console.error)
+  }
+}
+
 module.exports = async (
   {
     storeId,
@@ -113,28 +124,16 @@ module.exports = async (
       if (objectHorus && lastUpdateDoc) {
         return imports[resource](appClient, objectHorus, opts)
           .then(async (response) => {
-            const _id = response?._id
-            if (!_id) {
-              // console.log('>>context ', JSON.stringify(context))
-              return { _id: 'error' }
-              // const collectionName = 'pubSubErro'
-              // return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
-            }
-            if (isUpdateDate) {
-              const date = new Date(lastUpdate || Date.now())
-              const lastUpdateResource = new Date(date.getTime() + 60 * 1000).toISOString()
+            const _id = response?._id || 'not_update'
 
-              const body = { [`${field}`]: lastUpdateResource, updated_at: now.toISOString() }
-              await docRef.set(body, { merge: true })
-                .catch(console.error)
-            }
+            await checkAndUpdateLastUpdateDate(isUpdateDate, lastUpdate, field, now, docRef)
             if (opts.queueEntry) {
               return updateApp(appClient, _id, opts)
             }
             return { _id }
           })
       }
-      return updateApp(appClient, 'remove_queue', opts)
+      return updateApp(appClient, 'remove_queue_app', opts)
     })
     .then(async ({ _id }) => {
       console.log(`>> Sucess #${logId} import [${resource}: ${_id}]`)
@@ -152,6 +151,7 @@ module.exports = async (
       if (err.appWithoutAuth) {
         console.error(err)
       } else {
+        await checkAndUpdateLastUpdateDate(isUpdateDate, lastUpdate, field, now, docRef)
         const json = {
           storeId,
           resource,
@@ -159,19 +159,10 @@ module.exports = async (
           opts,
           eventName
         }
-        // const collectionName = 'pubSubErro'
-        // return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
-        // if (isUpdateDate) {
-        //   const date = new Date(lastUpdate || Date.now())
-        //   const lastDoc = lastUpdateDoc ? new Date(lastUpdateDoc) : now
-        //   const lastUpdateResource = lastDoc.getTime() < date.getTime()
-        //     ? lastDoc.toISOString()
-        //     : date.toISOString()
+        const collectionName = 'pubSubErro'
+        await saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
+          .catch()
 
-        //   const body = { [`${field}`]: lastUpdateResource }
-        //   await docRef.set(body, { merge: true })
-        //     .catch(console.error)
-        // }
         throw err
       }
     })

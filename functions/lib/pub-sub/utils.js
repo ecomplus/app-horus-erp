@@ -5,7 +5,7 @@ const { PubSub } = require('@google-cloud/pubsub')
 const saveFirestore = (idDoc, body) => firestore()
   .doc(idDoc)
   .set(body, { merge: true })
-  .then(() => { console.log('Save in firestore') })
+  // .then(() => { console.log('Save in firestore') })
   .catch(console.error)
 
 const getPubSubTopic = (eventName) => {
@@ -108,5 +108,6 @@ const sendMessageTopic = async (eventName, json) => {
 module.exports = {
   createEventsFunction,
   getPubSubTopic,
-  sendMessageTopic
+  sendMessageTopic,
+  saveFirestore
 }
