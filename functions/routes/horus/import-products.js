@@ -1,7 +1,9 @@
 const axios = require('axios')
+const { firestore } = require('firebase-admin')
 const getAppData = require('../../lib/store-api/get-app-data')
 const {
-  topicResourceToEcom
+  topicResourceToEcom,
+  collectionHorusEvents
 } = require('../../lib/utils-variables')
 const Horus = require('../../lib/horus/client')
 const requestHorus = require('../../lib/horus/request')
@@ -13,6 +15,12 @@ const requestStoreApi = axios.create({
     'Content-Type': 'application/json'
   }
 })
+
+const saveFirestore = (idDoc, body) => firestore()
+  .doc(idDoc)
+  .set(body, { merge: true })
+  .then(() => { console.log('Save in firestore') })
+  .catch(console.error)
 
 const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
   let hasRepeat = true
@@ -87,7 +95,7 @@ exports.post = async ({ appSdk }, req, res) => {
       } = appData
 
       const horus = new Horus(username, password, baseURL)
-      const opts = { appData }
+      const opts = { appData, isUpdateDate: false }
 
       let query = '?'
       if (body.cod_init || body.cod_end) {
@@ -97,6 +105,13 @@ exports.post = async ({ appSdk }, req, res) => {
       }
 
       return getAndSendProdcutToQueue(horus, storeId, query, opts)
+        .then(() => storeId)
+    })
+    .then((storeId) => {
+      const docId = `${collectionHorusEvents}/${storeId}_products`
+      const lastUpdateProducts = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
+      const body = { lastUpdateProducts }
+      return saveFirestore(docId, body)
     })
     .then(() => {
       // console.log('>> Finish send import Products')

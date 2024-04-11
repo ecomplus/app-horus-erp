@@ -4,7 +4,7 @@ const updateAppData = require('../../store-api/update-app-data')
 const getAppData = require('../../store-api/get-app-data')
 const handleExports = {
   orders: require('../../integration/exports/orders-to-horus'),
-  customers: require('../../integration/exports/custormers-to-horus')
+  customers: require('../../integration/exports/customers-to-horus')
 }
 
 const getAppSdk = () => {
