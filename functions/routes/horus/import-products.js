@@ -29,6 +29,7 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
   const limit = 50
 
   let total = 0
+  const init = Date.now()
   const promisesSendTopics = []
   while (hasRepeat) {
     // create Object Horus to request api Horus
@@ -57,6 +58,11 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
             })
         )
       })
+      const now = Date.now()
+      const time = now - init
+      if (time >= 20000) {
+        hasRepeat = false
+      }
     } else {
       hasRepeat = false
     }
