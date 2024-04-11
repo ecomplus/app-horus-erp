@@ -8,6 +8,7 @@ const {
 const Horus = require('../../lib/horus/client')
 const requestHorus = require('../../lib/horus/request')
 const { sendMessageTopic } = require('../../lib/pub-sub/utils')
+const { parseDate } = require('../../lib/parsers/parse-to-horus')
 
 const requestStoreApi = axios.create({
   baseURL: 'https://api.e-com.plus/v1',
@@ -102,6 +103,14 @@ exports.post = async ({ appSdk }, req, res) => {
         const codInit = body.cod_init || 1
         const codEnd = body.cod_end || (codInit + 100)
         query += `COD_ITEM_INI=${codInit}&COD_ITEM_FIM=${codEnd}&`
+      } else if (body.date_init && body.date_end) {
+        const now = new Date()
+        const bodyDateIni = new Date(body.date_init)
+        const bodyDateEnd = new Date(body.date_end)
+        const dateIni = !Number.isNaN(bodyDateIni.getTime()) ? bodyDateIni : now
+        const dateEnd = !Number.isNaN(bodyDateEnd.getTime()) ? bodyDateEnd : now
+
+        query += `DATA_INI=${parseDate(dateIni)}&DATA_FIM=${parseDate(dateEnd)}&`
       }
 
       return getAndSendProdcutToQueue(horus, storeId, query, opts)
