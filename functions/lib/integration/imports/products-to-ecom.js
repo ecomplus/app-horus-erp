@@ -271,6 +271,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const method = !product ? 'POST' : 'PATCH'
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
       .then(({ response }) => response.data)
+      .catch(err => {
+        console.error('>> create produtc ', err)
+        throw err
+      })
     const productId = product ? product._id : newProduct._id
     const sendForSync = []
     categoriesForSync.forEach((categoryHorus) => {
@@ -292,6 +296,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
 
     await Promise.all(sendForSync)
+      .catch(err => {
+        console.error('>> Promisse ', err)
+        throw err
+      })
 
     return newProduct
   }
