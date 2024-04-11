@@ -108,7 +108,7 @@ module.exports = async (
       if (objectHorus) {
         return imports[resource](appClient, objectHorus, opts)
           .then(async (response) => {
-            const _id = response._id
+            const _id = response?._id
             if (!_id) {
               console.log('>>context ', JSON.stringify(context))
               return { _id: 'error' }
