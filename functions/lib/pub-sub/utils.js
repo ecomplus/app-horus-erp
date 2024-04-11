@@ -40,6 +40,7 @@ const createEventsFunction = (
 
 const sendMessageTopic = async (eventName, json) => {
   const topicName = getPubSubTopic(eventName)
+  json.eventName = eventName
   let isSend = true
   const isProductOrOrders = json?.resource === 'orders' || json?.resource === 'products'
   let docId

@@ -79,7 +79,8 @@ module.exports = async (
     storeId,
     resource,
     objectHorus,
-    opts
+    opts,
+    eventName
   },
   context
 ) => {
@@ -123,7 +124,7 @@ module.exports = async (
               const date = new Date(lastUpdate || Date.now())
               const lastUpdateResource = new Date(date.getTime() + 60 * 1000).toISOString()
 
-              const body = { [`${field}`]: lastUpdateResource }
+              const body = { [`${field}`]: lastUpdateResource, updated_at: now.toISOString() }
               await docRef.set(body, { merge: true })
                 .catch(console.error)
             }
@@ -151,17 +152,26 @@ module.exports = async (
       if (err.appWithoutAuth) {
         console.error(err)
       } else {
-        if (isUpdateDate) {
-          const date = new Date(lastUpdate || Date.now())
-          const lastDoc = lastUpdateDoc ? new Date(lastUpdateDoc) : now
-          const lastUpdateResource = lastDoc.getTime() < date.getTime()
-            ? lastDoc.toISOString()
-            : date.toISOString()
-
-          const body = { [`${field}`]: lastUpdateResource }
-          await docRef.set(body, { merge: true })
-            .catch(console.error)
+        const json = {
+          storeId,
+          resource,
+          objectHorus,
+          opts,
+          eventName
         }
+        // const collectionName = 'pubSubErro'
+        // return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
+        // if (isUpdateDate) {
+        //   const date = new Date(lastUpdate || Date.now())
+        //   const lastDoc = lastUpdateDoc ? new Date(lastUpdateDoc) : now
+        //   const lastUpdateResource = lastDoc.getTime() < date.getTime()
+        //     ? lastDoc.toISOString()
+        //     : date.toISOString()
+
+        //   const body = { [`${field}`]: lastUpdateResource }
+        //   await docRef.set(body, { merge: true })
+        //     .catch(console.error)
+        // }
         throw err
       }
     })
