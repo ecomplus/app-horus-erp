@@ -71,7 +71,7 @@ const sendMessageTopic = async (eventName, json) => {
     console.log(msg)
   } catch (e) {
     console.warn('Error send pub/sub')
-    const collectionName = 'pubSubErro'
+    const collectionName = 'queuePubSub'
     return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
   }
 

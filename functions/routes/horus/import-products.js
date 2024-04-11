@@ -7,7 +7,7 @@ const {
 } = require('../../lib/utils-variables')
 const Horus = require('../../lib/horus/client')
 const requestHorus = require('../../lib/horus/request')
-const { sendMessageTopic } = require('../../lib/pub-sub/utils')
+// const { sendMessageTopic } = require('../../lib/pub-sub/utils')
 const { parseDate } = require('../../lib/parsers/parse-to-horus')
 
 const requestStoreApi = axios.create({
@@ -47,15 +47,18 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
     if (products && Array.isArray(products)) {
       total += products.length
       products.forEach((productHorus, index) => {
+        const json = {
+          storeId,
+          resource: 'products',
+          objectHorus: productHorus,
+          opts
+        }
+        const collectionName = 'queuePubSub'
         promisesSendTopics.push(
-          sendMessageTopic(
-            topicResourceToEcom,
-            {
-              storeId,
-              resource: 'products',
-              objectHorus: productHorus,
-              opts
-            })
+          saveFirestore(
+            `${collectionName}/${Date.now()}`,
+            { eventName: topicResourceToEcom, json }
+          )
         )
       })
       const now = Date.now()

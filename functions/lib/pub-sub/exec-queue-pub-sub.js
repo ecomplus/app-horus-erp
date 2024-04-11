@@ -1,11 +1,12 @@
 const { firestore } = require('firebase-admin')
 const { sendMessageTopic } = require('./utils')
 
-const collectionName = 'pubSubErro'
+const collectionName = 'queuePubSub'
 
 const replayPubSub = async (appSdk) => {
   const listErrors = await firestore()
     .collection(collectionName)
+    .limit(10)
     .get()
   const promises = []
   listErrors.forEach((doc) => {
@@ -21,7 +22,7 @@ const replayPubSub = async (appSdk) => {
   })
   return Promise.all(promises)
     .then(() => {
-      console.log('>> End Replay Pub/Sub')
+      console.log('>> End Pub/Sub')
     })
 }
 module.exports = replayPubSub
