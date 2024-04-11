@@ -41,64 +41,39 @@ const createEventsFunction = (
 const sendMessageTopic = async (eventName, json) => {
   const topicName = getPubSubTopic(eventName)
   json.eventName = eventName
-  let isSend = true
-  const isProductOrOrders = json?.resource === 'orders' || json?.resource === 'products'
-  let docId
-  if (isProductOrOrders) {
-    // isSend
-    const resourceId = json?.objectHorus?.COD_ITEM
-      ? `COD_ITEM${json?.objectHorus?.COD_ITEM}`
-      : json?.resourceId
+  try {
+    const messageId = await new PubSub()
+      .topic(topicName)
+      .publishMessage({ json })
 
-    docId = `queue/${json?.storeId}_${json?.resource}_${resourceId}`
-    const docRef = firestore().doc(docId)
-    const docSnapshot = await docRef.get()
+    let msg = `>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - `
+    msg += `[${json?.resource}]`
 
-    // check in queue if doc exists
-    if (docSnapshot.exists) {
-      isSend = false
+    if (json?.objectHorus?.COD_ITEM) {
+      msg += ` COD_ITEM: ${json?.objectHorus?.COD_ITEM}`
+    } else if (json?.objectHorus) {
+      let resource
+      if (json.objectHorus.codGenero) {
+        resource = 'codGenero'
+      } else if (json.objectHorus.codAutor) {
+        resource = 'codAutor'
+      } else if (json.objectHorus.codEditora) {
+        resource = 'codEditora'
+      }
+      if (resource) {
+        msg += ` ${resource}: ${json.objectHorus[resource]}`
+      } else {
+        msg += ` ${JSON.stringify(json.objectHorus)}`
+      }
+    } else if (json.resourceId) {
+      msg += ` ${json.resourceId}`
     }
-  }
-  if (isSend) {
-    try {
-      const messageId = await new PubSub()
-        .topic(topicName)
-        .publishMessage({ json })
-
-      let msg = `>> Topic: ${topicName} MessageId: #${messageId}-s${json?.storeId} - `
-      msg += `[${json?.resource}]`
-
-      if (json?.objectHorus?.COD_ITEM) {
-        msg += ` COD_ITEM: ${json?.objectHorus?.COD_ITEM}`
-      } else if (json?.objectHorus) {
-        let resource
-        if (json.objectHorus.codGenero) {
-          resource = 'codGenero'
-        } else if (json.objectHorus.codAutor) {
-          resource = 'codAutor'
-        } else if (json.objectHorus.codEditora) {
-          resource = 'codEditora'
-        }
-        if (resource) {
-          msg += ` ${resource}: ${json.objectHorus[resource]}`
-        } else {
-          msg += ` ${JSON.stringify(json.objectHorus)}`
-        }
-      } else if (json.resourceId) {
-        msg += ` ${json.resourceId}`
-      }
-      console.log(msg)
-
-      // queue to resource
-      if (isProductOrOrders && docId) {
-        return saveFirestore(docId, { updated_at: new Date().toISOString() })
-      }
-    } catch (e) {
-      if (json?.objectHorus?.COD_ITEM || json?.resource === 'orders') {
-        console.warn('Error send pub/sub')
-        const collectionName = 'pubSubErro'
-        return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
-      }
+    console.log(msg)
+  } catch (e) {
+    if (json?.objectHorus?.COD_ITEM || json?.resource === 'orders') {
+      console.warn('Error send pub/sub')
+      const collectionName = 'pubSubErro'
+      return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
     }
   }
 
