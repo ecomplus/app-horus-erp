@@ -105,7 +105,7 @@ module.exports = async (
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
-      if (objectHorus) {
+      if (objectHorus && lastUpdateDoc) {
         return imports[resource](appClient, objectHorus, opts)
           .then(async (response) => {
             const _id = response?._id

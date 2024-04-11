@@ -302,10 +302,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
 
     await Promise.all(sendForSync)
-      .catch(err => {
-        console.error('>> Promisse ', err)
-        throw err
-      })
 
     return { _id: productId }
   }
