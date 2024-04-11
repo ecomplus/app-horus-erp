@@ -273,7 +273,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const newProduct = await appSdk.apiRequest(storeId, endpoint, method, body, auth)
       .then(({ response }) => response.data)
       .catch(err => {
-        console.error('>> create produtc ', err?.response?.data && JSON.stringify(err.response.data))
+        console.error('>> error create product: ', err?.response?.data && JSON.stringify(err.response.data))
         // throw err
         return null
       })

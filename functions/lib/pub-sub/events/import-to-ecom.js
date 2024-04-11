@@ -110,7 +110,7 @@ module.exports = async (
           .then(async (response) => {
             const _id = response?._id
             if (!_id) {
-              console.log('>>context ', JSON.stringify(context))
+              // console.log('>>context ', JSON.stringify(context))
               return { _id: 'error' }
               // const collectionName = 'pubSubErro'
               // return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
