@@ -6,7 +6,7 @@ const collectionName = 'queuePubSub'
 const replayPubSub = async (appSdk) => {
   const listPubSubs = await firestore()
     .collection(collectionName)
-    .limit(50)
+    .limit(10)
     .get()
   const promises = []
   listPubSubs.forEach((doc) => {
