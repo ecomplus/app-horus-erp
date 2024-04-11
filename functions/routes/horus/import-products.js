@@ -118,7 +118,7 @@ exports.post = async ({ appSdk }, req, res) => {
     })
     .then((storeId) => {
       const docId = `${collectionHorusEvents}/${storeId}_products`
-      const lastUpdateProducts = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
+      const lastUpdateProducts = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() // UTC-3
       const body = { lastUpdateProducts }
       return saveFirestore(docId, body)
     })
