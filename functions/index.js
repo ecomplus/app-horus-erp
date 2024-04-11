@@ -160,7 +160,7 @@ exports.pusubExportToHorusEvent = require('./lib/pub-sub/utils')
 // cron jobs
 const handleEventsHorus = require('./lib/cron-events-horus')
 const handleSyncEcomHorus = require('./lib/integration/sync-ecom-horus')
-const handlePubSubErrors = require('./lib/pub-sub/replay-errors')
+const handleQueuePubSub = require('./lib/pub-sub/exec-queue-pub-sub')
 const eventsCron = '*/1 * * * *'
 // /*
 exports.horusEvents = functions
@@ -173,11 +173,11 @@ exports.syncQueueEcomHorus = functions.pubsub.schedule(eventsCron)
   .onRun(() => handleSyncEcomHorus())
 console.log(`-- Sync Resources to E-com'${eventsCron}'`)
 // /*
-exports.replayPubSub = functions.pubsub.schedule(eventsCron)
+exports.queuePubSub = functions.pubsub.schedule(eventsCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {
-      return handlePubSubErrors(appSdk)
+      return handleQueuePubSub(appSdk)
     })
   })
-console.log(`-- Replay Pub/Sub'${eventsCron}'`)
+console.log(`-- Queue Pub/Sub'${eventsCron}'`)
 // */
