@@ -70,11 +70,9 @@ const sendMessageTopic = async (eventName, json) => {
     }
     console.log(msg)
   } catch (e) {
-    if (json?.objectHorus?.COD_ITEM || json?.resource === 'orders') {
-      console.warn('Error send pub/sub')
-      const collectionName = 'pubSubErro'
-      return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
-    }
+    console.warn('Error send pub/sub')
+    const collectionName = 'pubSubErro'
+    return saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
   }
 
   return null
