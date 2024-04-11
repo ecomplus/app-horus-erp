@@ -87,6 +87,10 @@ module.exports = async (
   if (typeof opts.isUpdateDate === 'boolean') {
     isUpdateDate = opts.isUpdateDate
   }
+
+  const resourceId = objectHorus?.COD_ITEM && `COD_ITEM${objectHorus?.COD_ITEM}`
+  const docIdQueue = resourceId && `queue/${storeId}_${resource}_${resourceId}`
+
   const { eventId } = context
   const { DAT_ULT_ATL: lastUpdate } = objectHorus
   const logId = `${eventId}-s${storeId}`
@@ -131,11 +135,19 @@ module.exports = async (
       }
       return updateApp(appClient, 'remove_queue', opts)
     })
-    .then(({ _id }) => {
+    .then(async ({ _id }) => {
       console.log(`>> Sucess #${logId} import [${resource}: ${_id}]`)
+      if (docIdQueue) {
+        const docQueueRef = firestore().doc(docIdQueue)
+        await docQueueRef.delete().catch()
+      }
     })
     .catch(async (err) => {
       console.error(`>> Error Event #${logId} import: ${resource}`)
+      if (docIdQueue) {
+        const docQueueRef = firestore().doc(docIdQueue)
+        await docQueueRef.delete().catch()
+      }
       if (err.appWithoutAuth) {
         console.error(err)
       } else {
