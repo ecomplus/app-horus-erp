@@ -234,16 +234,14 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.keywords = PALAVRAS_CHAVE.split(',')
     }
 
-    if (DESC_SINOPSE) {
-      body.body_html = DESC_SINOPSE
-    }
-
     if (
+      DESC_SINOPSE ||
       OBS_ESPECIAIS ||
       INFO_COMP_ITEM ||
       QTD_PAGINAS
     ) {
-      body.body_html = `${OBS_ESPECIAIS}<br/>` || ''
+      body.body_html = DESC_SINOPSE || ''
+      body.body_html += OBS_ESPECIAIS ? `<br/>${OBS_ESPECIAIS}<br/>` : '<br/>'
       body.body_html += INFO_COMP_ITEM ? `${INFO_COMP_ITEM}<br/>` : ''
       body.body_html += QTD_PAGINAS ? ` Quantidade de páginas: ${QTD_PAGINAS} <br/>` : ''
     }
