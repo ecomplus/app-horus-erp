@@ -166,17 +166,26 @@ const eventsCron = '*/1 * * * *'
 exports.horusEvents = functions
   .runWith({ memory: '512MB' })
   .pubsub.schedule(eventsCron)
-  .onRun(() => handleEventsHorus())
-console.log(`-- Check Events in Horus ERP'${eventsCron}'`)
-
-exports.syncQueueEcomHorus = functions.pubsub.schedule(eventsCron)
-  .onRun(() => handleSyncEcomHorus())
-console.log(`-- Sync Resources to E-com'${eventsCron}'`)
-
-exports.queuePubSub = functions.pubsub.schedule(eventsCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {
-      return handleQueuePubSub(appSdk)
+      return Promise.all([
+        handleEventsHorus(appSdk),
+        handleQueuePubSub(appSdk),
+        handleSyncEcomHorus(appSdk)
+      ])
     })
   })
-console.log(`-- Queue Pub/Sub'${eventsCron}'`)
+
+console.log(`-- Check Events ERP'${eventsCron}'`)
+
+// exports.syncQueueEcomHorus = functions.pubsub.schedule(eventsCron)
+//   .onRun(() => handleSyncEcomHorus())
+// console.log(`-- Sync Resources to E-com'${eventsCron}'`)
+
+// exports.queuePubSub = functions.pubsub.schedule(eventsCron)
+//   .onRun(() => {
+//     return prepareAppSdk().then(appSdk => {
+//       return handleQueuePubSub(appSdk)
+//     })
+//   })
+// console.log(`-- Queue Pub/Sub'${eventsCron}'`)

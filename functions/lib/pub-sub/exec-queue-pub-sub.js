@@ -3,7 +3,8 @@ const { sendMessageTopic } = require('./utils')
 
 const collectionName = 'queuePubSub'
 
-const replayPubSub = async (appSdk) => {
+const replayPubSub = async (_appSdk) => {
+  console.log('>> Exec Queue Pub/Sub')
   const listPubSubs = await firestore()
     .collection(collectionName)
     .limit(10)

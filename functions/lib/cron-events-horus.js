@@ -1,5 +1,5 @@
 const { firestore } = require('firebase-admin')
-const { setup } = require('@ecomplus/application-sdk')
+// const { setup } = require('@ecomplus/application-sdk')
 const getAppData = require('./store-api/get-app-data')
 const {
   collectionHorusEvents,
@@ -102,69 +102,38 @@ const productsEvents = async (horus, storeId, opts) => {
     })
 }
 
-/*
-const customerEvents = async (appData, storeId) => {
-  const { username, password, baseURL } = appData
-  const horus = new Horus(username, password, baseURL)
-  let dateInit = parseDate(new Date(1), true)
-  const dateEnd = parseDate(new Date(), true)
-  const docRef = firestore()
-    .doc(`${collectionHorusEvents}/${storeId}/customers`)
-
-  const docSnapshot = await docRef.get()
-  if (docSnapshot.exists) {
-    const { lastUpdateCustomer } = docSnapshot.data()
-    dateInit = parseDate(new Date(lastUpdateCustomer), true)
-  }
-
-  const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}`
-  console.log('>> Query ', query)
-  const { data: listCustomers } = await horus.get(`/Busca_Cliente${query}`)
-  listCustomers.forEach((customersHorus) => {
-    sendMessageTopic(topicCustomerHorus, { storeId, customersHorus })
-  })
-}
-*/
-
-// Autores_item?COD_ITEM=1
-
-module.exports = context => setup(null, true, firestore())
-  .then(async (appSdk) => {
-    const storeIds = await listStoreIds()
-    const promises = []
-    const now = new Date()
-    const runEvent = async (storeId) => {
-      console.log(`>> Run #${storeId} in ${now.toISOString()}`)
-      await appSdk.getAuth(storeId)
-        .then((auth) => {
-          return getAppData({ appSdk, storeId, auth }, true)
-        })
-        .then((appData) => {
-          const {
-            username,
-            password,
-            baseURL
-          } = appData
-          const horus = new Horus(username, password, baseURL)
-          const opts = { appData }
-          productsEvents(horus, storeId, opts)
-          // if (now.getMinutes() % 5 === 0) {
-          //   customerEvents(appData, storeId)
-          // }
-          return null
-        })
-        .then(() => {
-          console.log(`Finish Exec #${storeId}`)
-        })
-    }
-    console.log('>>Check Events ', storeIds.length, ' <')
-    storeIds?.forEach(async (storeId) => {
-      promises.push(runEvent(storeId))
-    })
-
-    return Promise.all(promises)
-      .then(() => {
-        console.log('> Finish Check Events All Stores')
+module.exports = async (appSdk) => {
+  const storeIds = await listStoreIds()
+  const promises = []
+  const now = new Date()
+  const runEvent = async (storeId) => {
+    console.log(`>> Run #${storeId} in ${now.toISOString()}`)
+    await appSdk.getAuth(storeId)
+      .then((auth) => {
+        return getAppData({ appSdk, storeId, auth }, true)
       })
+      .then((appData) => {
+        const {
+          username,
+          password,
+          baseURL
+        } = appData
+        const horus = new Horus(username, password, baseURL)
+        const opts = { appData }
+        return productsEvents(horus, storeId, opts)
+      })
+      .then(() => {
+        console.log(`Finish Exec #${storeId}`)
+      })
+  }
+  console.log('>>Check Events ', storeIds.length, ' <')
+  storeIds?.forEach(async (storeId) => {
+    promises.push(runEvent(storeId))
   })
-  .catch(console.error)
+
+  return Promise.all(promises)
+    .then(() => {
+      console.log('> Finish Check Events All Stores')
+    })
+    .catch(console.error)
+}

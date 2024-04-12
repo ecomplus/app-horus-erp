@@ -1,5 +1,5 @@
 const { firestore } = require('firebase-admin')
-const { setup } = require('@ecomplus/application-sdk')
+// const { setup } = require('@ecomplus/application-sdk')
 const handle = {
   brand: require('./handles-queues/queue-brands'),
   category: require('./handles-queues/queue-categories'),
@@ -31,23 +31,22 @@ const runStore = async ({ appSdk, storeId, auth }) => {
   return Promise.all(promisesResources)
 }
 
-module.exports = context => setup(null, true, firestore())
-  .then(async (appSdk) => {
-    const listStoreIds = await firestore()
-      .collection('sync')
-      .listDocuments()
-    let i = 0
-    const promisesStore = []
-    while (i <= listStoreIds.length - 1) {
-      const docFirestore = listStoreIds[i]
-      const storeId = parseInt(docFirestore.id, 10)
-      // console.log('>> Sync: ', storeId)
-      promisesStore.push(
-        appSdk.getAuth(storeId)
-          .then(async (auth) => runStore({ appSdk, storeId, auth }))
-      )
-      i += 1
-    }
-    return Promise.all(promisesStore)
-  })
-  .catch(console.error)
+module.exports = async (appSdk) => {
+  const listStoreIds = await firestore()
+    .collection('sync')
+    .listDocuments()
+  let i = 0
+  const promisesStore = []
+  while (i <= listStoreIds.length - 1) {
+    const docFirestore = listStoreIds[i]
+    const storeId = parseInt(docFirestore.id, 10)
+    // console.log('>> Sync: ', storeId)
+    promisesStore.push(
+      appSdk.getAuth(storeId)
+        .then(async (auth) => runStore({ appSdk, storeId, auth }))
+    )
+    i += 1
+  }
+  return Promise.all(promisesStore)
+    .catch(console.error)
+}
