@@ -7,7 +7,7 @@ const replayPubSub = async (_appSdk) => {
   console.log('>> Exec Queue Pub/Sub')
   const listPubSubs = await firestore()
     .collection(collectionName)
-    .limit(10)
+    // .limit(10)
     .get()
   const promises = []
   listPubSubs.forEach((doc) => {
@@ -17,13 +17,11 @@ const replayPubSub = async (_appSdk) => {
       await docRef.delete()
       return sendMessageTopic(eventName, json)
     }
-    promises.push(
-      run()
-    )
+    promises.push(run())
   })
   return Promise.all(promises)
     .then(() => {
-      console.log('>> End Pub/Sub')
+      console.log('>> End Queue Pub/Sub ', listPubSubs?.length)
     })
 }
 module.exports = replayPubSub

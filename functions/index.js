@@ -168,24 +168,27 @@ exports.horusEvents = functions
   .pubsub.schedule(eventsCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {
-      return Promise.all([
-        handleEventsHorus(appSdk),
-        handleQueuePubSub(appSdk),
-        handleSyncEcomHorus(appSdk)
-      ])
+      return handleEventsHorus(appSdk)
     })
   })
 
 console.log(`-- Check Events ERP'${eventsCron}'`)
 
-// exports.syncQueueEcomHorus = functions.pubsub.schedule(eventsCron)
-//   .onRun(() => handleSyncEcomHorus())
-// console.log(`-- Sync Resources to E-com'${eventsCron}'`)
+const syncCron = '*/5 * * * *'
+exports.syncQueueEcomHorus = functions.pubsub.schedule(syncCron)
+  .onRun(() => {
+    return prepareAppSdk().then(appSdk => {
+      return handleSyncEcomHorus(appSdk)
+    })
+  })
+console.log(`-- Sync Resources to E-com'${eventsCron}'`)
 
-// exports.queuePubSub = functions.pubsub.schedule(eventsCron)
-//   .onRun(() => {
-//     return prepareAppSdk().then(appSdk => {
-//       return handleQueuePubSub(appSdk)
-//     })
-//   })
-// console.log(`-- Queue Pub/Sub'${eventsCron}'`)
+const queueCron = '*/30 * * * *'
+exports.queuePubSub = functions.pubsub.schedule(queueCron)
+  .onRun(() => {
+    return prepareAppSdk().then(appSdk => {
+      return handleQueuePubSub(appSdk)
+    })
+  })
+
+console.log(`-- Queue Pub/Sub'${eventsCron}'`)
