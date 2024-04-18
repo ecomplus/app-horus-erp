@@ -235,7 +235,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               )
             }
           } else {
-            console.warn(`> sku: ${item.sku} product not imported from ERP`)
+            console.warn(`> orderId #${orderId} -> sku: ${item.sku} product not imported from ERP`)
           }
         })
 
