@@ -206,32 +206,36 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           .catch(() => null)
 
         order.items?.forEach((item) => {
-          const codItem = item.sku.replace('COD_ITEM', '')
-          body.COD_ITEM = codItem
-          body.VLR_LIQUIDO = parsePrice(item.final_price || item.price)
-          body.QTD_PEDIDA = item.quantity
+          if (item.sku.startsWith('COD_ITEM')) {
+            const codItem = item.sku.replace('COD_ITEM', '')
+            body.COD_ITEM = codItem
+            body.VLR_LIQUIDO = parsePrice(item.final_price || item.price)
+            body.QTD_PEDIDA = item.quantity
 
-          const itemHorus = itemsHorus?.find(itemFind => `${itemFind.COD_ITEM}` === codItem)
-          let isImport = !itemHorus
-          // console.log('>> i:', itemsHorus && JSON.stringify(itemsHorus), '=>', codItem, JSON.stringify(itemHorus))
+            const itemHorus = itemsHorus?.find(itemFind => `${itemFind.COD_ITEM}` === codItem)
+            let isImport = !itemHorus
+            // console.log('>> i:', itemsHorus && JSON.stringify(itemsHorus), '=>', codItem, JSON.stringify(itemHorus))
 
-          if (itemHorus && itemHorus.QT_PEDIDA < item.quantity) {
-            body.QTD_PEDIDA = item.quantity - itemHorus.QTD_PEDIDA
-            isImport = true
-          }
-          if (isImport) {
-            const params = new url.URLSearchParams(body)
-            const endpoint = `/InsItensPedidoVenda?${params.toString()}`
-            // console.log('>>item add: ', endpoint)
-            promisesAddItemOrderHorus.push(
-              requestHorus(horus, endpoint)
-                .then(() => {
-                  console.log('>> Add Item in order', endpoint)
-                })
-                .catch(() => {
-                  errorAddItem.push(endpoint)
-                })
-            )
+            if (itemHorus && itemHorus.QT_PEDIDA < item.quantity) {
+              body.QTD_PEDIDA = item.quantity - itemHorus.QTD_PEDIDA
+              isImport = true
+            }
+            if (isImport) {
+              const params = new url.URLSearchParams(body)
+              const endpoint = `/InsItensPedidoVenda?${params.toString()}`
+              // console.log('>>item add: ', endpoint)
+              promisesAddItemOrderHorus.push(
+                requestHorus(horus, endpoint)
+                  .then(() => {
+                    console.log('>> Add Item in order', endpoint)
+                  })
+                  .catch(() => {
+                    errorAddItem.push(endpoint)
+                  })
+              )
+            }
+          } else {
+            console.warn(`> sku: ${item.sku} product not imported from ERP`)
           }
         })
 
@@ -241,6 +245,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
         if (errorAddItem.length) {
           return null
+        }
+
+        if (!promisesAddItemOrderHorus.length && !errorAddItem.length) {
+          console.log(`${logHead} skipped, products not imported from ERP`)
+          throw new Error(skipCreate)
         }
 
         return {
