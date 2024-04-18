@@ -50,7 +50,7 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
         year
       } = customer.birth_date
 
-      body.DAT_NASCIMENTO = `${day}/${month}/${year}`
+      body.DAT_NASCIMENTO = `${day < 10 ? '0' + day : day}/${month < 10 ? '0' + month : month}/${year}`
     }
     const documentType = customer.registry_type === 'p' ? 'CPF' : 'CNPJ'
     const documentNumber = customer.doc_number

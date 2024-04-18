@@ -181,7 +181,7 @@ exports.syncQueueEcomHorus = functions.pubsub.schedule(syncCron)
       return handleSyncEcomHorus(appSdk)
     })
   })
-console.log(`-- Sync Resources to E-com'${eventsCron}'`)
+console.log(`-- Sync Resources to E-com'${syncCron}'`)
 
 const queueCron = '*/30 * * * *'
 exports.queuePubSub = functions.pubsub.schedule(queueCron)
@@ -191,4 +191,4 @@ exports.queuePubSub = functions.pubsub.schedule(queueCron)
     })
   })
 
-console.log(`-- Queue Pub/Sub'${eventsCron}'`)
+console.log(`-- Queue Pub/Sub'${queueCron}'`)
