@@ -183,7 +183,7 @@ exports.syncQueueEcomHorus = functions.pubsub.schedule(syncCron)
   })
 console.log(`-- Sync Resources to E-com'${syncCron}'`)
 
-const queueCron = '*/30 * * * *'
+const queueCron = '*/10 * * * *'
 exports.queuePubSub = functions.pubsub.schedule(queueCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {
