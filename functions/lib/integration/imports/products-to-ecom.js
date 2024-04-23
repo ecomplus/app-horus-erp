@@ -130,7 +130,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       sku: `COD_ITEM${COD_ITEM}`,
       name: NOM_ITEM,
       slug: removeAccents(NOM_ITEM.toLowerCase())
-        .replace(/[^a-z0-9-_./]/gi, '_'),
+        .replace(/[^a-z0-9-_./]/gi, '-'),
       price,
       status: STATUS_ITEM,
       quantity,
