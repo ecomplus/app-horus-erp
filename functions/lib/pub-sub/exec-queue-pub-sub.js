@@ -21,7 +21,7 @@ const replayPubSub = async (_appSdk) => {
   })
   return Promise.all(promises)
     .then(() => {
-      console.log('>> End Queue Pub/Sub ', listPubSubs?.length)
+      console.log('>> End Queue Pub/Sub ', promises?.length)
     })
 }
 module.exports = replayPubSub
