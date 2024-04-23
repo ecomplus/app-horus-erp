@@ -121,6 +121,9 @@ module.exports = async (
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
       if (objectHorus && lastUpdateDoc) {
+        if (resource === 'products') {
+          console.log('> try import COD_ITEM: ', objectHorus?.COD_ITEM)
+        }
         return imports[resource](appClient, objectHorus, opts)
           .then(async (response) => {
             const _id = response?._id || 'not_update'
