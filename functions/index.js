@@ -158,21 +158,21 @@ exports.pusubExportToHorusEvent = require('./lib/pub-sub/utils')
   .createEventsFunction(topicExportToHorus, handleExportToHorusEvent)
 
 // cron jobs
-const handleEventsHorus = require('./lib/cron-events-horus')
+// const handleEventsHorus = require('./lib/cron-events-horus')
 const handleSyncEcomHorus = require('./lib/integration/sync-ecom-horus')
 const handleQueuePubSub = require('./lib/pub-sub/exec-queue-pub-sub')
-const eventsCron = '*/1 * * * *'
+// const eventsCron = '*/1 * * * *'
 
-exports.horusEvents = functions
-  .runWith({ memory: '512MB' })
-  .pubsub.schedule(eventsCron)
-  .onRun(() => {
-    return prepareAppSdk().then(appSdk => {
-      return handleEventsHorus(appSdk)
-    })
-  })
+// exports.horusEvents = functions
+//   .runWith({ memory: '512MB' })
+//   .pubsub.schedule(eventsCron)
+//   .onRun(() => {
+//     return prepareAppSdk().then(appSdk => {
+//       return handleEventsHorus(appSdk)
+//     })
+//   })
 
-console.log(`-- Check Events ERP'${eventsCron}'`)
+// console.log(`-- Check Events ERP'${eventsCron}'`)
 
 const syncCron = '*/5 * * * *'
 exports.syncQueueEcomHorus = functions.pubsub.schedule(syncCron)
