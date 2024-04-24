@@ -31,7 +31,7 @@ exports.post = async ({ appSdk }, req, res) => {
             if (result.length) {
               result.forEach(category => {
                 if (category.slug && category.slug.includes('_')) {
-                  const newSlug = category.slug.replace('_', '-')
+                  const newSlug = category.slug.replaceAll('_', '-')
                   updateResourses.push(
                     appSdk.apiRequest(storeId, `categories/${category._id}.json`, 'PATCH', { slug: newSlug }, auth)
                   )
@@ -48,7 +48,7 @@ exports.post = async ({ appSdk }, req, res) => {
             if (result.length) {
               result.forEach(brand => {
                 if (brand.slug && brand.slug.includes('_')) {
-                  const newSlug = brand.slug.replace('_', '-')
+                  const newSlug = brand.slug.replaceAll('_', '-')
                   updateResourses.push(
                     appSdk.apiRequest(storeId, `brands/${brand._id}.json`, 'PATCH', { slug: newSlug }, auth)
                   )
