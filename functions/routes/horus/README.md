@@ -20,10 +20,7 @@ See more : https://developers.e-com.plus/docs/api/#/store/authentications/authen
 
 
 ``` JSON
-{
-  "cod_init": 1,
-  "cod_end": 1000
-}
+
 ```
 
 ### 2) Check IP the CloudFunction is using

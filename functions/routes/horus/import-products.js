@@ -1,14 +1,15 @@
 const axios = require('axios')
 const { firestore } = require('firebase-admin')
 const getAppData = require('../../lib/store-api/get-app-data')
+const { baseUri } = require('./../../__env')
 const {
-  topicResourceToEcom,
-  collectionHorusEvents
+  topicResourceToEcom
+  // collectionHorusEvents
 } = require('../../lib/utils-variables')
 const Horus = require('../../lib/horus/client')
 const requestHorus = require('../../lib/horus/request')
 // const { sendMessageTopic } = require('../../lib/pub-sub/utils')
-const { parseDate } = require('../../lib/parsers/parse-to-horus')
+// const { parseDate } = require('../../lib/parsers/parse-to-horus')
 
 const requestStoreApi = axios.create({
   baseURL: 'https://api.e-com.plus/v1',
@@ -17,24 +18,63 @@ const requestStoreApi = axios.create({
   }
 })
 
+let total = 0
+
 const saveFirestore = (idDoc, body) => firestore()
   .doc(idDoc)
   .set(body, { merge: true })
   // .then(() => { console.log('Save in firestore') })
   .catch(console.error)
 
-const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
+const getAndSendProdcutToQueue = async (horus, codItem, storeId, opts) => {
+  const endpoint = `/Busca_Acervo?COD_ITEM=${codItem}&offset=0&limit=1`
+  const item = await requestHorus(horus, endpoint, 'get')
+    .catch((err) => {
+      if (err.response) {
+        console.warn(JSON.stringify(err.response?.data))
+      } else {
+        console.error(err)
+      }
+      return null
+    })
+
+  if (item && item.length) {
+    const json = {
+      storeId,
+      resource: 'products',
+      objectHorus: item && item.length && item[0],
+      opts
+    }
+    const collectionName = 'queuePubSub'
+    return saveFirestore(
+      `${collectionName}/${Date.now()}`,
+      { eventName: topicResourceToEcom, json }
+    )
+  }
+  return null
+}
+
+const checkProducts = async (horus, storeId, opts) => {
   let hasRepeat = true
-  let offset = 0
+  let offset = opts.setOffset || 0
+  delete opts.setOffset
   const limit = 50
 
-  let total = 0
   const init = Date.now()
   const promisesSendTopics = []
+  const codCaract = 5 // TODO: opts.appData.code_characteristic
+  const codTpoCaract = 3 // TODO: opts.appData.code_type_characteristic
+
+  // TODO: appData.hashas_import_feature
+  let baseEndpoint = ''
+  // TODO: baseEndpointt = `/Busca_Acervo${query}offset=${offset}&limit=${limit}`
+  baseEndpoint = `/Busca_Caracteristicas?COD_TPO_CARACT=${codTpoCaract}` +
+  `&COD_CARACT=${codCaract}`
+  let setOffset
   while (hasRepeat) {
     // create Object Horus to request api Horus
-    const endpoint = `/Busca_Acervo${query}offset=${offset}&limit=${limit}`
-    const products = await requestHorus(horus, endpoint, 'get', true)
+    const endpoint = `${baseEndpoint}&offset=${offset}&limit=${limit}`
+    const items = await requestHorus(horus, endpoint, 'get', true)
       .catch((_err) => {
         // if (err.response) {
         //   console.warn(JSON.stringify(err.response?.data))
@@ -44,27 +84,18 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
         return null
       })
 
-    if (products && Array.isArray(products)) {
-      total += products.length
-      products.forEach((productHorus, index) => {
-        const json = {
-          storeId,
-          resource: 'products',
-          objectHorus: productHorus,
-          opts
-        }
-        const collectionName = 'queuePubSub'
+    if (items && Array.isArray(items)) {
+      total += items.length
+      items.forEach((productHorus, index) => {
         promisesSendTopics.push(
-          saveFirestore(
-            `${collectionName}/${Date.now()}`,
-            { eventName: topicResourceToEcom, json }
-          )
+          getAndSendProdcutToQueue(horus, productHorus.COD_ITEM, storeId, opts)
         )
       })
       const now = Date.now()
       const time = now - init
       if (time >= 20000) {
         hasRepeat = false
+        setOffset = offset
       }
     } else {
       hasRepeat = false
@@ -73,24 +104,22 @@ const getAndSendProdcutToQueue = async (horus, storeId, query, opts) => {
     offset += limit
   }
 
-  console.log(`>> import all #${storeId} [${query}] total imports ${total}`)
+  console.log(`>> import all #${storeId}  try imports ${total} items`)
   return Promise.all(promisesSendTopics)
+    .then(() => ({ setOffset }))
 }
 
 exports.post = async ({ appSdk }, req, res) => {
-  const {
-    headers,
-    body
-  } = req
+  const { headers: reqHeaders, query } = req
   const url = '/authentications/me.json'
+  const headers = {
+    'x-store-id': reqHeaders['x-store-id'],
+    'x-my-id': reqHeaders['x-my-id'],
+    'x-access-token': reqHeaders['x-access-token']
+  }
+  const { setOffset } = query
 
-  requestStoreApi.get(url, {
-    headers: {
-      'x-store-id': headers['x-store-id'],
-      'x-my-id': headers['x-my-id'],
-      'x-access-token': headers['x-access-token']
-    }
-  })
+  requestStoreApi.get(url, { headers })
     .then(({ data }) => data)
 
     .then(async (data) => {
@@ -105,32 +134,24 @@ exports.post = async ({ appSdk }, req, res) => {
       } = appData
 
       const horus = new Horus(username, password, baseURL)
-      const opts = { appData, isUpdateDate: false }
+      const opts = { appData, isUpdateDate: false, setOffset }
 
-      let query = '?'
-      if (body.cod_init || body.cod_end) {
-        const codInit = body.cod_init || 1
-        const codEnd = body.cod_end || (codInit + 100)
-        query += `COD_ITEM_INI=${codInit}&COD_ITEM_FIM=${codEnd}&`
-      } else if (body.date_init && body.date_end) {
-        const now = new Date()
-        const bodyDateIni = new Date(body.date_init)
-        const bodyDateEnd = new Date(body.date_end)
-        const dateIni = !Number.isNaN(bodyDateIni.getTime()) ? bodyDateIni : now
-        const dateEnd = !Number.isNaN(bodyDateEnd.getTime()) ? bodyDateEnd : now
-
-        query += `DATA_INI=${parseDate(dateIni)}&DATA_FIM=${parseDate(dateEnd)}&`
-      }
-
-      return getAndSendProdcutToQueue(horus, storeId, query, opts)
-        .then(() => storeId)
+      return checkProducts(horus, storeId, opts)
+        .then(async ({ setOffset }) => {
+          if (setOffset) {
+            console.log('>> setOffset: ', setOffset)
+            await axios.post(`${baseUri}/horus/import-products?setOffset=${setOffset}`, undefined, { headers })
+              .catch(console.error)
+          }
+          return storeId
+        })
     })
-    .then((storeId) => {
-      const docId = `${collectionHorusEvents}/${storeId}_products`
-      const lastUpdateProducts = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() // UTC-3
-      const body = { lastUpdateProducts }
-      return saveFirestore(docId, body)
-    })
+    // .then((storeId) => {
+    //   const docId = `${collectionHorusEvents}/${storeId}_products`
+    //   const lastUpdateProducts = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() // UTC-3
+    //   const body = { lastUpdateProducts }
+    //   return saveFirestore(docId, body)
+    // })
     .then(() => {
       // console.log('>> Finish send import Products')
       res.status(201)
