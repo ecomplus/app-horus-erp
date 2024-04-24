@@ -90,13 +90,17 @@ const checkAndUpdateLastUpdateDate = async (isUpdateDate, lastUpdate, field, now
 module.exports = async (
   {
     storeId,
-    resource,
+    resource: resourcePrefix,
     objectHorus,
     opts,
     eventName
   },
   context
 ) => {
+  const resource = resourcePrefix
+    .replace('-stocks', '')
+    .replace('-price', '')
+
   let isUpdateDate = true
   if (typeof opts.isUpdateDate === 'boolean') {
     isUpdateDate = opts.isUpdateDate
@@ -105,7 +109,7 @@ module.exports = async (
   const { eventId } = context
   const { DAT_ULT_ATL: lastUpdate } = objectHorus
   const logId = `${eventId}-s${storeId}`
-  const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_${resource}`)
+  const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
   console.log(`>> Exec Event #${logId} import: ${resource}`)
   const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
   let lastUpdateDoc
@@ -128,7 +132,10 @@ module.exports = async (
           .then(async (response) => {
             const _id = response?._id || 'not_update'
 
-            await checkAndUpdateLastUpdateDate(isUpdateDate, lastUpdate, field, now, docRef)
+            if (resourcePrefix.startsWith('products')) {
+              await checkAndUpdateLastUpdateDate(isUpdateDate, lastUpdate, field, now, docRef)
+            }
+
             if (opts.queueEntry) {
               return updateApp(appClient, _id, opts)
             }

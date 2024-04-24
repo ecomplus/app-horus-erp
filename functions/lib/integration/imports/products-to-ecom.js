@@ -92,21 +92,30 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     // SITUACAO_ITEM_DESC,
     // DAT_EXP_LANCTO,
     PALAVRAS_CHAVE,
-    KIT
+    KIT,
     // COD_ORIGEM_EDITORA,
     // POD,
     // DISPONIBILIDADE_MERCADO,
     // NCM
+    SALDO
   } = productHorus
   if (!COD_ITEM) {
     throw new Error(productHorus.Mensagem)
   }
   const price = parsePrice(VLR_CAPA)
-  const quantity = SALDO_DISPONIVEL || 0
-  const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)
-  console.log('>> hasQueue ', opts.queueEntry)
+  let quantity = 0
 
-  if (product && !updateProduct) {
+  if (SALDO_DISPONIVEL) {
+    quantity = SALDO_DISPONIVEL
+  } else if (SALDO) {
+    quantity = SALDO
+  }
+  const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)
+  const isUpdatePriceOrStock = !opts.queueEntry?.mustUpdateAppQueue && (updatePrice || updateStock)
+
+  console.log('>> isUpdatePriceOrStock ', isUpdatePriceOrStock)
+
+  if (product && (isUpdatePriceOrStock || !updateProduct)) {
     const endpoint = `products/${product._id}.json`
     const body = {}
     if (price !== product.price && updatePrice) {
