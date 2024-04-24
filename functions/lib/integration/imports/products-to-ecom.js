@@ -115,7 +115,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
   console.log('>> isUpdatePriceOrStock ', isUpdatePriceOrStock)
 
-  if (product && (isUpdatePriceOrStock || !updateProduct)) {
+  if ((isUpdatePriceOrStock || (product && !updateProduct))) {
+    if (!product && isUpdatePriceOrStock) {
+      // product not found to update
+      return { _id: 'skip_stock_or_price' }
+    }
     const endpoint = `products/${product._id}.json`
     const body = {}
     if (price !== product.price && updatePrice) {

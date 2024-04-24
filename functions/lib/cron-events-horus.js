@@ -53,8 +53,9 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const codTpoCaract = 3 // TODO: opts.appData.code_type_characteristic
 
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
-    `COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
-    `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}`
+    `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
+    `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
+    '&TIPO_SALDO=V'
 
   let hasRepeat = true
   let offset = 0
