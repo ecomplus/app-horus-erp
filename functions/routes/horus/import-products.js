@@ -57,7 +57,7 @@ const getAndSendProdcutToQueue = async (horus, codItem, storeId, opts) => {
 
 const checkProducts = async (horus, storeId, opts) => {
   let hasRepeat = true
-  let offset = opts.setOffset || 0
+  let offset = opts.setOffset ? parseInt(opts.setOffset, 10) : 0
   delete opts.setOffset
   const limit = 50
 
@@ -72,7 +72,9 @@ const checkProducts = async (horus, storeId, opts) => {
   baseEndpoint = `/Busca_Caracteristicas?COD_TPO_CARACT=${codTpoCaract}` +
   `&COD_CARACT=${codCaract}`
   let setOffset
+
   while (hasRepeat) {
+    console.log('>> offset ', offset)
     // create Object Horus to request api Horus
     const endpoint = `${baseEndpoint}&offset=${offset}&limit=${limit}`
     const items = await requestHorus(horus, endpoint, 'get', true)
@@ -88,6 +90,7 @@ const checkProducts = async (horus, storeId, opts) => {
     if (items && Array.isArray(items)) {
       total += items.length
       items.forEach((productHorus, index) => {
+        console.log('>> index ', index)
         promisesSendTopics.push(
           getAndSendProdcutToQueue(horus, productHorus.COD_ITEM, storeId, opts)
         )
