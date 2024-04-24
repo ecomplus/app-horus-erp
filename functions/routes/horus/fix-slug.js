@@ -57,6 +57,7 @@ exports.post = async ({ appSdk }, req, res) => {
             }
           })
       }
+      console.log('>>Promises ', updateResourses.length)
       return Promise.all(updateResourses)
         .then(() => {
           console.log('Sucess Update')
