@@ -138,11 +138,11 @@ exports.post = async ({ appSdk }, req, res) => {
 
       return checkProducts(horus, storeId, opts)
         .then(async ({ setOffset }) => {
-          if (setOffset) {
-            console.log('>> setOffset: ', setOffset)
-            await axios.post(`${baseUri}/horus/import-products?setOffset=${setOffset}`, undefined, { headers })
-              .catch(console.error)
-          }
+          // if (setOffset) {
+          //   console.log('>> setOffset: ', setOffset)
+          //   await axios.post(`${baseUri}/horus/import-products?setOffset=${setOffset}`, undefined, { headers })
+          //     .catch(console.error)
+          // }
           return storeId
         })
     })
@@ -152,8 +152,8 @@ exports.post = async ({ appSdk }, req, res) => {
     //   const body = { lastUpdateProducts }
     //   return saveFirestore(docId, body)
     // })
-    .then(() => {
-      // console.log('>> Finish send import Products')
+    .then((res) => {
+      console.log('>> Finish send import Products', res)
       res.status(201)
         .send('Importing Products')
     })
