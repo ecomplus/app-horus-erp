@@ -98,8 +98,8 @@ module.exports = async (
   context
 ) => {
   const resource = resourcePrefix
-    .replace('-stocks', '')
-    .replace('-price', '')
+    .replace('_stocks', '')
+    .replace('_price', '')
 
   let isUpdateDate = true
   if (typeof opts.isUpdateDate === 'boolean') {
@@ -160,7 +160,7 @@ module.exports = async (
           opts,
           eventName
         }
-        const collectionName = 'pubSubErro'
+        const collectionName = 'queuePubSub'
         await saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
           .catch()
 
