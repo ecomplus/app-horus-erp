@@ -1,7 +1,7 @@
 const axios = require('axios')
 const { firestore } = require('firebase-admin')
 const getAppData = require('../../lib/store-api/get-app-data')
-const { baseUri } = require('./../../__env')
+// const { baseUri } = require('./../../__env')
 const {
   topicResourceToEcom
   // collectionHorusEvents
@@ -46,8 +46,9 @@ const getAndSendProdcutToQueue = async (horus, codItem, storeId, opts) => {
       opts
     }
     const collectionName = 'queuePubSub'
+    const id = json?.objectHorus?.COD_ITEM || Date.now()
     return saveFirestore(
-      `${collectionName}/${Date.now()}`,
+      `${collectionName}/product-${id}}`,
       { eventName: topicResourceToEcom, json }
     )
   }
