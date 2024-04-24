@@ -13,8 +13,7 @@ const requestStoreApi = axios.create({
 
 const getAllItemsHorus = async (horus, storeId, opts) => {
   let hasRepeat = true
-  let offset = opts.setOffset ? parseInt(opts.setOffset, 10) : 0
-  delete opts.setOffset
+  let offset = 0
   const limit = 50
 
   const init = Date.now()
@@ -62,14 +61,13 @@ const getAllItemsHorus = async (horus, storeId, opts) => {
 }
 
 exports.post = async ({ appSdk }, req, res) => {
-  const { headers: reqHeaders, query } = req
+  const { headers: reqHeaders } = req
   const url = '/authentications/me.json'
   const headers = {
     'x-store-id': reqHeaders['x-store-id'],
     'x-my-id': reqHeaders['x-my-id'],
     'x-access-token': reqHeaders['x-access-token']
   }
-  const { setOffset } = query
 
   requestStoreApi.get(url, { headers })
     .then(({ data }) => data)
@@ -86,7 +84,7 @@ exports.post = async ({ appSdk }, req, res) => {
       } = appData
 
       const horus = new Horus(username, password, baseURL)
-      const opts = { appData, isUpdateDate: false, setOffset }
+      const opts = { appData, isUpdateDate: false }
 
       return getAllItemsHorus(horus, storeId, opts)
         .then(async (products) => {
