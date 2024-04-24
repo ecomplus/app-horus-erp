@@ -104,6 +104,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const price = parsePrice(VLR_CAPA)
   const quantity = SALDO_DISPONIVEL || 0
   const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)
+  console.log('>> hasQueue ', opts.queueEntry)
 
   if (product && !updateProduct) {
     const endpoint = `products/${product._id}.json`
