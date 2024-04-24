@@ -48,7 +48,7 @@ const getAndSendProdcutToQueue = async (horus, codItem, storeId, opts) => {
     const collectionName = 'queuePubSub'
     const id = json?.objectHorus?.COD_ITEM || Date.now()
     return saveFirestore(
-      `${collectionName}/product-${id}}`,
+      `${collectionName}/product-${id}`,
       { eventName: topicResourceToEcom, json }
     )
   }
@@ -74,7 +74,6 @@ const checkProducts = async (horus, storeId, opts) => {
   let setOffset
 
   while (hasRepeat) {
-    console.log('>> offset ', offset)
     // create Object Horus to request api Horus
     const endpoint = `${baseEndpoint}&offset=${offset}&limit=${limit}`
     const items = await requestHorus(horus, endpoint, 'get', true)
@@ -90,9 +89,8 @@ const checkProducts = async (horus, storeId, opts) => {
     if (items && Array.isArray(items)) {
       total += items.length
       items.forEach((productHorus, index) => {
-        console.log('>> index ', index)
-        promisesSendTopics.push(
-          getAndSendProdcutToQueue(horus, productHorus.COD_ITEM, storeId, opts)
+        promisesSendTopics.push(productHorus.COD_ITEM
+          // getAndSendProdcutToQueue(horus, productHorus.COD_ITEM, storeId, opts)
         )
       })
       const now = Date.now()
@@ -108,9 +106,11 @@ const checkProducts = async (horus, storeId, opts) => {
     offset += limit
   }
 
+  console.log('>> ', JSON.stringify(promisesSendTopics), ' > ', promisesSendTopics.length)
   console.log(`>> import all #${storeId}  try imports ${total} items`)
-  return Promise.all(promisesSendTopics)
-    .then(() => ({ setOffset }))
+  return { setOffset }
+  // return Promise.all(promisesSendTopics)
+  //   .then(() => ({ setOffset }))
 }
 
 exports.post = async ({ appSdk }, req, res) => {
