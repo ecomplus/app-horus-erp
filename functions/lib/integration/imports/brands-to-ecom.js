@@ -29,7 +29,7 @@ module.exports = async ({ appSdk, storeId, auth }, brandHorus, opts = {}) => {
   const body = {
     name: nomeEditora,
     slug: removeAccents((nomeEditora).toLowerCase())
-      .replace(/[^a-z0-9-_./]/gi, '_'),
+      .replace(/[^a-z0-9-_./]/gi, '-'),
     metafields: [
       {
         _id: ecomUtils.randomObjectId(),

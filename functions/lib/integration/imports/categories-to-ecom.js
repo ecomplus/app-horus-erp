@@ -25,7 +25,7 @@ module.exports = async ({ appSdk, storeId, auth }, categoriesHorus, opts = {}) =
   const body = {
     name,
     slug: removeAccents(name.toLowerCase())
-      .replace(/[^a-z0-9-_./]/gi, '_')
+      .replace(/[^a-z0-9-_./]/gi, '-')
   }
 
   let endpoint = 'categories.json?metafields.namespace=horus-erp'
