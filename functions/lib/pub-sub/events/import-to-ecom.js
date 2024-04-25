@@ -137,6 +137,7 @@ module.exports = async (
             const _id = response?._id || 'not_update'
 
             if (resourcePrefix.startsWith('products')) {
+              console.log('>> ', resourcePrefix)
               await checkAndUpdateLastUpdateDate(isUpdateDate, lastUpdate, field, now, docRef)
             }
 

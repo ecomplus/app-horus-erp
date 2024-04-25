@@ -168,7 +168,7 @@ const productsPriceEvents = async (horus, storeId, opts) => {
             topicResourceToEcom,
             {
               storeId,
-              resource,
+              resource: resourcePrefix,
               objectHorus: productHorus,
               opts
             })
