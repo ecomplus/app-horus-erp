@@ -120,7 +120,7 @@ const productsPriceEvents = async (horus, storeId, opts) => {
   const releaseDate = '2024-04-01T00:00:00.000Z'
   let dateInit = parseDate(new Date(releaseDate), true)
   const dateEnd = parseDate(new Date(), true)
-  const resourcePrefix = `${resource}_stocks`
+  const resourcePrefix = `${resource}_price`
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
 
@@ -214,9 +214,8 @@ module.exports = async (appSdk) => {
         const promises = []
         promises.push(productsStocksEvents(horus, storeId, opts))
         const now = new Date()
-        if (now.getMinutes() % 5 === 0) {
-          console.log('>> add check price ', now.toISOString())
-          // TODO: every day
+        if ((now.getMinutes()) % 2 === 0) {
+          console.log('>> Check price ', now.toISOString())
           promises.push(productsPriceEvents(horus, storeId, opts))
         }
         return Promise.all(promises)
