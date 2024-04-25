@@ -164,7 +164,7 @@ const handleQueuePubSub = require('./lib/pub-sub/exec-queue-pub-sub')
 const eventsCron = '*/1 * * * *'
 
 exports.horusEvents = functions
-  // .runWith({ memory: '512MB' })
+  .runWith({ memory: '512MB' })
   .pubsub.schedule(eventsCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {

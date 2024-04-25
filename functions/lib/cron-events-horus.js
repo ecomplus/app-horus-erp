@@ -55,7 +55,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const codCaract = 5 // TODO: opts.appData.code_characteristic
   const codTpoCaract = 3 // TODO: opts.appData.code_type_characteristic
 
-  console.log(`>> Check ${dateInit} at ${dateEnd}`)
+  console.log(`>> Check STOCKS ${dateInit} at ${dateEnd}`)
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
     `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
     `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
@@ -106,7 +106,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
     offset += limit
   }
-  console.log(`>>Cron #${storeId} [${query}] total imports ${total}`)
+  console.log(`>>Cron #${storeId} [${query}] Updates stocks ${total}`)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
@@ -114,76 +114,84 @@ const productsStocksEvents = async (horus, storeId, opts) => {
     })
 }
 
-// const productsPriceEvents = async (horus, storeId, opts) => {
-//   const resource = 'products'
-//   const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
-//   const releaseDate = '2024-04-01T00:00:00.000Z'
-//   let dateInit = parseDate(new Date(releaseDate), true)
-//   const dateEnd = parseDate(new Date(), true)
-//   const docRef = firestore()
-//     .doc(`${collectionHorusEvents}/${storeId}_${resource}_price`)
+const productsPriceEvents = async (horus, storeId, opts) => {
+  const resource = 'products'
+  const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
+  const releaseDate = '2024-04-01T00:00:00.000Z'
+  let dateInit = parseDate(new Date(releaseDate), true)
+  const dateEnd = parseDate(new Date(), true)
+  const resourcePrefix = `${resource}_stocks`
+  const docRef = firestore()
+    .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
 
-//   // console.log('>> ', resource, ' => ', field)
-//   const docSnapshot = await docRef.get()
-//   if (docSnapshot.exists) {
-//     const lastUpdateResource = docSnapshot.data()[field]
-//     dateInit = parseDate(new Date(lastUpdateResource), true)
-//   }
+  // console.log('>> ', resource, ' => ', field)
+  const docSnapshot = await docRef.get()
+  if (docSnapshot.exists) {
+    const data = docSnapshot.data()
+    const lastUpdateResource = data[field]
+    // console.log('>> ', resource, ' ', resourcePrefix, ' => ', field, ' ', lastUpdateResource)
+    // console.log('>> data ', data && JSON.stringify(data))
+    dateInit = parseDate(new Date(lastUpdateResource), true)
+  }
+  const codCaract = 5 // TODO: opts.appData.code_characteristic
+  const codTpoCaract = 3 // TODO: opts.appData.code_type_characteristic
 
-//   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}`
+  console.log(`>> Check PRICE ${dateInit} at ${dateEnd}`)
+  const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
+    `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}`
 
-//   let hasRepeat = true
-//   let offset = 0
-//   const limit = 50
+  let hasRepeat = true
+  let offset = 0
+  const limit = 50
 
-//   let total = 0
-//   // const init = Date.now()
-//   const promisesSendTopics = []
-//   while (hasRepeat) {
-//     // create Object Horus to request api Horus
-//     const endpoint = `/Busca_Acervo${query}&offset=${offset}&limit=${limit}`
-//     const products = await requestHorus(horus, endpoint, 'get', true)
-//       .catch((_err) => {
-//         // if (_err.response) {
-//         //   console.warn(JSON.stringify(_err.response))
-//         // } else {
-//         //   console.error(_err)
-//         // }
-//         return null
-//       })
+  let total = 0
+  // const init = Date.now()
+  const promisesSendTopics = []
+  while (hasRepeat) {
+    // create Object Horus to request api Horus
+    const endpoint = `/Busca_preco_item${query}&offset=${offset}&limit=${limit}`
+    const products = await requestHorus(horus, endpoint, 'get', true)
+      .catch((_err) => {
+        // if (_err.response) {
+        //   console.warn(JSON.stringify(_err.response))
+        // } else {
+        //   console.error(_err)
+        // }
+        return null
+      })
 
-//     if (products && Array.isArray(products)) {
-//       total += products.length
-//       products.forEach((productHorus, index) => {
-//         promisesSendTopics.push(
-//           sendMessageTopic(
-//             topicResourceToEcom,
-//             {
-//               storeId,
-//               resource,
-//               objectHorus: productHorus,
-//               opts
-//             })
-//         )
-//       })
-//       // const now = Date.now()
-//       // const time = now - init
-//       // if (time >= 50000) {
-//       //   hasRepeat = false
-//       // }
-//     } else {
-//       hasRepeat = false
-//     }
+    if (products && Array.isArray(products)) {
+      total += products.length
+      products.forEach((productHorus, index) => {
+        // promisesSendTopics.push(
+        //   sendMessageTopic(
+        //     topicResourceToEcom,
+        //     {
+        //       storeId,
+        //       resource,
+        //       objectHorus: productHorus,
+        //       opts
+        //     })
+        // )
+      })
+      // const now = Date.now()
+      // const time = now - init
+      // if (time >= 50000) {
+      //   hasRepeat = false
+      // }
+    } else {
+      hasRepeat = false
+    }
 
-//     offset += limit
-//   }
-//   console.log(`>>Cron #${storeId} [${query}] total imports ${total}`)
+    offset += limit
+  }
+  console.log(`>>Cron #${storeId} [${query}] Update Price ${total}`)
 
-//   return Promise.all(promisesSendTopics)
-//     .then(() => {
-//       console.log(`Finish Exec Products in #${storeId}`)
-//     })
-// }
+  return Promise.all(promisesSendTopics)
+    .then(() => {
+      console.log(`Finish Exec Products in #${storeId}`)
+    })
+}
 
 module.exports = async (appSdk) => {
   const storeIds = await listStoreIds()
@@ -209,7 +217,7 @@ module.exports = async (appSdk) => {
         if (now.getMinutes() % 5 === 0) {
           console.log('>> add check price ', now.toISOString())
           // TODO: every day
-          // promises.push(productsPriceEvents(horus, storeId, opts))
+          promises.push(productsPriceEvents(horus, storeId, opts))
         }
         return Promise.all(promises)
       })
