@@ -34,7 +34,8 @@ const listStoreIds = async () => {
 const productsStocksEvents = async (horus, storeId, opts) => {
   const resource = 'products'
   const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
-  let dateInit = parseDate(new Date(1), true)
+  const releaseDate = '2024-04-01T00:00:00.000Z'
+  let dateInit = parseDate(new Date(releaseDate), true)
   const dateEnd = parseDate(new Date(), true)
   const resourcePrefix = `${resource}_stocks`
   const docRef = firestore()
@@ -52,6 +53,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const codCaract = 5 // TODO: opts.appData.code_characteristic
   const codTpoCaract = 3 // TODO: opts.appData.code_type_characteristic
 
+  console.log(`>> Check ${dateInit} at ${dateEnd}`)
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
     `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
     `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
@@ -113,7 +115,8 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 // const productsPriceEvents = async (horus, storeId, opts) => {
 //   const resource = 'products'
 //   const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
-//   let dateInit = parseDate(new Date(1), true)
+//   const releaseDate = '2024-04-01T00:00:00.000Z'
+//   let dateInit = parseDate(new Date(releaseDate), true)
 //   const dateEnd = parseDate(new Date(), true)
 //   const docRef = firestore()
 //     .doc(`${collectionHorusEvents}/${storeId}_${resource}_price`)
