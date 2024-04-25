@@ -213,7 +213,9 @@ module.exports = async (appSdk) => {
         const promises = []
         promises.push(productsStocksEvents(horus, storeId, opts))
         const now = new Date()
-        if ((now.getMinutes()) % 2 === 0) {
+
+        if ((now.horus() - 6) % 24 === 0) {
+          // run at 3 am (UTC -3) everyday
           promises.push(productsPriceEvents(horus, storeId, opts))
         }
         return Promise.all(promises)
