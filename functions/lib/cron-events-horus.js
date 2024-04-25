@@ -63,7 +63,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   let offset = 0
   const limit = 50
 
-  let total = 0
+  // let total = 0
   // const init = Date.now()
   const promisesSendTopics = []
   while (hasRepeat) {
@@ -80,19 +80,19 @@ const productsStocksEvents = async (horus, storeId, opts) => {
       })
 
     if (products && Array.isArray(products)) {
-      total += products.length
-      products.forEach((productHorus, index) => {
-        promisesSendTopics.push(
-          sendMessageTopic(
-            topicResourceToEcom,
-            {
-              storeId,
-              resource: resourcePrefix,
-              objectHorus: productHorus,
-              opts
-            })
-        )
-      })
+      // total += products.length
+      // products.forEach((productHorus, index) => {
+      //   promisesSendTopics.push(
+      //     sendMessageTopic(
+      //       topicResourceToEcom,
+      //       {
+      //         storeId,
+      //         resource: resourcePrefix,
+      //         objectHorus: productHorus,
+      //         opts
+      //       })
+      //   )
+      // })
       // const now = Date.now()
       // const time = now - init
       // if (time >= 50000) {
