@@ -5,7 +5,8 @@ const collectionHorusEvents = 'horusEvents'
 const topicExportToHorus = 'export_to_horus'
 const topicResourceToEcom = 'resource_to_ecom'
 
-const removeAccents = str => str.replace(/[áàãâÁÀÃÂ]/gi, 'a')
+const removeAccents = str => str.trim()
+  .replace(/[áàãâÁÀÃÂ]/gi, 'a')
   .replace(/[éêÉÊ]/gi, 'e')
   .replace(/[óõôÓÕÔ]/gi, 'o')
   .replace(/[íÍ]/gi, 'i')
