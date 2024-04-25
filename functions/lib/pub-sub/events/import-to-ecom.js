@@ -128,6 +128,7 @@ module.exports = async (
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
+      console.log('>> ', resourcePrefix, ' ', resource, ' ', lastUpdateDoc)
       if (objectHorus && lastUpdateDoc) {
         if (resource === 'products') {
           console.log('> try import COD_ITEM: ', objectHorus?.COD_ITEM)
