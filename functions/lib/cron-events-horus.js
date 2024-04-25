@@ -45,8 +45,8 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   if (docSnapshot.exists) {
     const data = docSnapshot.data()
     const lastUpdateResource = data[field]
-    console.log('>> ', resource, ' ', resourcePrefix, ' => ', field, ' ', lastUpdateResource)
-    console.log('>> data ', data && JSON.stringify(data))
+    // console.log('>> ', resource, ' ', resourcePrefix, ' => ', field, ' ', lastUpdateResource)
+    // console.log('>> data ', data && JSON.stringify(data))
     dateInit = parseDate(new Date(lastUpdateResource), true)
   }
   const companyCode = opts.appData.company_code || 1
@@ -65,7 +65,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   let offset = 0
   const limit = 50
 
-  // let total = 0
+  let total = 0
   // const init = Date.now()
   const promisesSendTopics = []
   while (hasRepeat) {
@@ -82,19 +82,19 @@ const productsStocksEvents = async (horus, storeId, opts) => {
       })
 
     if (products && Array.isArray(products)) {
-      // total += products.length
-      // products.forEach((productHorus, index) => {
-      //   promisesSendTopics.push(
-      //     sendMessageTopic(
-      //       topicResourceToEcom,
-      //       {
-      //         storeId,
-      //         resource: resourcePrefix,
-      //         objectHorus: productHorus,
-      //         opts
-      //       })
-      //   )
-      // })
+      total += products.length
+      products.forEach((productHorus, index) => {
+        promisesSendTopics.push(
+          sendMessageTopic(
+            topicResourceToEcom,
+            {
+              storeId,
+              resource: resourcePrefix,
+              objectHorus: productHorus,
+              opts
+            })
+        )
+      })
       // const now = Date.now()
       // const time = now - init
       // if (time >= 50000) {
@@ -106,7 +106,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
     offset += limit
   }
-  // console.log(`>>Cron #${storeId} [${query}] total imports ${total}`)
+  console.log(`>>Cron #${storeId} [${query}] total imports ${total}`)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
