@@ -9,6 +9,7 @@ const { parseDate } = require('./parsers/parse-to-horus')
 const Horus = require('./horus/client')
 const requestHorus = require('./horus/request')
 const { sendMessageTopic } = require('./pub-sub/utils')
+const releaseDate = '2024-04-01T00:00:00.000Z'
 
 const listStoreIds = async () => {
   const storeIds = []
@@ -34,7 +35,6 @@ const listStoreIds = async () => {
 const productsStocksEvents = async (horus, storeId, opts) => {
   const resource = 'products'
   const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
-  const releaseDate = '2024-04-01T00:00:00.000Z'
   let dateInit = parseDate(new Date(releaseDate), true)
   const dateEnd = parseDate(new Date(), true)
   const resourcePrefix = `${resource}_stocks`
@@ -117,7 +117,6 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 const productsPriceEvents = async (horus, storeId, opts) => {
   const resource = 'products'
   const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
-  const releaseDate = '2024-04-01T00:00:00.000Z'
   let dateInit = parseDate(new Date(releaseDate), true)
   const dateEnd = parseDate(new Date(), true)
   const resourcePrefix = `${resource}_price`

@@ -8,6 +8,7 @@ const imports = {
   categories: require('../../integration/imports/categories-to-ecom'),
   brands: require('../../integration/imports/brands-to-ecom')
 }
+const releaseDate = '2024-04-01T00:00:00.000Z'
 
 const getAppSdk = () => {
   return new Promise(resolve => {
@@ -121,6 +122,8 @@ module.exports = async (
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
     lastUpdateDoc = docSnapshot.data()[field]
+  } else {
+    lastUpdateDoc = releaseDate
   }
 
   const now = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
@@ -138,7 +141,6 @@ module.exports = async (
             const _id = response?._id || 'not_update'
 
             if (resourcePrefix.startsWith('products')) {
-              console.log('>> ', resourcePrefix)
               await checkAndUpdateLastUpdateDate(isUpdateDate, lastUpdate, field, now, docRef)
             }
 
