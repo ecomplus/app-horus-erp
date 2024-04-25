@@ -253,7 +253,21 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     })
 
     if (PALAVRAS_CHAVE) {
-      body.keywords = PALAVRAS_CHAVE.split(',')
+      let keywords
+      if (PALAVRAS_CHAVE.includes(',')) {
+        keywords = PALAVRAS_CHAVE.split(',')
+      } else if (PALAVRAS_CHAVE.includes('-')) {
+        keywords = PALAVRAS_CHAVE.split('-')
+      }
+      keywords.forEach(keyword => {
+        keyword = keyword.trim()
+        if (keyword.length > 50) {
+          keyword = keyword.substring(0, 50)
+        }
+      })
+      if (keywords.length) {
+        body.keywords = keywords
+      }
     }
 
     if (
