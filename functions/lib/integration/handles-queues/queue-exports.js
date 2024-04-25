@@ -1,11 +1,6 @@
 const { firestore } = require('firebase-admin')
-// const getAppData = require('../../store-api/get-app-data')
 const { sendMessageTopic } = require('../../pub-sub/utils')
 const { topicExportToHorus } = require('../../utils-variables')
-// const {
-//   getProductByCodItem,
-//   getItemHorusAndSendProductToImport
-// } = require('../imports/utils')
 
 const getDoc = (doc) => new Promise((resolve) => {
   doc?.onSnapshot(data => {

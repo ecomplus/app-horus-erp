@@ -299,7 +299,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       .catch(err => {
         console.error(
           `>> error ${method === 'POST' ? 'created' : 'updated'} product: `,
-          err?.response?.data && JSON.stringify(err.response.data)
+          err?.response?.data && JSON.stringify(err.response.data),
+          'body: ', JSON.stringify(body)
         )
         // throw err
         return null
