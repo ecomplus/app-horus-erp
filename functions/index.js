@@ -159,7 +159,7 @@ exports.pusubExportToHorusEvent = require('./lib/pub-sub/utils')
 
 // cron jobs
 // const handleEventsHorus = require('./lib/cron-events-horus')
-const handleSyncEcomHorus = require('./lib/integration/sync-ecom-horus')
+const handleSyncEcomHorus = require('./lib/integration/sync-queue')
 const handleQueuePubSub = require('./lib/pub-sub/exec-queue-pub-sub')
 // const eventsCron = '*/1 * * * *'
 

@@ -13,6 +13,19 @@ const replayPubSub = async (_appSdk) => {
   listPubSubs.forEach((doc) => {
     const docRef = doc.ref
     const { eventName, json } = doc.data()
+    if (json?.opts?.appData) {
+      const {
+        exportation,
+        importation
+      } = json.opts.appData
+
+      if (importation.products) {
+        delete importation.products
+      }
+      if (exportation.orders) {
+        delete exportation.orders
+      }
+    }
     const run = async () => {
       await docRef.delete()
       return sendMessageTopic(eventName, json)

@@ -1,6 +1,7 @@
 const { firestore } = require('firebase-admin')
 // const { setup } = require('@ecomplus/application-sdk')
 const handle = {
+  // Import To Ecom
   brand: require('./handles-queues/queue-brands'),
   category: require('./handles-queues/queue-categories'),
   kit: require('./handles-queues/queue-kit'),
