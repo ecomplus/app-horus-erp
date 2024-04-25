@@ -41,10 +41,10 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
 
-  // console.log('>> ', resource, ' => ', field)
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
     const lastUpdateResource = docSnapshot.data()[field]
+    console.log('>> ', resource, ' => ', field, ' ', lastUpdateResource)
     dateInit = parseDate(new Date(lastUpdateResource), true)
   }
   const companyCode = opts.appData.company_code || 1
