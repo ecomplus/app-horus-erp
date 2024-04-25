@@ -30,7 +30,7 @@ const sendToQueueForSync = async (storeId, resource, objectHorus, productId) => 
   if (resourceId) {
     const createdAt = new Date().toISOString()
     const docFirestoreId = docFirestore + `/${resourceId}`
-    const bodyResource = { ...objectHorus, createdAt }
+    const bodyResource = { ...objectHorus, createdAt, resourceId }
     const promises = []
     if (!objectHorus.productId) {
       const bodyProduct = { productId, createdAt }

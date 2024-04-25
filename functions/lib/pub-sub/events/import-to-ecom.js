@@ -131,10 +131,10 @@ module.exports = async (
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
-      console.log('>> ', resourcePrefix, ' ', resource, ' ', lastUpdateDoc)
+      // console.log('>> ', resourcePrefix, ' ', resource, ' ', lastUpdateDoc)
       if (objectHorus && lastUpdateDoc) {
         if (resource === 'products') {
-          console.log('> try import COD_ITEM: ', objectHorus?.COD_ITEM)
+          console.log('> try COD_ITEM: ', objectHorus?.COD_ITEM, ' ', resourcePrefix)
         }
         return imports[resource](appClient, objectHorus, opts)
           .then(async (response) => {
@@ -153,10 +153,10 @@ module.exports = async (
       return updateApp(appClient, 'remove_queue_app', opts)
     })
     .then(async ({ _id }) => {
-      console.log(`>> Sucess #${logId} import [${resource}: ${_id}]`)
+      console.log(`>> Sucess #${logId} [${resourcePrefix}: ${_id}]`)
     })
     .catch(async (err) => {
-      console.error(`>> Error Event #${logId} import: ${resource}`)
+      console.error(`>> Error Event #${logId} ${resourcePrefix}`)
 
       if (err.appWithoutAuth) {
         console.error(err)
@@ -169,7 +169,11 @@ module.exports = async (
           eventName
         }
         const collectionName = 'queuePubSub'
-        await saveFirestore(`${collectionName}/${Date.now()}`, { eventName, json })
+        const id = objectHorus.COD_ITEM || objectHorus.resourceId
+        await saveFirestore(
+          `${collectionName}/${id ? `_${id}` : Date.now()}`,
+          { eventName, json }
+        )
           .catch()
 
         throw err
