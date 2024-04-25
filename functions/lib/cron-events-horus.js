@@ -104,7 +104,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
     offset += limit
   }
-  console.log(`>>Cron #${storeId} [${query}] total imports ${total}`)
+  // console.log(`>>Cron #${storeId} [${query}] total imports ${total}`)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
