@@ -205,8 +205,12 @@ module.exports = async (appSdk) => {
         const opts = { appData }
         const promises = []
         promises.push(productsStocksEvents(horus, storeId, opts))
-        // TODO: every day
-        // promises.push(productsPriceEvents(horus, storeId, opts))
+        const now = new Date()
+        if (now.getMinutes() % 5 === 0) {
+          console.log('>> add check price ', now.toISOString())
+          // TODO: every day
+          // promises.push(productsPriceEvents(horus, storeId, opts))
+        }
         return Promise.all(promises)
       })
       .then(() => {
