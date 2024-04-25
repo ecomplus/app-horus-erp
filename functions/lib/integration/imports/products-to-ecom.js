@@ -150,7 +150,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       name: NOM_ITEM,
       slug: removeAccents(NOM_ITEM.toLowerCase())
         .replace(/[^a-z0-9-_./]/gi, '-'),
-      price,
       status: STATUS_ITEM,
       quantity,
       dimensions: {
@@ -172,6 +171,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         value: PESO_ITEM || 0,
         unit: 'mg'
       }
+    }
+
+    if (price) {
+      body.price = price
     }
 
     if (SUBTITULO) {
