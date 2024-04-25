@@ -1,4 +1,9 @@
-const parsePrice = (str) => parseFloat(str.replace(',', '.'))
+const parsePrice = (str) => {
+  if (str) {
+    return parseFloat(str.replace(',', '.'))
+  }
+  return str
+}
 
 module.exports = {
   parsePrice
