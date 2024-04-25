@@ -8,7 +8,7 @@ const parseDate = (date = new Date(), isComplete) => {
   if (isComplete) {
     const hours = date.getHours()
     const minutes = date.getMinutes()
-    const seconds = date.getSeconds()
+    const seconds = '00' // date.getSeconds()
 
     format += ` ${hours < 10 ? `0${hours}` : hours}`
     format += `:${minutes < 10 ? `0${minutes}` : minutes}`
