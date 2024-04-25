@@ -29,41 +29,43 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
     .listDocuments()
 
   console.log('>> Sync Kit', storeId, listProducts.length)
-  const promisesProducts = []
+  const addProductToKit = []
   let index = 0
   while (index <= listProducts.length - 1) {
     const docFirestore = listProducts[index]
-    // const docId = docFirestore.id
     const doc = await getDoc(docFirestore)
     const { items, productId } = doc.data()
-    // console.log('>> ', JSON.stringify(items), docId, productId)
     const promises = []
-    const promisesSendProduct = []
+    const createProducts = []
     try {
       const appData = await getAppData({ appSdk, storeId, auth })
       items.forEach((item) => {
         promises.push(
+          // checks whether all products in the kit have already been registered
           getProductByCodItem({ appSdk, storeId, auth }, item.codItem)
             .then((data) => {
               return { _id: data._id }
             })
             .catch(() => {
-              promisesSendProduct.push(
+              createProducts.push(
+                // If product not registered, send pub/sub to register
                 getItemHorusAndSendProductToImport(storeId, item.codItem, appData)
               )
             })
         )
       })
-      const products = await Promise.all(promises)
-      if (promisesSendProduct.length) {
-        await Promise.all(promisesSendProduct)
+      // parallel checks
+      const kitProducts = await Promise.all(promises)
+
+      // if there is a single product to be created, send the pub/sub
+      if (createProducts.length) {
+        await Promise.all(createProducts)
       } else {
-        // update products
-        products.forEach(product => {
+        kitProducts.forEach(product => {
           if (product._id) {
             const endpoint = `/products/${productId}/kit_composition.json`
             const body = { _id: product._id, quantity: 1 }
-            promisesProducts.push(
+            addProductToKit.push(
               updateProduct({ appSdk, storeId, auth }, endpoint, 'POST', body)
                 .catch(err => {
                   throw err
@@ -72,10 +74,10 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
           }
         })
       }
-      if (promisesProducts.length) {
-        await Promise.all(promisesProducts)
+      if (addProductToKit.length) {
+        await Promise.all(addProductToKit)
           .then(async () => {
-            // console.log('>> Update')
+            // upgrade kit for available
             const endpoint = `/products/${productId}.json`
             await updateProduct({ appSdk, storeId, auth }, endpoint, 'PATCH', { available: true })
               .then(() => {

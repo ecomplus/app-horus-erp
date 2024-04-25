@@ -122,8 +122,13 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
     const endpoint = `products/${product._id}.json`
     const body = {}
-    if (price !== product.price && updatePrice) {
+    if (price && price !== product.price && updatePrice) {
       body.price = price
+      // creates a product with no price, but as unavailable if the value is available,
+      // the product becomes available
+      if (!product.price && price) {
+        body.available = true
+      }
     }
 
     if (quantity !== product.quantity && updateStock) {
@@ -273,7 +278,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       })
     }
 
-    if (sendSyncKit.length) {
+    if (sendSyncKit.length || !price) {
       // Incomplete Kit
       body.available = false
     }
