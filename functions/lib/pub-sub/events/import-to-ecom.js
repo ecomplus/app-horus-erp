@@ -117,13 +117,12 @@ module.exports = async (
   const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
   console.log(`>> Exec Event #${logId} import: ${resource}`)
   const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
-  let lastUpdateDoc
+  let lastUpdateDoc = releaseDate
   const appSdk = await getAppSdk()
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
-    lastUpdateDoc = docSnapshot.data()[field]
-  } else {
-    lastUpdateDoc = releaseDate
+    const data = docSnapshot.data()[field]
+    lastUpdateDoc = typeof data === 'string' ? data : releaseDate
   }
 
   const now = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
