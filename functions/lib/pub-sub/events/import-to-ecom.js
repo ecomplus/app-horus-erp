@@ -125,7 +125,8 @@ module.exports = async (
     lastUpdateDoc = typeof data === 'string' ? data : releaseDate
   }
 
-  const now = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
+  // const now = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
+  const now = new Date()
 
   return appSdk.getAuth(storeId)
     .then((auth) => {
