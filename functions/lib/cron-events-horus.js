@@ -106,11 +106,11 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
     offset += limit
   }
-  console.log(`>>Cron #${storeId} [${query}] Updates stocks ${total}`)
+  console.log(`>>Cron STOCKS #${storeId} Updates: ${total}`)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
-      console.log(`Finish Exec Products in #${storeId}`)
+      console.log(`Finish Exec STOCKS in #${storeId}`)
     })
 }
 
@@ -163,16 +163,16 @@ const productsPriceEvents = async (horus, storeId, opts) => {
     if (products && Array.isArray(products)) {
       total += products.length
       products.forEach((productHorus, index) => {
-        // promisesSendTopics.push(
-        //   sendMessageTopic(
-        //     topicResourceToEcom,
-        //     {
-        //       storeId,
-        //       resource,
-        //       objectHorus: productHorus,
-        //       opts
-        //     })
-        // )
+        promisesSendTopics.push(
+          sendMessageTopic(
+            topicResourceToEcom,
+            {
+              storeId,
+              resource,
+              objectHorus: productHorus,
+              opts
+            })
+        )
       })
       // const now = Date.now()
       // const time = now - init
@@ -185,11 +185,11 @@ const productsPriceEvents = async (horus, storeId, opts) => {
 
     offset += limit
   }
-  console.log(`>>Cron #${storeId} [${query}] Update Price ${total}`)
+  console.log(`>>Cron PRICE #${storeId} Updates: ${total}`)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
-      console.log(`Finish Exec Products in #${storeId}`)
+      console.log(`Finish Exec PRICE in #${storeId}`)
     })
 }
 
@@ -215,7 +215,6 @@ module.exports = async (appSdk) => {
         promises.push(productsStocksEvents(horus, storeId, opts))
         const now = new Date()
         if ((now.getMinutes()) % 2 === 0) {
-          console.log('>> Check price ', now.toISOString())
           promises.push(productsPriceEvents(horus, storeId, opts))
         }
         return Promise.all(promises)
