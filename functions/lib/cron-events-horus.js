@@ -43,8 +43,10 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
-    const lastUpdateResource = docSnapshot.data()[field]
-    console.log('>> ', resource, ' => ', field, ' ', lastUpdateResource)
+    const data = docSnapshot.data()
+    const lastUpdateResource = data[field]
+    console.log('>> ', resource, ' ', resourcePrefix, ' => ', field, ' ', lastUpdateResource)
+    console.log('>> data ', data && JSON.stringify(data))
     dateInit = parseDate(new Date(lastUpdateResource), true)
   }
   const companyCode = opts.appData.company_code || 1
