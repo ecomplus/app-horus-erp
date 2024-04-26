@@ -202,6 +202,28 @@ const app = {
       },
       hide: true
     },
+    code_type_characteristic: {
+      schema: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 999999,
+        default: 3,
+        title: 'Código da Tipo de Característica',
+        description: 'Código da Tipo de Característica para atualizações dos produtos de acordo com o HORUS. Ex.:("DESC_TPO_CARACT" : "EXPORTA WEB ML" COD_TPO_CARAC: 3)'
+      },
+      hide: true
+    },
+    code_characteristic : {
+      schema: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 999999,
+        default: 5,
+        title: 'Código da Característica',
+        description: 'Código da Característica para atualizações dos produtos de acordo com o HORUS. Ex.:(DESC_CARACTERISTICA": "SIM" COD_CARACTERITICA: 5)'
+      },
+      hide: true
+    },
     products: {
       schema: {
         title: 'Produtos',

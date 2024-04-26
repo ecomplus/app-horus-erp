@@ -18,8 +18,8 @@ const getAllItemsHorus = async (horus, storeId, opts) => {
 
   const init = Date.now()
   const listItemsToImport = []
-  const codCaract = 5 // TODO: opts.appData.code_characteristic
-  const codTpoCaract = 3 // TODO: opts.appData.code_type_characteristic
+  const codCaract = opts?.appData?.code_characteristic || 5
+  const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
   // TODO: appData.hashas_import_feature
   let baseEndpoint = ''

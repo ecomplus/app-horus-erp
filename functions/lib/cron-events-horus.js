@@ -52,8 +52,8 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const companyCode = opts.appData.company_code || 1
   const subsidiaryCode = opts.appData.subsidiary_code || 1
 
-  const codCaract = 5 // TODO: opts.appData.code_characteristic
-  const codTpoCaract = 3 // TODO: opts.appData.code_type_characteristic
+  const codCaract = opts?.appData?.code_characteristic || 5
+  const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
   console.log(`>> Check STOCKS ${dateInit} at ${dateEnd}`)
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
@@ -132,8 +132,8 @@ const productsPriceEvents = async (horus, storeId, opts) => {
     // console.log('>> data ', data && JSON.stringify(data))
     dateInit = parseDate(new Date(lastUpdateResource), true)
   }
-  const codCaract = 5 // TODO: opts.appData.code_characteristic
-  const codTpoCaract = 3 // TODO: opts.appData.code_type_characteristic
+  const codCaract = opts?.appData?.code_characteristic || 5
+  const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
   console.log(`>> Check PRICE ${dateInit} at ${dateEnd}`)
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
