@@ -1,9 +1,10 @@
 // read configured E-Com Plus app data
 const getAppData = require('./../../lib/store-api/get-app-data')
 const updateAppData = require('./../../lib/store-api/update-app-data')
-// const Horus = require('../../lib/horus/client')
-// const requestHorus = require('../../lib/horus/request')
-const { getItemHorusAndSendProductToImport } = require('../../lib/integration/imports/utils')
+const Horus = require('../../lib/horus/client')
+const requestHorus = require('../../lib/horus/request')
+const importProductsToEcom = require('../../lib/integration/imports/products-to-ecom')
+// const { getItemHorusAndSendProductToImport } = require('../../lib/integration/imports/utils')
 const { saveAndSendExportOrderToHorus } = require('../../lib/integration/exports/utils')
 const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
@@ -70,9 +71,56 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
     })
 }
 
-const sendHorusProductForImportByCodItem = async ({ _appSdk, storeId, _auth }, appData, queueEntry) => {
+const getItemByIdHorusAndCreateProduct = async ({ appSdk, storeId, auth }, appData, queueEntry) => {
   // console.log('>> Import Products')
-  return getItemHorusAndSendProductToImport(storeId, queueEntry.nextId, appData, { queueEntry })
+  // return getItemHorusAndSendProductToImport(storeId, queueEntry.nextId, appData, { queueEntry })
+  // const getItemHorusAndSendProductToImport = async (storeId, codItem, appData, options) => {
+  const codItem = queueEntry.nextId
+  const {
+    username,
+    password,
+    baseURL
+  } = appData
+  const appClient = { appSdk, storeId, auth }
+  const opts = {
+    appData,
+    isUpdateDate: false,
+    queueEntry
+  }
+  const endpoint = `/Busca_Acervo?COD_ITEM=${codItem}&offset=0&limit=1`
+  const horus = new Horus(username, password, baseURL)
+  const item = await requestHorus(horus, endpoint, 'get')
+    .catch((err) => {
+      if (err.response) {
+        console.warn(JSON.stringify(err.response?.data))
+      } else {
+        console.error(err)
+      }
+      return null
+    })
+  // console.log('>> item', JSON.stringify(item))
+  if (item && item.length && item[0]) {
+    const objectHorus = item && item.length && item[0]
+    return importProductsToEcom(appClient, objectHorus, opts)
+      .then(response => {
+        const _id = response?._id || 'not_update'
+        return updateApp(appClient, _id, opts)
+      })
+    // const options = {
+    //   storeId,
+    //   resource: 'products',
+    //   objectHorus: item && item.length && item[0],
+    //   opts: {
+    //     appData,
+    //     isUpdateDate: false,
+    //     queueEntry
+    //   },
+    //   eventName: `${topicResourceToEcom}_events`
+    // }
+
+    // return importToEcom(options, { eventId: Date.now() })
+  }
+  return updateApp(appClient, 'item_not_found_horus', opts)
 }
 
 const exportOrder = async ({ appSdk, storeId, auth }, appData, queueEntry) => {
@@ -92,7 +140,7 @@ const integrationHandlers = {
     orders: exportOrder
   },
   importation: {
-    products: sendHorusProductForImportByCodItem
+    products: getItemByIdHorusAndCreateProduct
   }
 }
 
