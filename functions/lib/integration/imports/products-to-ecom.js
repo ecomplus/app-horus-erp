@@ -282,6 +282,19 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.body_html += QTD_PAGINAS ? ` Quantidade de páginas: ${QTD_PAGINAS} <br/>` : ''
     }
 
+    const fieldsGtin = ['COD_BARRA_ITEM', 'COD_BARRA_ITEM_ALT', 'COD_ISBN_ITEM']
+
+    const gtin = []
+    fieldsGtin.forEach(field => {
+      if (productHorus[field]) {
+        gtin.push(productHorus[field])
+      }
+    })
+
+    if (gtin.length) {
+      body.gtin = gtin
+    }
+
     const sendSyncKit = []
     if (KIT === 'S') {
       const productsKit = await getHorusKitComposition({ appSdk, storeId, auth }, COD_ITEM, opts.appData, sendSyncKit)
