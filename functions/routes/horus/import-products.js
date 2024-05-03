@@ -1,5 +1,5 @@
 const axios = require('axios')
-// const updateAppData = require('../../lib/store-api/update-app-data')
+const updateAppData = require('../../lib/store-api/update-app-data')
 const getAppData = require('../../lib/store-api/get-app-data')
 const Horus = require('../../lib/horus/client')
 const requestHorus = require('../../lib/horus/request')
@@ -90,19 +90,23 @@ exports.post = async ({ appSdk }, req, res) => {
         .then(async (products) => {
           if (products.length) {
             console.log(`> #${storeId} all ${products.length} COD_ITEM: ${JSON.stringify(products)}`)
-            return null
+            // return products
             // todo: this is not a good solution because it is duplicated
-            // return updateAppData({ appSdk, storeId }, {
-            //   importation: { products }
-            // })
+            return updateAppData({ appSdk, storeId }, {
+              importation: { products }
+            })
+              .then(() => products)
           } else {
             return null
           }
         })
     })
-    .then(() => {
+    .then((products) => {
       res.status(201)
-        .send('Importing Products')
+        .send({
+          message: 'Importing Products',
+          products
+        })
     })
     .catch(err => {
       let message = err.name
