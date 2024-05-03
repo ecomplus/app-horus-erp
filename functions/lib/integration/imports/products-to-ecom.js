@@ -286,7 +286,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
     const gtin = []
     fieldsGtin.forEach(field => {
-      if (productHorus[field]) {
+      if (productHorus[field] && !gtin.includes(productHorus[field])) {
         gtin.push(productHorus[field])
       }
     })
