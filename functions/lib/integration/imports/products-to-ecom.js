@@ -102,6 +102,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   if (!COD_ITEM) {
     throw new Error(productHorus.Mensagem)
   }
+  console.log('> COD_ITEM => ', COD_ITEM)
   const price = parsePrice(VLR_CAPA)
   let quantity = 0
 
@@ -259,7 +260,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       } else if (PALAVRAS_CHAVE.includes('-')) {
         keywords = PALAVRAS_CHAVE.split('-')
       }
-      keywords.forEach(keyword => {
+      console.log('>keywords', PALAVRAS_CHAVE)
+      keywords?.forEach(keyword => {
         keyword = keyword.trim()
         if (keyword.length > 50) {
           keyword = keyword.substring(0, 50)
