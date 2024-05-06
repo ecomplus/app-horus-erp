@@ -106,6 +106,7 @@ const getItemByIdHorusAndCreateProduct = async ({ appSdk, storeId, auth }, appDa
         const _id = response?._id || 'not_update'
         return updateApp(appClient, _id, opts)
       })
+      .catch(console.error)
     // const options = {
     //   storeId,
     //   resource: 'products',
