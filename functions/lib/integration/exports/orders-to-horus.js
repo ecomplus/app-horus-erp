@@ -94,6 +94,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         getClientByCustomer(storeId, horus, customer)
       ])
 
+      console.log('>> order ', JSON.stringify(orderHorus))
+
       if (!customerHorus) {
         const opts = {
           isCreate: true,
