@@ -259,8 +259,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         keywords = PALAVRAS_CHAVE.split(',')
       } else if (PALAVRAS_CHAVE.includes('-')) {
         keywords = PALAVRAS_CHAVE.split('-')
+      } else {
+        keywords = [PALAVRAS_CHAVE]
       }
-      console.log('>keywords', PALAVRAS_CHAVE)
+
       keywords?.forEach(keyword => {
         keyword = keyword.trim()
         if (keyword.length > 50) {
