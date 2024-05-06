@@ -72,7 +72,7 @@ const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
 }
 
 const getItemByIdHorusAndCreateProduct = async ({ appSdk, storeId, auth }, appData, queueEntry) => {
-  // console.log('>> Import Products')
+  console.log('>> Import Products: ', JSON.stringify(queueEntry))
   // return getItemHorusAndSendProductToImport(storeId, queueEntry.nextId, appData, { queueEntry })
   // const getItemHorusAndSendProductToImport = async (storeId, codItem, appData, options) => {
   const codItem = queueEntry.nextId
