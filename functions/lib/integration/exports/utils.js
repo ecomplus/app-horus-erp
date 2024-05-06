@@ -52,22 +52,19 @@ const saveAndSendExportOrderToHorus = async (storeId, orderId, appData, options)
     resourceId: orderId,
     created_at: new Date().toISOString()
   }
-  console.log('>> t ', JSON.stringify(body))
 
   return firestore()
     .doc(`sync/${storeId}/orders/${orderId}`)
     .set(body, { merge: true })
     .then(() => {
-      // /* TODO:
       const opts = {
         appData,
         isUpdateDate: false,
         ...options
       }
       return sendMessageTopic(topicExportToHorus, { ...body, opts })
-      // */
     })
-    .catch(console.error)
+    // .catch(console.error)
 }
 
 module.exports = {
