@@ -29,11 +29,14 @@ const getClientByCustomer = (storeId, horus, customer) => {
 }
 
 const getClientAddressByZipCode = (horus, customerCodeHorus, zipCode) => {
-  const endpoint = `/Busca_EndCliente?COD_CLI=${customerCodeHorus}&CEP=${zipCode || 0}&OFFSET=0&LIMIT=1`
+  const endpoint = `/Busca_EndCliente?COD_CLI=${customerCodeHorus}&CEP=${zipCode || 0}&OFFSET=0&LIMIT=10`
 
   return requestHorus(horus, endpoint)
     .then((data) => {
-      return data && data.length ? data[0] : null
+      if (data && data.length) {
+        return data.find(addressFind => addressFind.COD_TPO_END === 1)
+      }
+      return null
     })
     .catch((err) => {
       if (err.response) {

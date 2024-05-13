@@ -17,7 +17,7 @@ module.exports = async (horus, customerCodeHorus, customerAddress, isBillingAddr
 
   const body = {
     COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório
-    COD_TPO_END: isBillingAddress ? 1 : 2, // Código do tipo de endereço - Parâmetro obrigatório.
+    COD_TPO_END: 1, // Código do tipo de endereço - Parâmetro obrigatório.
     NOM_PAIS: customerAddress.country ? customerAddress.country.toUpperCase() : 'BRASIL', // Nome do país - Parâmetro obrigatório
     SIGLA_UF: customerAddress.province_code, // SIGLA_UF - Parâmetro Obrigatório, informar a sigla do estado (unidade da federação, ex: SP)
     NOME_UF: customerAddress.province, // NOME_UF - Parâmetro Obrigatório, informar O NOME do estado (unidade da federação, ex: São Paulo)
@@ -53,7 +53,12 @@ module.exports = async (horus, customerCodeHorus, customerAddress, isBillingAddr
       return requestHorus(horus, endpoint)
     })
     .then((data) => {
-      return data && data.length ? data[0] : null
+      let address
+      if (data && data.length) {
+        address = data.find(addressFind => addressFind.COD_TPO_END === 1)
+        return address || data[0]
+      }
+      return null
     })
     .catch((err) => {
       if (err.response) {
