@@ -15,10 +15,6 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
 
   console.log('>> Sync export ', storeId, listObjects.length)
   const promisesResources = []
-  // const appData = await getAppData({ appSdk, storeId, auth })
-  // const opts = {
-  //   appData
-  // }
 
   let index = 0
   while (index <= listObjects.length - 1) {
@@ -30,14 +26,10 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
       storeId,
       resource,
       resourceId
-      // opts
     }
-    // console.log('>> ', JSON.stringify(body))
-    // /* // TODO:
     promisesResources.push(
       sendMessageTopic(topicExportToHorus, body)
     )
-    // */
 
     index += 1
   }

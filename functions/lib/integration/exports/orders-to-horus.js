@@ -288,7 +288,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const endpoint = `/AltStatus_Pedido?${params.toString()}`
       console.log('>> Update Status Order', endpoint)
 
-      // /* // TODO:
       return requestHorus(horus, endpoint, 'POST')
         .then(response => {
           if (response && response.length) {
@@ -296,7 +295,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           }
           return null
         })
-        // */
     })
     .catch((err) => {
       if (err.message === skipCreate) {

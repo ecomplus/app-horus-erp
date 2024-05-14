@@ -73,6 +73,24 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
       .then(async (data) => {
         if (data && data.length) {
           const customerCodeHorus = data[0].Cliente
+          // /InsAltTipoCliente?COD_CLI=200596143&COD_TIPO_CLIENTE=4&STA_DEFAULT=S'
+          const params = new url.URLSearchParams({
+            COD_CLI: customerCodeHorus,
+            COD_TIPO_CLIENTE: appData.customers?.type_customer_code || 31, // TODO: Default is 1
+            STA_DEFAULT: 'S'
+          })
+
+          const endpoint = `/InsAltTipoCliente?${params.toString()}`
+          console.log('>> Type Customer ', endpoint)
+          await requestHorus(horus, endpoint, 'POST')
+            .catch((err) => {
+              if (err.response) {
+                console.warn(JSON.stringify(err.response?.data))
+              } else {
+                console.error(err)
+              }
+            })
+
           if (address) {
             return createAddress(horus, customerCodeHorus, address, true)
               .then(() => customerId)

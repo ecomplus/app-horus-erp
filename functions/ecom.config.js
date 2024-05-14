@@ -295,6 +295,14 @@ const app = {
             title: 'Nome do responsável',
             description: 'Nome do responsável pelo cadastros de clientes no ERP. (Padrão: ecomplus)',
           },
+          type_customer_code: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 999999,
+            default: 1,
+            title: 'Código do tipo de cliente',
+            description: 'Código do tipo de cliente, código para identificar cadastro da plataforma no ERP. (Padrão: 1)',
+          },
         }
       },
       hide: true

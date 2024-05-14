@@ -21,9 +21,7 @@ const getAllItemsHorus = async (horus, storeId, opts) => {
   const codCaract = opts?.appData?.code_characteristic || 5
   const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
-  // TODO: appData.hashas_import_feature
   let baseEndpoint = ''
-  // TODO: baseEndpointt = `/Busca_Acervo${query}offset=${offset}&limit=${limit}`
   baseEndpoint = `/Busca_Caracteristicas?COD_TPO_CARACT=${codTpoCaract}` +
   `&COD_CARACT=${codCaract}`
 
@@ -90,8 +88,6 @@ exports.post = async ({ appSdk }, req, res) => {
         .then(async (products) => {
           if (products.length) {
             console.log(`> #${storeId} all ${products.length} COD_ITEM: ${JSON.stringify(products)}`)
-            // return products
-            // todo: this is not a good solution because it is duplicated
             return updateAppData({ appSdk, storeId }, {
               importation: { products }
             })
