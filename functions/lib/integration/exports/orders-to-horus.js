@@ -37,7 +37,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
     .then(async (order) => {
       if (appData?.orders?.approved_order_only) {
         if (order.status !== 'cancelled') {
-          if (order.financial_status !== 'paid') {
+          if (order.financial_status.current !== 'paid') {
             console.log(`${logHead} skipped, setting approved_order_only activate and financial_status unpaid`)
             throw new Error(skipCreate)
           }
