@@ -37,7 +37,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
     .then(async (order) => {
       if (appData?.orders?.approved_order_only) {
         if (order.status !== 'cancelled') {
-          if (order.financial_status.current !== 'paid') {
+          if (order.financial_status?.current !== 'paid') {
             console.log(`${logHead} skipped, setting approved_order_only activate and financial_status unpaid`)
             throw new Error(skipCreate)
           }
@@ -128,6 +128,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
 
       if (!orderHorus) {
+        console.log('> amount: ', JSON.stringify(amount))
         const body = {
           COD_PEDIDO_ORIGEM: orderId,
           COD_EMPRESA: companyCode,
@@ -138,7 +139,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
           COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
-          FRETE_EMIT_DEST: amount.freight ? 2 : 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
+          FRETE_EMIT_DEST: 2, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
           COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction), // Informar o código da forma de pagamento - Parâmetro Obrigatório
           QTD_PARCELAS: 0, // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
           VLR_FRETE: parsePrice(amount.freight || 0), // Informar valor do Frete quando existir - Parâmetro opcional!
@@ -149,6 +150,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           VALOR_CUPOM_DESCONTO: parsePrice(amount.discount || 0), // Informar nesta coluna o valor do cupom de desconto do pedido, esse valor será usado para atribuir um desconto adicional e rateado em nota fiscal. Parâmetro opcional!
           NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
         }
+
+        console.log('>> ', parsePrice(amount.discount || 0))
+        console.log('>> body ', JSON.stringify(body))
 
         if (order.status === 'cancelled') {
           console.log(`${logHead} skipped, order cancelled`)
