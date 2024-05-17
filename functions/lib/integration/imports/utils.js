@@ -175,9 +175,57 @@ const getItemHorusAndSendProductToImport = async (storeId, codItem, appData, opt
     })
 }
 
+const getAllItemsHorusToImport = async (horus, storeId, opts) => {
+  let hasRepeat = true
+  let offset = 0
+  const limit = 50
+
+  const init = Date.now()
+  const listItemsToImport = []
+  const codCaract = opts?.appData?.code_characteristic || 5
+  const codTpoCaract = opts?.appData?.code_type_characteristic || 3
+
+  let baseEndpoint = ''
+  baseEndpoint = `/Busca_Caracteristicas?COD_TPO_CARACT=${codTpoCaract}` +
+  `&COD_CARACT=${codCaract}`
+
+  while (hasRepeat) {
+    // create Object Horus to request api Horus
+    const endpoint = `${baseEndpoint}&offset=${offset}&limit=${limit}`
+    const items = await requestHorus(horus, endpoint, 'get', true)
+      .catch((_err) => {
+        // if (err.response) {
+        //   console.warn(JSON.stringify(err.response?.data))
+        // } else {
+        //   console.error(err)
+        // }
+        return null
+      })
+
+    if (items && Array.isArray(items)) {
+      // total += items.length
+      items.forEach((productHorus, index) => {
+        listItemsToImport.push(productHorus.COD_ITEM)
+      })
+      const now = Date.now()
+      const time = now - init
+      if (time >= 20000) {
+        hasRepeat = false
+      }
+    } else {
+      hasRepeat = false
+    }
+
+    offset += limit
+  }
+
+  return listItemsToImport
+}
+
 module.exports = {
   getHorusAutores,
   getProductByCodItem,
   getHorusKitComposition,
-  getItemHorusAndSendProductToImport
+  getItemHorusAndSendProductToImport,
+  getAllItemsHorusToImport
 }

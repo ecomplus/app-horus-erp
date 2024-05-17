@@ -1,6 +1,7 @@
 const { firestore } = require('firebase-admin')
 // const { setup } = require('@ecomplus/application-sdk')
 const getAppData = require('./store-api/get-app-data')
+const updateAppData = require('./store-api/update-app-data')
 const {
   collectionHorusEvents,
   topicResourceToEcom
@@ -9,6 +10,8 @@ const { parseDate } = require('./parsers/parse-to-horus')
 const Horus = require('./horus/client')
 const requestHorus = require('./horus/request')
 const { sendMessageTopic } = require('./pub-sub/utils')
+const { getAllItemsHorusToImport } = require('../lib/integration/imports/utils')
+const ecomClient = require('@ecomplus/client')
 const releaseDate = '2024-04-01T00:00:00.000Z'
 
 const listStoreIds = async () => {
@@ -30,6 +33,38 @@ const listStoreIds = async () => {
   })
 
   return storeIds
+}
+
+const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
+  console.log(`Exec Check New Product in #${storeId}`)
+  const codigoItems = await getAllItemsHorusToImport(horus, storeId, opts)
+  const newProducts = await ecomClient.search({
+    storeId,
+    url: '/items.json',
+    data: {
+      size: codigoItems.length + 10
+    }
+  }).then(({ data }) => {
+    const { hits: { hits } } = data
+    const skus = hits?.reduce((acc, current) => {
+      const { _source } = current
+      if (_source.sku.startsWith('COD_ITEM')) {
+        acc.push(Number(_source.sku.replace('COD_ITEM', '')))
+      }
+      return acc
+    }, [])
+    return codigoItems.filter(codigo => !skus.includes(codigo))
+  })
+    .catch(() => [])
+
+  const productsQueue = opts?.appData?.importation.products || []
+  const products = productsQueue.concat(newProducts || [])
+
+  return updateAppData({ appSdk, storeId }, {
+    importation: { products }
+  }).then(() => {
+    console.log(`Finish Exec Check New Product in #${storeId}`)
+  })
 }
 
 const productsStocksEvents = async (horus, storeId, opts) => {
@@ -218,6 +253,12 @@ module.exports = async (appSdk) => {
           // run at 3 am (UTC -3) everyday
           promises.push(productsPriceEvents(horus, storeId, opts))
         }
+
+        if (now.getMinutes() % 30 === 0) {
+          // run at 30 in 30min
+          promises.push(checkProductsImports({ appSdk, storeId }, horus, opts))
+        }
+
         return Promise.all(promises)
       })
       .then(() => {

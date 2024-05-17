@@ -2,7 +2,8 @@ const axios = require('axios')
 const updateAppData = require('../../lib/store-api/update-app-data')
 const getAppData = require('../../lib/store-api/get-app-data')
 const Horus = require('../../lib/horus/client')
-const requestHorus = require('../../lib/horus/request')
+// const requestHorus = require('../../lib/horus/request')
+const { getAllItemsHorusToImport } = require('../../lib/integration/imports/utils')
 
 const requestStoreApi = axios.create({
   baseURL: 'https://api.e-com.plus/v1',
@@ -10,53 +11,6 @@ const requestStoreApi = axios.create({
     'Content-Type': 'application/json'
   }
 })
-
-const getAllItemsHorus = async (horus, storeId, opts) => {
-  let hasRepeat = true
-  let offset = 0
-  const limit = 50
-
-  const init = Date.now()
-  const listItemsToImport = []
-  const codCaract = opts?.appData?.code_characteristic || 5
-  const codTpoCaract = opts?.appData?.code_type_characteristic || 3
-
-  let baseEndpoint = ''
-  baseEndpoint = `/Busca_Caracteristicas?COD_TPO_CARACT=${codTpoCaract}` +
-  `&COD_CARACT=${codCaract}`
-
-  while (hasRepeat) {
-    // create Object Horus to request api Horus
-    const endpoint = `${baseEndpoint}&offset=${offset}&limit=${limit}`
-    const items = await requestHorus(horus, endpoint, 'get', true)
-      .catch((_err) => {
-        // if (err.response) {
-        //   console.warn(JSON.stringify(err.response?.data))
-        // } else {
-        //   console.error(err)
-        // }
-        return null
-      })
-
-    if (items && Array.isArray(items)) {
-      // total += items.length
-      items.forEach((productHorus, index) => {
-        listItemsToImport.push(productHorus.COD_ITEM)
-      })
-      const now = Date.now()
-      const time = now - init
-      if (time >= 20000) {
-        hasRepeat = false
-      }
-    } else {
-      hasRepeat = false
-    }
-
-    offset += limit
-  }
-
-  return listItemsToImport
-}
 
 exports.post = async ({ appSdk }, req, res) => {
   const { headers: reqHeaders } = req
@@ -84,7 +38,7 @@ exports.post = async ({ appSdk }, req, res) => {
       const horus = new Horus(username, password, baseURL)
       const opts = { appData, isUpdateDate: false }
 
-      return getAllItemsHorus(horus, storeId, opts)
+      return getAllItemsHorusToImport(horus, storeId, opts)
         .then(async (products) => {
           if (products.length) {
             console.log(`> #${storeId} all ${products.length} COD_ITEM: ${JSON.stringify(products)}`)
