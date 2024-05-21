@@ -52,10 +52,12 @@ const parsePaymentMethod = (paymentMethod) => {
 
 const getCodePayment = (paymentMethodCode, appDataPayments, transaction) => {
   if (!appDataPayments?.length || !paymentMethodCode) {
+    console.log('> Code Payment Default 1 (app not found)')
     return 1
   }
   const methodName = parsePaymentMethod(paymentMethodCode)
   if (!methodName || transaction.app) {
+    console.log('> Code Payment Default 1')
     return 1
   }
   const checkAppId = (mapApp, transactionApp) => {
@@ -68,11 +70,15 @@ const getCodePayment = (paymentMethodCode, appDataPayments, transaction) => {
   const method = appDataPayments
     .find(payment => payment.name === methodName && checkAppId(payment, transaction.app))
 
-  return method ? method.code : 1
+  const code = method ? method.code : 1
+  console.log('> Code Payment: ', code)
+
+  return code
 }
 
 const getCodeDelivery = (shippingApp, appDataDelivery) => {
   if (!appDataDelivery?.length || !shippingApp) {
+    console.log('> Code Delivery Default 1')
     return 1
   }
 
@@ -86,7 +92,10 @@ const getCodeDelivery = (shippingApp, appDataDelivery) => {
   const delivey = appDataDelivery
     .find(app => app.app_id === shippingApp._id && checkLabel(app, shippingApp))
 
-  return delivey ? delivey.code : 1
+  const code = delivey ? delivey.code : 1
+  console.log('> Code Delivery: ', code)
+
+  return code
 }
 
 const parsePrice = (value) => value

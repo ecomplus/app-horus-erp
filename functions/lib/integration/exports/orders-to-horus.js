@@ -210,7 +210,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         console.log('>>Busca ', queryHorus)
         const itemsHorus = await requestHorus(horus, queryHorus)
           .catch(() => null)
-
+        let allImported = true
         order.items?.forEach((item) => {
           if (item.sku.startsWith('COD_ITEM')) {
             const codItem = item.sku.replace('COD_ITEM', '')
@@ -227,6 +227,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               isImport = true
             }
             if (isImport) {
+              allImported = false
               const params = new url.URLSearchParams(body)
               const endpoint = `/InsItensPedidoVenda?${params.toString()}`
               // console.log('>>item add: ', endpoint)
@@ -253,7 +254,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           return null
         }
 
-        if (!promisesAddItemOrderHorus.length && !errorAddItem.length) {
+        if (!promisesAddItemOrderHorus.length && !errorAddItem.length && !allImported) {
           console.log(`${logHead} skipped, products not imported from ERP`)
           throw new Error(skipCreate)
         }
