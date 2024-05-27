@@ -30,6 +30,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   const horus = new Horus(username, password, baseURL)
   const companyCode = appData.company_code || 1
   const subsidiaryCode = appData.subsidiary_code || 1
+  let condicaoPagamento // CONDICAO_PAGAMENTO
 
   console.log('> Order => ', orderId)
 
@@ -187,6 +188,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           })
       }
 
+      if (orderHorus.CONDICAO_PAGAMENTO) {
+        condicaoPagamento = orderHorus.CONDICAO_PAGAMENTO
+      }
+
       if (orderHorus.STATUS_PEDIDO_VENDA && orderHorus.STATUS_PEDIDO_VENDA === 'CAN') {
         console.log(`${logHead} skipped, order cancelled in ERP`)
         throw new Error(skipCreate)
@@ -315,11 +320,13 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         DATA_VENCIMENTO: parseDate(new Date(order.created_at))
       }
 
+      const isTry = (isNew || Boolean(condicaoPagamento)) && order.status !== 'cancelled'
+
       const params = new url.URLSearchParams(body)
       const endpoint = `/InsVencPedidoVenda?${params.toString()}`
-      console.log('>> try is new: ', isNew, ' installments: ', endpoint)
+      console.log('>> is try: ', isTry, ' installments: ', endpoint)
 
-      if (isNew) {
+      if (isTry) {
         await requestHorus(horus, endpoint, 'POST')
           .catch(console.error)
       }
