@@ -30,7 +30,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   const horus = new Horus(username, password, baseURL)
   const companyCode = appData.company_code || 1
   const subsidiaryCode = appData.subsidiary_code || 1
-  let condicaoPagamento // CONDICAO_PAGAMENTO
+  // let condicaoPagamento // CONDICAO_PAGAMENTO
 
   console.log('> Order => ', orderId)
 
@@ -130,16 +130,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       if (!orderHorus) {
         console.log('> amount: ', JSON.stringify(amount))
-        let vlr = 0
-        let qnt = 0
-        let obs = ''
-        if (transaction.installments) {
-          const { number } = transaction.installments
-          qnt = number
-          // const extra = amount.extra || 0
-          vlr = (amount.total) / number
-          obs += `| ${qnt} parcela(s) de R$ ${parsePrice(vlr)}`
-        }
 
         const body = {
           COD_PEDIDO_ORIGEM: orderId,
@@ -147,7 +137,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_FILIAL: subsidiaryCode,
           TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
           COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
-          OBS_PEDIDO: `Pedido #${number} id: ${orderId} ${obs}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
+          OBS_PEDIDO: `Pedido #${number} id: ${orderId}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
           COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
           COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
@@ -188,9 +178,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           })
       }
 
-      if (orderHorus.CONDICAO_PAGAMENTO) {
-        condicaoPagamento = orderHorus.CONDICAO_PAGAMENTO
-      }
+      // if (orderHorus.CONDICAO_PAGAMENTO) {
+      //   condicaoPagamento = orderHorus.CONDICAO_PAGAMENTO
+      // }
 
       if (orderHorus.STATUS_PEDIDO_VENDA && orderHorus.STATUS_PEDIDO_VENDA === 'CAN') {
         console.log(`${logHead} skipped, order cancelled in ERP`)
@@ -320,13 +310,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         DATA_VENCIMENTO: parseDate(new Date(order.created_at))
       }
 
-      const isTry = (isNew || Boolean(condicaoPagamento)) && order.status !== 'cancelled'
-
       const params = new url.URLSearchParams(body)
       const endpoint = `/InsVencPedidoVenda?${params.toString()}`
-      console.log('>> is try: ', isTry, ' installments: ', endpoint)
+      console.log('>> Installments: ', isNew ? endpoint : 'skip')
 
-      if (isTry) {
+      if (isNew) {
         await requestHorus(horus, endpoint, 'POST')
           .catch(console.error)
       }

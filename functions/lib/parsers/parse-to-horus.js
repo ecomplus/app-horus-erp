@@ -56,7 +56,7 @@ const getCodePayment = (paymentMethodCode, appDataPayments, transaction) => {
     return 1
   }
   const methodName = parsePaymentMethod(paymentMethodCode)
-  if (!methodName || transaction.app) {
+  if (!methodName || !transaction.app) {
     console.log('> Code Payment Default 1')
     return 1
   }
@@ -67,8 +67,13 @@ const getCodePayment = (paymentMethodCode, appDataPayments, transaction) => {
     return mapApp.app_id === transactionApp._id
   }
 
-  const method = appDataPayments
-    .find(payment => payment.name === methodName && checkAppId(payment, transaction.app))
+  const appWithId = appDataPayments.filter(app => Boolean(app.app_id && app.app_id !== ''))
+  const appWitoutId = appDataPayments.filter(app => Boolean(app.app_id && app.app_id !== '') === false)
+  // console.log('>> ', appWithId, '\n =>', appWitoutId)
+
+  const method = appWithId
+    .find(payment => payment.name === methodName && checkAppId(payment, transaction.app)) ||
+    appWitoutId.find(payment => payment.name === methodName)
 
   const code = method ? method.code : 1
   console.log('> Code Payment: ', code)
