@@ -94,7 +94,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         getClientByCustomer(storeId, horus, customer)
       ])
 
-      console.log('>> order ', JSON.stringify(orderHorus))
+      console.log('>> Number: ', number, ' Order ERP: ', JSON.stringify(orderHorus))
 
       if (!customerHorus) {
         const opts = {
@@ -148,7 +148,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           DAT_PEDIDO_ORIGEM: parseDate(new Date(order.created_at)), // Poderá ser preenchido nesta coluna a data original que o cliente registrou o pedido no e-commerce ou demais plataformas. Usar o formato DD/MM/AAAA hh:mm:ss. Servirá como estatística de tempo total de atendimento do pedido para facilitar o controle e as pesquisas - Parâmetro opcional, porém, recomendado seu uso.
           // DATA_EST_ENTREGA // Data estimada para entrega - Informar nesta coluna quando o pedido possuir alguma data pré-estipulada para entrega da mercadoria, usar o formato DD/MM/AAAA - Parâmetro opcional!
           VALOR_CUPOM_DESCONTO: parsePrice(amount.discount || 0), // Informar nesta coluna o valor do cupom de desconto do pedido, esse valor será usado para atribuir um desconto adicional e rateado em nota fiscal. Parâmetro opcional!
-          NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
+          NOM_RESP: appData.orders?.responsible?.name || 'ecomplus',
+          VLR_LIQUIDO: parsePrice(amount.total || 0)
+          // VLR_BRUTO: parsePrice(amount.total || 0)
         }
 
         console.log('>> ', parsePrice(amount.discount || 0))
@@ -165,6 +167,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         return requestHorus(horus, endpoint, 'POST')
           .then(response => {
             if (response && response.length) {
+              console.log('>> COD_PED_VENDA', response[0].COD_PED_VENDA)
               return {
                 order,
                 saleCodeHorus: response[0].COD_PED_VENDA,
