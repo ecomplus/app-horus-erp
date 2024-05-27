@@ -319,8 +319,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const endpoint = `/InsVencPedidoVenda?${params.toString()}`
       console.log('>> try installments: ', endpoint)
 
-      await requestHorus(horus, endpoint, 'POST')
-        .catch(console.error)
+      // await requestHorus(horus, endpoint, 'POST')
+      //   .catch(console.error)
 
       return {
         order,
