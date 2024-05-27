@@ -139,6 +139,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           vlr = (amount.total) / number
           obs += `| ${qnt} parcela(s) de R$ ${parsePrice(vlr)}`
         }
+
         const body = {
           COD_PEDIDO_ORIGEM: orderId,
           COD_EMPRESA: companyCode,
@@ -151,8 +152,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
           FRETE_EMIT_DEST: 2, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
           COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction), // Informar o código da forma de pagamento - Parâmetro Obrigatório
-          VLR_PARCELA: parsePrice(vlr || amount.total),
-          QTD_PARCELAS: qnt, // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
+          QTD_PARCELAS: 0, // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
           VLR_FRETE: parsePrice(amount.freight || 0), // Informar valor do Frete quando existir - Parâmetro opcional!
           VLR_OUTRAS_DESP: parsePrice((amount.tax || 0) + (amount.extra || 0)), // Informar o valor de Outras despesas, essa informação sairá na Nota Fiscal - Parâmetro opcional!
           // DADOS_ADICIONAIS_NF Informar os dados adicionais que deverão sair impresso na Nota Fiscal - Parâmetro opcional!
@@ -279,6 +279,54 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         }
       }
       return null
+    })
+    .then(async data => {
+      if (!data) {
+        return null
+      }
+      const {
+        order,
+        saleCodeHorus,
+        customerCodeHorus,
+        isNew
+      } = data
+
+      const { amount } = order
+      const transaction = order.transactions && order.transactions.length && order.transactions[0]
+      const paymentMethodCode = transaction && transaction.payment_method.code
+
+      let vlr = 0
+      let qnt = 0
+      if (transaction.installments) {
+        const { number } = transaction.installments
+        qnt = number
+        // const extra = amount.extra || 0
+        vlr = (amount.total) / number
+      }
+
+      const body = {
+        COD_EMPRESA: companyCode,
+        COD_FILIAL: subsidiaryCode,
+        COD_PED_VENDA: saleCodeHorus,
+        COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction),
+        VLR_PARCELA: parsePrice(vlr || amount.total),
+        QTD_PARCELAS: qnt,
+        DATA_VENCIMENTO: parseDate(new Date(order.created_at))
+      }
+
+      const params = new url.URLSearchParams(body)
+      const endpoint = `/InsVencPedidoVenda?${params.toString()}`
+      console.log('>> try installments: ', endpoint)
+
+      await requestHorus(horus, endpoint, 'POST')
+        .catch(console.error)
+
+      return {
+        order,
+        saleCodeHorus,
+        customerCodeHorus,
+        isNew
+      }
     })
     .then(async data => {
       if (!data) {
