@@ -307,6 +307,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const body = {
         COD_EMPRESA: companyCode,
         COD_FILIAL: subsidiaryCode,
+        COD_CLI: customerCodeHorus,
         COD_PED_VENDA: saleCodeHorus,
         COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction),
         VLR_PARCELA: parsePrice(vlr || amount.total),
