@@ -317,10 +317,12 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       const params = new url.URLSearchParams(body)
       const endpoint = `/InsVencPedidoVenda?${params.toString()}`
-      console.log('>> try installments: ', endpoint)
+      console.log('>> try is new: ', isNew, ' installments: ', endpoint)
 
-      // await requestHorus(horus, endpoint, 'POST')
-      //   .catch(console.error)
+      if (isNew) {
+        await requestHorus(horus, endpoint, 'POST')
+          .catch(console.error)
+      }
 
       return {
         order,
