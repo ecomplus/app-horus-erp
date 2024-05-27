@@ -295,7 +295,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const transaction = order.transactions && order.transactions.length && order.transactions[0]
       const paymentMethodCode = transaction && transaction.payment_method.code
 
-      let vlr = 0
+      let vlr = amount.total
       let qnt = 1
       if (transaction.installments) {
         const { number } = transaction.installments
@@ -310,7 +310,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         COD_CLI: customerCodeHorus,
         COD_PED_VENDA: saleCodeHorus,
         COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction),
-        VLR_PARCELA: parsePrice(vlr || amount.total),
+        VLR_PARCELA: parsePrice(vlr),
         QTD_PARCELAS: qnt,
         DATA_VENCIMENTO: parseDate(new Date(order.created_at))
       }
