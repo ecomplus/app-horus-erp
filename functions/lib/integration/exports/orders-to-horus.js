@@ -131,11 +131,13 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         console.log('> amount: ', JSON.stringify(amount))
         let vlr = 0
         let qnt = 0
+        let obs = ''
         if (transaction.installments) {
           const { number } = transaction.installments
           qnt = number
           // const extra = amount.extra || 0
           vlr = (amount.total) / number
+          obs += `| ${qnt} parcela(s) de R$ ${parsePrice(vlr)}`
         }
         const body = {
           COD_PEDIDO_ORIGEM: orderId,
@@ -143,13 +145,13 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_FILIAL: subsidiaryCode,
           TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
           COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
-          OBS_PEDIDO: `Pedido #${number} id: ${orderId}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
+          OBS_PEDIDO: `Pedido #${number} id: ${orderId} ${obs}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
           COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
           COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
           FRETE_EMIT_DEST: 2, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
           COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction), // Informar o código da forma de pagamento - Parâmetro Obrigatório
-          VLR_PARCELA: vlr || amount.total,
+          VLR_PARCELA: parsePrice(vlr || amount.total),
           QTD_PARCELAS: qnt, // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
           VLR_FRETE: parsePrice(amount.freight || 0), // Informar valor do Frete quando existir - Parâmetro opcional!
           VLR_OUTRAS_DESP: parsePrice((amount.tax || 0) + (amount.extra || 0)), // Informar o valor de Outras despesas, essa informação sairá na Nota Fiscal - Parâmetro opcional!
