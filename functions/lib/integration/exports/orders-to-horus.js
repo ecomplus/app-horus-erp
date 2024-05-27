@@ -129,6 +129,14 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       if (!orderHorus) {
         console.log('> amount: ', JSON.stringify(amount))
+        let vlr = 0
+        let qnt = 0
+        if (transaction.installments) {
+          const { number } = transaction.installments
+          qnt = number
+          // const extra = amount.extra || 0
+          vlr = (amount.total) / number
+        }
         const body = {
           COD_PEDIDO_ORIGEM: orderId,
           COD_EMPRESA: companyCode,
@@ -141,19 +149,18 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
           FRETE_EMIT_DEST: 2, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
           COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction), // Informar o código da forma de pagamento - Parâmetro Obrigatório
-          QTD_PARCELAS: 0, // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
+          VLR_PARCELA: vlr || amount.total,
+          QTD_PARCELAS: qnt, // Informar a quantidade de parcelas do pedido de venda (informar ZERO, quando for pagamento a vista ou baixa automática) - Parâmetro Obrigatório
           VLR_FRETE: parsePrice(amount.freight || 0), // Informar valor do Frete quando existir - Parâmetro opcional!
           VLR_OUTRAS_DESP: parsePrice((amount.tax || 0) + (amount.extra || 0)), // Informar o valor de Outras despesas, essa informação sairá na Nota Fiscal - Parâmetro opcional!
           // DADOS_ADICIONAIS_NF Informar os dados adicionais que deverão sair impresso na Nota Fiscal - Parâmetro opcional!
           DAT_PEDIDO_ORIGEM: parseDate(new Date(order.created_at)), // Poderá ser preenchido nesta coluna a data original que o cliente registrou o pedido no e-commerce ou demais plataformas. Usar o formato DD/MM/AAAA hh:mm:ss. Servirá como estatística de tempo total de atendimento do pedido para facilitar o controle e as pesquisas - Parâmetro opcional, porém, recomendado seu uso.
           // DATA_EST_ENTREGA // Data estimada para entrega - Informar nesta coluna quando o pedido possuir alguma data pré-estipulada para entrega da mercadoria, usar o formato DD/MM/AAAA - Parâmetro opcional!
           VALOR_CUPOM_DESCONTO: parsePrice(amount.discount || 0), // Informar nesta coluna o valor do cupom de desconto do pedido, esse valor será usado para atribuir um desconto adicional e rateado em nota fiscal. Parâmetro opcional!
-          NOM_RESP: appData.orders?.responsible?.name || 'ecomplus',
-          VLR_LIQUIDO: parsePrice(amount.total || 0)
-          // VLR_BRUTO: parsePrice(amount.total || 0)
+          NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
         }
 
-        console.log('>> ', parsePrice(amount.discount || 0))
+        // console.log('>> discount: ', parsePrice(amount.discount || 0))
         console.log('>> body ', JSON.stringify(body))
 
         if (order.status === 'cancelled') {
