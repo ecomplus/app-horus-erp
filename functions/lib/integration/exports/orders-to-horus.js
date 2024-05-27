@@ -296,7 +296,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const paymentMethodCode = transaction && transaction.payment_method.code
 
       let vlr = 0
-      let qnt = 0
+      let qnt = 1
       if (transaction.installments) {
         const { number } = transaction.installments
         qnt = number
