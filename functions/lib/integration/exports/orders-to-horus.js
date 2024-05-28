@@ -30,7 +30,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   const horus = new Horus(username, password, baseURL)
   const companyCode = appData.company_code || 1
   const subsidiaryCode = appData.subsidiary_code || 1
-  // let condicaoPagamento // CONDICAO_PAGAMENTO
 
   console.log('> Order => ', orderId)
 
@@ -55,7 +54,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const {
         amount,
         number
-        // created_at: createdAt
       } = order
 
       const transaction = order.transactions && order.transactions.length && order.transactions[0]
@@ -72,7 +70,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         console.log(`${logHead} skipped with no financial status`)
         return null
       }
-      // const codOriginal = new Date(createdAt).getTime()
       const queryHorus = `/Busca_PedidosVenda?COD_PEDIDO_ORIGEM=${orderId}&OFFSET=0&LIMIT=1` +
         `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}`
 
@@ -153,7 +150,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
         }
 
-        // console.log('>> discount: ', parsePrice(amount.discount || 0))
         console.log('>> body ', JSON.stringify(body))
 
         if (order.status === 'cancelled') {
@@ -177,10 +173,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             }
           })
       }
-
-      // if (orderHorus.CONDICAO_PAGAMENTO) {
-      //   condicaoPagamento = orderHorus.CONDICAO_PAGAMENTO
-      // }
 
       if (orderHorus.STATUS_PEDIDO_VENDA && orderHorus.STATUS_PEDIDO_VENDA === 'CAN') {
         console.log(`${logHead} skipped, order cancelled in ERP`)
@@ -211,17 +203,13 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
       const promisesAddItemOrderHorus = []
       const errorAddItem = []
-      const discount = order.amount?.discount || 0
       if (order.items && order.items.length) {
         const queryHorus = `/Busca_ItensPedidosVenda?COD_PED_VENDA=${saleCodeHorus}` +
           `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}&OFFSET=0&LIMIT=${order.items.length}`
-        // console.log('>>Busca ', queryHorus)
         const itemsHorus = await requestHorus(horus, queryHorus)
           .catch(() => null)
         let allImported = true
         order.items?.forEach((item) => {
-          const discountForProduct = discount ? (discount / order.items.length) : 0
-
           if (item.sku.startsWith('COD_ITEM')) {
             const codItem = item.sku.replace('COD_ITEM', '')
             body.COD_ITEM = codItem
@@ -230,21 +218,17 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
             const itemHorus = itemsHorus?.find(itemFind => `${itemFind.COD_ITEM}` === codItem)
             let isImport = !itemHorus
-            // console.log('>> i:', itemsHorus && JSON.stringify(itemsHorus), '=>', codItem, JSON.stringify(itemHorus))
 
             if (itemHorus && itemHorus.QT_PEDIDA < item.quantity) {
               body.QTD_PEDIDA = item.quantity - itemHorus.QTD_PEDIDA
               isImport = true
             }
             if (isImport) {
-              const discountItem = discountForProduct ? (discountForProduct / item.quantity) : 0
               allImported = false
-              body.VLR_BRUTO = parsePrice(vlrBruto)
-              body.VLR_LIQUIDO = parsePrice(vlrBruto - (discountItem))
-              console.log('>> try item: ', codItem, JSON.stringify(body))
+              body.VLR_LIQUIDO = parsePrice(vlrBruto)
+
               const params = new url.URLSearchParams(body)
               const endpoint = `/InsItensPedidoVenda?${params.toString()}`
-              // console.log('>>item add: ', endpoint)
               promisesAddItemOrderHorus.push(
                 requestHorus(horus, endpoint)
                   .then(() => {
@@ -302,7 +286,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       if (transaction.installments) {
         const { number } = transaction.installments
         qnt = number
-        // const extra = amount.extra || 0
         vlr = (amount.total) / number
       }
 
@@ -373,7 +356,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       if (err.response) {
         console.warn(JSON.stringify(err.response?.data))
-        // console.error(err.response)
       } else {
         console.error(err)
       }
