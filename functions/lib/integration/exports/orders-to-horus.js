@@ -211,18 +211,21 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
       const promisesAddItemOrderHorus = []
       const errorAddItem = []
+      const discount = order.amount?.discount || 0
       if (order.items && order.items.length) {
         const queryHorus = `/Busca_ItensPedidosVenda?COD_PED_VENDA=${saleCodeHorus}` +
           `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}&OFFSET=0&LIMIT=${order.items.length}`
-        console.log('>>Busca ', queryHorus)
+        // console.log('>>Busca ', queryHorus)
         const itemsHorus = await requestHorus(horus, queryHorus)
           .catch(() => null)
         let allImported = true
         order.items?.forEach((item) => {
+          const discountForProduct = discount ? (discount / order.items.length) : 0
+
           if (item.sku.startsWith('COD_ITEM')) {
             const codItem = item.sku.replace('COD_ITEM', '')
             body.COD_ITEM = codItem
-            body.VLR_LIQUIDO = parsePrice(item.final_price || item.price)
+            const vlrBruto = item.final_price || item.price
             body.QTD_PEDIDA = item.quantity
 
             const itemHorus = itemsHorus?.find(itemFind => `${itemFind.COD_ITEM}` === codItem)
@@ -234,14 +237,18 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               isImport = true
             }
             if (isImport) {
+              const discountItem = discountForProduct ? (discountForProduct / item.quantity) : 0
               allImported = false
+              body.VLR_BRUTO = parsePrice(vlrBruto)
+              body.VLR_LIQUIDO = parsePrice(vlrBruto - (discountItem))
+              console.log('>> try item: ', codItem, JSON.stringify(body))
               const params = new url.URLSearchParams(body)
               const endpoint = `/InsItensPedidoVenda?${params.toString()}`
               // console.log('>>item add: ', endpoint)
               promisesAddItemOrderHorus.push(
                 requestHorus(horus, endpoint)
                   .then(() => {
-                    console.log('>> Add Item in order', endpoint)
+                    console.log('>> Add Item in order: ', endpoint)
                   })
                   .catch(() => {
                     errorAddItem.push(endpoint)
