@@ -146,7 +146,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           // DADOS_ADICIONAIS_NF Informar os dados adicionais que deverão sair impresso na Nota Fiscal - Parâmetro opcional!
           DAT_PEDIDO_ORIGEM: parseDate(new Date(order.created_at)), // Poderá ser preenchido nesta coluna a data original que o cliente registrou o pedido no e-commerce ou demais plataformas. Usar o formato DD/MM/AAAA hh:mm:ss. Servirá como estatística de tempo total de atendimento do pedido para facilitar o controle e as pesquisas - Parâmetro opcional, porém, recomendado seu uso.
           // DATA_EST_ENTREGA // Data estimada para entrega - Informar nesta coluna quando o pedido possuir alguma data pré-estipulada para entrega da mercadoria, usar o formato DD/MM/AAAA - Parâmetro opcional!
-          VALOR_CUPOM_DESCONTO: parsePrice(amount.discount || 0), // Informar nesta coluna o valor do cupom de desconto do pedido, esse valor será usado para atribuir um desconto adicional e rateado em nota fiscal. Parâmetro opcional!
+          // VALOR_CUPOM_DESCONTO: parsePrice(amount.discount || 0), // Informar nesta coluna o valor do cupom de desconto do pedido, esse valor será usado para atribuir um desconto adicional e rateado em nota fiscal. Parâmetro opcional!
           NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
         }
 
@@ -168,7 +168,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
                 order,
                 saleCodeHorus: response[0].COD_PED_VENDA,
                 customerCodeHorus: customerHorus.COD_CLI,
-                isNew: true
+                isNewOrder: true
               }
             }
           })
@@ -193,7 +193,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         order,
         saleCodeHorus,
         customerCodeHorus,
-        isNew
+        isNewOrder
       } = data
       const body = {
         COD_EMPRESA: companyCode,
@@ -208,7 +208,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}&OFFSET=0&LIMIT=${order.items.length}`
         const itemsHorus = await requestHorus(horus, queryHorus)
           .catch(() => null)
-        let allImported = true
+        let isAllImportedItems = true
         const discount = order.amount?.discount || 0
         const discountForProduct = discount ? (discount / order.items.length) : 0
         order.items?.forEach((item) => {
@@ -219,15 +219,15 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             body.QTD_PEDIDA = item.quantity
 
             const itemHorus = itemsHorus?.find(itemFind => `${itemFind.COD_ITEM}` === codItem)
-            let isImport = !itemHorus
+            let isImportItem = !itemHorus
 
             if (itemHorus && itemHorus.QT_PEDIDA < item.quantity) {
               body.QTD_PEDIDA = item.quantity - itemHorus.QTD_PEDIDA
-              isImport = true
+              isImportItem = true
             }
-            if (isImport) {
+            if (isImportItem) {
               const discountItem = discountForProduct ? (discountForProduct / item.quantity) : 0
-              allImported = false
+              isAllImportedItems = false
               body.VLR_LIQUIDO = parsePrice(vlrBruto - discountItem)
               console.log('>> vlrBruto: ', vlrBruto, ' discount: ', discountItem, ' total: ', (vlrBruto - discountItem))
 
@@ -256,7 +256,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           return null
         }
 
-        if (!promisesAddItemOrderHorus.length && !errorAddItem.length && !allImported) {
+        if (!promisesAddItemOrderHorus.length && !errorAddItem.length && !isAllImportedItems) {
           console.log(`${logHead} skipped, products not imported from ERP`)
           throw new Error(skipCreate)
         }
@@ -265,7 +265,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           order,
           saleCodeHorus,
           customerCodeHorus,
-          isNew
+          isNewOrder
         }
       }
       return null
@@ -278,7 +278,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         order,
         saleCodeHorus,
         customerCodeHorus,
-        isNew
+        isNewOrder
       } = data
 
       const { amount } = order
@@ -306,9 +306,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       const params = new url.URLSearchParams(body)
       const endpoint = `/InsVencPedidoVenda?${params.toString()}`
-      console.log('>> Installments: ', isNew ? endpoint : 'skip')
+      console.log('>> Installments: ', isNewOrder ? endpoint : 'skip')
 
-      if (isNew) {
+      if (isNewOrder) {
         await requestHorus(horus, endpoint, 'POST')
           .catch(console.error)
       }
@@ -317,7 +317,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         order,
         saleCodeHorus,
         customerCodeHorus,
-        isNew
+        isNewOrder
       }
     })
     .then(async data => {
