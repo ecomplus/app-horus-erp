@@ -209,6 +209,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         const itemsHorus = await requestHorus(horus, queryHorus)
           .catch(() => null)
         let allImported = true
+        const discount = order.amount?.discount || 0
+        const discountForProduct = discount ? (discount / order.items.length) : 0
         order.items?.forEach((item) => {
           if (item.sku.startsWith('COD_ITEM')) {
             const codItem = item.sku.replace('COD_ITEM', '')
@@ -224,8 +226,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               isImport = true
             }
             if (isImport) {
+              const discountItem = discountForProduct ? (discountForProduct / item.quantity) : 0
               allImported = false
-              body.VLR_LIQUIDO = parsePrice(vlrBruto)
+              body.VLR_LIQUIDO = parsePrice(vlrBruto - discountItem)
+              console.log('>> vlrBruto: ', vlrBruto, ' discount: ', discountItem, ' total: ', (vlrBruto - discountItem))
 
               const params = new url.URLSearchParams(body)
               const endpoint = `/InsItensPedidoVenda?${params.toString()}`
