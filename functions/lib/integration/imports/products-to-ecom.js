@@ -113,8 +113,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   }
   const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)
   const isUpdatePriceOrStock = !opts.queueEntry?.mustUpdateAppQueue && (updatePrice || updateStock)
+  const isUpdateStock = updateStock && (SALDO_DISPONIVEL >= 0 || SALDO >= 0)
 
-  console.log('>> isUpdatePriceOrStock ', isUpdatePriceOrStock)
+  console.log('>> isUpdatePriceOrStock ', isUpdatePriceOrStock, ' isUpdateStock: ', isUpdateStock)
 
   if ((isUpdatePriceOrStock || (product && !updateProduct))) {
     if (!product && isUpdatePriceOrStock) {
@@ -132,7 +133,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     }
 
-    if (quantity !== product.quantity && updateStock) {
+    if (quantity !== product.quantity && isUpdateStock) {
       body.quantity = quantity
     }
 
