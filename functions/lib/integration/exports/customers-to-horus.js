@@ -62,9 +62,11 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
       body[`INS_${customer.inscription_type === 'State' ? 'ESTADUAL' : 'MUNICIPAL'}`] = customer.inscription_number
     }
 
-    if (customer.corporate_name) {
+    // Field is used in the store 51504 (minsterio ler) to NF in orders
+    if (customer.corporate_name && storeId !== 51504) {
       body.NOM_CONTATO = customer.corporate_name
     }
+
     const params = new url.URLSearchParams(body)
     const endpoint = `/InsAltCliente?${params.toString()}`
     console.log('>> Insert Client', endpoint, method)

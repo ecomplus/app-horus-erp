@@ -150,6 +150,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
         }
 
+        // Requirement requested by store 51504 (ministerio ler)
+        if (customer.corporate_name && storeId === 51504) {
+          body.DADOS_ADICIONAIS_NF = customer.corporate_name
+        }
+
         console.log('>> body ', JSON.stringify(body))
 
         if (order.status === 'cancelled') {

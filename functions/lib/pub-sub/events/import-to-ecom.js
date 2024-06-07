@@ -2,7 +2,7 @@ const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
 const { saveFirestore } = require('../utils')
 const { collectionHorusEvents } = require('../../utils-variables')
-// const updateAppData = require('../../store-api/update-app-data')
+
 const imports = {
   products: require('../../integration/imports/products-to-ecom'),
   categories: require('../../integration/imports/categories-to-ecom'),
@@ -16,69 +16,6 @@ const getAppSdk = () => {
       .then(appSdk => resolve(appSdk))
   })
 }
-// const queueRetry = (appClient, { action, queue, nextId }, appData) => {
-//   const retryKey = `${appClient.storeId}_${action}_${queue}_${nextId}`
-//   console.warn(retryKey)
-
-//   let queueList = appData[action] && appData[action][queue]
-//   if (!Array.isArray(queueList)) {
-//     queueList = [nextId]
-//   } else if (!queueList.includes(nextId)) {
-//     queueList.unshift(nextId)
-//   }
-//   return new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       updateAppData(appClient, {
-//         [action]: {
-//           ...appData[action],
-//           [queue]: queueList
-//         }
-//       })
-//         .then(resolve)
-//         .catch(reject)
-//     }, 7000)
-//   })
-// }
-
-// const updateApp = async ({ appSdk, storeId, auth }, _id, opts) => {
-//   const {
-//     queueEntry,
-//     appData
-//   } = opts
-//   if (queueEntry) {
-//     const { action, queue, nextId } = queueEntry
-//     let queueList = appData[action][queue]
-//     if (Array.isArray(queueList)) {
-//       const idIndex = queueList.indexOf(nextId)
-//       if (idIndex > -1) {
-//         queueList.splice(idIndex, 1)
-//       }
-//     } else {
-//       queueList = []
-//     }
-//     const data = {
-//       [action]: {
-//         ...appData[action],
-//         [queue]: queueList
-//       }
-//     }
-//     console.log(`> Update app #${storeId} ${JSON.stringify(data)}`)
-//     return updateAppData({ appSdk, storeId, auth }, data)
-//       .then(() => {
-//         return { _id }
-//       })
-//       .catch(async (err) => {
-//         if (err.response && (!err.response.status || err.response.status >= 500)) {
-//           await queueRetry({ appSdk, storeId, auth }, queueEntry, appData, err.response)
-//           return { _id }
-//         } else {
-//           throw err
-//         }
-//       })
-//   }
-
-//   return { _id }
-// }
 
 const checkAndUpdateLastUpdateDate = async (isUpdateDate, lastUpdate, field, now, docRef) => {
   if (isUpdateDate) {

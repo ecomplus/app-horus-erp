@@ -52,25 +52,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
 
   const {
     COD_ITEM,
-    // COD_BARRA_ITEM,
-    // COD_BARRA_ITEM_ALT,
-    // COD_ISBN_ITEM,
-    // COD_ISSN_ITEM,
     NOM_ITEM,
     COD_EDITORA,
     NOM_EDITORA,
-    // SELO,
-    // COD_GRUPO_ITEM,
-    // NOM_GRUPO_ITEM,
-    // COD_UNIDADE,
-    // NOM_UNIDADE,
-    // TIPO,
-    // COD_GENERO,
-    // GENERO_NIVEL_1,
-    // COD_GENERO_NIVEL2,
-    // GENERO_NIVEL_2,
-    // COD_GENERO_NIVEL3,
-    // GENERO_NIVEL_3,
     SUBTITULO,
     DESC_SINOPSE,
     OBS_ESPECIAIS,
@@ -81,23 +65,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     ALTURA_ITEM,
     QTD_PAGINAS,
     SALDO_DISPONIVEL,
-    // EBOOK,
-    // FORMATO_EBOOK,
-    // TAMANHO_EBOOK,
     VLR_CAPA,
-    // DAT_CADASTRO,
-    // DAT_ULT_ATL,
     STATUS_ITEM,
-    // SITUACAO_ITEM,
-    // SITUACAO_ITEM_DESC,
-    // DAT_EXP_LANCTO,
     PALAVRAS_CHAVE,
     KIT,
-    // COD_ORIGEM_EDITORA,
-    // POD,
-    // DISPONIBILIDADE_MERCADO,
-    // NCM
-    SALDO
+    SALDO // field sent in update stock event
   } = productHorus
   if (!COD_ITEM) {
     throw new Error(productHorus.Mensagem)
