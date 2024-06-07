@@ -9,6 +9,7 @@ const {
 const { parseDate } = require('./parsers/parse-to-horus')
 const Horus = require('./horus/client')
 const requestHorus = require('./horus/request')
+const checkHorusApi = require('./horus/check-horus-api')
 const { sendMessageTopic } = require('./pub-sub/utils')
 const { getAllItemsHorusToImport } = require('../lib/integration/imports/utils')
 const ecomClient = require('@ecomplus/client')
@@ -239,7 +240,7 @@ module.exports = async (appSdk) => {
       .then((auth) => {
         return getAppData({ appSdk, storeId, auth }, true)
       })
-      .then((appData) => {
+      .then(async (appData) => {
         const {
           username,
           password,
@@ -247,18 +248,23 @@ module.exports = async (appSdk) => {
         } = appData
         const horus = new Horus(username, password, baseURL)
         const opts = { appData }
+        const horusApiOk = await checkHorusApi(horus)
         const promises = []
-        promises.push(productsStocksEvents(horus, storeId, opts))
-        const now = new Date()
+        if (horusApiOk) {
+          promises.push(productsStocksEvents(horus, storeId, opts))
+          const now = new Date()
 
-        if ((now.getHours() - 6) % 24 === 0 && now.getMinutes() === 3) {
-          // run at 3 am (UTC -3) everyday
-          promises.push(productsPriceEvents(horus, storeId, opts))
-        }
+          if ((now.getHours() - 6) % 24 === 0 && now.getMinutes() === 3) {
+            // run at 3 am (UTC -3) everyday
+            promises.push(productsPriceEvents(horus, storeId, opts))
+          }
 
-        if (now.getMinutes() % 30 === 0) {
-          // run at 30 in 30min
-          promises.push(checkProductsImports({ appSdk, storeId }, horus, opts))
+          if (now.getMinutes() % 30 === 0) {
+            // run at 30 in 30min
+            promises.push(checkProductsImports({ appSdk, storeId }, horus, opts))
+          }
+        } else {
+          console.log('> Horus API Offline')
         }
 
         return Promise.all(promises)
