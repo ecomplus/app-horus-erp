@@ -18,7 +18,7 @@ const replayPubSub = async (_appSdk) => {
     const doc = listPubSubs.docs[i]
     const docRef = doc.ref
     const { eventName, json } = doc.data()
-    let isSendMessage = true
+    let isHorusApiOk = true
     if (json?.opts?.appData) {
       const {
         exportation,
@@ -38,14 +38,15 @@ const replayPubSub = async (_appSdk) => {
       if (username && password && baseURL) {
         console.log('Queue Pub/Sub => check Horus Api')
         const horus = new Horus(username, password, baseURL)
-        isSendMessage = await checkHorusApi(horus)
+        isHorusApiOk = await checkHorusApi(horus)
       }
     }
     const run = async () => {
       await docRef.delete()
       return sendMessageTopic(eventName, json)
     }
-    if (isSendMessage) {
+    console.log('>> Horus API ok: ', isHorusApiOk)
+    if (isHorusApiOk) {
       promises.push(run())
     }
 
