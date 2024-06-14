@@ -35,6 +35,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
   return getOrderById({ appSdk, storeId, auth }, 'orders', orderId)
     .then(async (order) => {
+      if (!order) {
+        console.log(`${logHead} skipped, order not found`)
+        throw new Error(skipCreate)
+      }
       if (appData?.orders?.approved_order_only) {
         if (order.status !== 'cancelled') {
           if (order.financial_status?.current !== 'paid') {
@@ -46,7 +50,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           throw new Error(skipCreate)
         }
       }
-      const customer = order.buyers && order.buyers.length && order.buyers[0]
+      const customer = order.buyers && order.buyers?.length && order.buyers[0]
       if (!customer) {
         console.log(`${logHead} skipped, customer not found`)
         return null
