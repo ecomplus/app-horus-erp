@@ -5,6 +5,13 @@ const {
 const requestHorus = require('../../horus/request')
 const { parseZipCode } = require('../../parsers/parse-to-horus')
 
+const parsePhone = (phone) => {
+  // limit ERP is 14 characteres
+  const { number } = phone
+  const start = number.length > 14 ? number.length - 14 : 0
+  return number.substring(start, number.length)
+}
+
 module.exports = async (horus, customerCodeHorus, customerAddress, isBillingAddress) => {
   const zipCode = parseZipCode(customerAddress.zip) || 0
   console.log('> Address Customer => CLI: ', customerCodeHorus, ' ZipCode: ', zipCode)
@@ -34,7 +41,7 @@ module.exports = async (horus, customerCodeHorus, customerAddress, isBillingAddr
   }
 
   if (customerAddress.phone) {
-    body.TEL_ENDERECO = customerAddress.phone // Telefone do cliente - Parâmetro opcional
+    body.TEL_ENDERECO = parsePhone(customerAddress.phone) // Telefone do cliente - Parâmetro opcional
   }
 
   if (customerAddress.name) {
