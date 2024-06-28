@@ -75,7 +75,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     throw new Error(productHorus.Mensagem)
   }
   console.log('> COD_ITEM => ', COD_ITEM)
-  const price = parsePrice(VLR_CAPA)
+  const basePrice = parsePrice(VLR_CAPA)
   let quantity = 0
 
   if (SALDO_DISPONIVEL) {
@@ -96,11 +96,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
     const endpoint = `products/${product._id}.json`
     const body = {}
-    if (price && price !== product.price && updatePrice) {
-      body.price = price
+    if (basePrice && basePrice !== product.base_price && updatePrice) {
+      body.base_price = basePrice
       // creates a product with no price, but as unavailable if the value is available,
       // the product becomes available
-      if (!product.price && price) {
+      if (!product.base_price && basePrice) {
         body.available = true
       }
     }
@@ -147,8 +147,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     }
 
-    if (price) {
-      body.price = price
+    if (basePrice) {
+      body.base_price = basePrice
     }
 
     if (SUBTITULO) {
@@ -285,7 +285,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       })
     }
 
-    if (sendSyncKit.length || !price) {
+    if (sendSyncKit.length || !basePrice) {
       // Incomplete Kit
       body.available = false
     }
