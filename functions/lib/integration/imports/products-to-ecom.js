@@ -63,7 +63,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     LARGURA_ITEM,
     COMPRIMENTO_ITEM,
     ALTURA_ITEM,
-    QTD_PAGINAS,
+    // QTD_PAGINAS,
     SALDO_DISPONIVEL,
     VLR_CAPA,
     STATUS_ITEM,
@@ -250,13 +250,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     if (
       DESC_SINOPSE ||
       OBS_ESPECIAIS ||
-      INFO_COMP_ITEM ||
-      QTD_PAGINAS
+      INFO_COMP_ITEM
     ) {
       body.body_html = DESC_SINOPSE || ''
       body.body_html += OBS_ESPECIAIS ? `<br/>${OBS_ESPECIAIS}<br/>` : '<br/>'
       body.body_html += INFO_COMP_ITEM ? `${INFO_COMP_ITEM}<br/>` : ''
-      body.body_html += QTD_PAGINAS ? ` Quantidade de páginas: ${QTD_PAGINAS} <br/>` : ''
     }
 
     const fieldsGtin = ['COD_BARRA_ITEM', 'COD_BARRA_ITEM_ALT', 'COD_ISBN_ITEM']
