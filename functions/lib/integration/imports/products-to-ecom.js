@@ -143,7 +143,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       },
       weight: {
         value: PESO_ITEM || 0,
-        unit: 'mg'
+        unit: 'g'
       }
     }
 
