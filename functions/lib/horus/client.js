@@ -45,6 +45,14 @@ class Horus {
     })
   }
 
+  put (url, data) {
+    return this._request({
+      method: 'put',
+      url,
+      data
+    })
+  }
+
   delete (url) {
     return this._request({
       method: 'delete',
