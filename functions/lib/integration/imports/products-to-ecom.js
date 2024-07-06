@@ -130,20 +130,20 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       dimensions: {
 
         width: {
-          value: LARGURA_ITEM || 0,
+          value: LARGURA_ITEM || 5,
           unit: 'cm'
         },
         height: {
-          value: ALTURA_ITEM || 0,
+          value: ALTURA_ITEM || 2,
           unit: 'cm'
         },
         length: {
-          value: COMPRIMENTO_ITEM || 0,
+          value: COMPRIMENTO_ITEM || 15,
           unit: 'cm'
         }
       },
       weight: {
-        value: PESO_ITEM || 0,
+        value: PESO_ITEM || 500,
         unit: 'g'
       }
     }
