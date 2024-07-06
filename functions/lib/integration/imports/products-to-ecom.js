@@ -156,6 +156,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       body.subtitle = SUBTITULO
     }
 
+    if (!body.price && body.base_price) {
+      body.price = body.base_price
+    }
+
     const promisesGenders = []
     const promisesPublishingCompanies = []
     const categoriesForSync = []
