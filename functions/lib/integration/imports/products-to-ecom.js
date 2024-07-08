@@ -75,7 +75,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     throw new Error(productHorus.Mensagem)
   }
   console.log('> COD_ITEM => ', COD_ITEM)
-  const basePrice = parsePrice(VLR_CAPA)
+  const priceHorus = parsePrice(VLR_CAPA)
   let quantity = 0
 
   if (SALDO_DISPONIVEL) {
@@ -90,17 +90,27 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   console.log('>> isUpdatePriceOrStock ', isUpdatePriceOrStock, ' isUpdateStock: ', isUpdateStock)
 
   if ((isUpdatePriceOrStock || (product && !updateProduct))) {
+    // Update product in E-com
+
     if (!product && isUpdatePriceOrStock) {
       // product not found to update
       return { _id: 'skip_stock_or_price' }
     }
     const endpoint = `products/${product._id}.json`
     const body = {}
-    if (basePrice && basePrice !== product.base_price && updatePrice) {
-      body.base_price = basePrice
-      // creates a product with no price, but as unavailable if the value is available,
-      // the product becomes available
-      if (!product.base_price && basePrice) {
+
+    if (priceHorus && updatePrice) {
+      // create a product without a price, but as unavailable if the value is available, 
+      // the product becomes available (used in the kit)
+      if (!product.price) {
+        body.price = priceHorus
+      }
+
+      if (priceHorus !== product.base_price) {
+        body.base_price = priceHorus
+      }
+
+      if (!product.base_price) {
         body.available = true
       }
     }
@@ -120,6 +130,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
     return product
   } else {
+    // New product in E-com
     const body = {
       sku: `COD_ITEM${COD_ITEM}`,
       name: NOM_ITEM,
@@ -148,16 +159,13 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     }
 
-    if (basePrice) {
-      body.base_price = basePrice
+    if (priceHorus) {
+      body.base_price = priceHorus
+      body.price = priceHorus
     }
 
     if (SUBTITULO) {
       body.subtitle = SUBTITULO
-    }
-
-    if (!body.price && body.base_price) {
-      body.price = body.base_price
     }
 
     const promisesGenders = []
@@ -288,7 +296,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       })
     }
 
-    if (sendSyncKit.length || !basePrice) {
+    if (sendSyncKit.length || !priceHorus) {
       // Incomplete Kit
       body.available = false
     }
