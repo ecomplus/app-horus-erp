@@ -183,14 +183,28 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           })
       }
 
-      console.log('>> Horus order: ', JSON.stringify(orderHorus))
-      const statusSkip = ['CAN', 'FAT']
+      // console.log('>> Horus order: ', JSON.stringify(orderHorus))
+      const statusSkip = ['CAN', 'FAT', 'IMP']
       const isStatusSkip = orderHorus.STATUS_PEDIDO_VENDA && statusSkip.includes(orderHorus.STATUS_PEDIDO_VENDA)
 
-      console.log('>> Horus isStatusSkip: ', isStatusSkip)
+      console.log('>> Horus status: ', orderHorus.STATUS_PEDIDO_VENDA, ' skip: ', isStatusSkip)
 
-      if (orderHorus.STATUS_PEDIDO_VENDA && (orderHorus.STATUS_PEDIDO_VENDA === 'CAN')) {
-        console.log(`${logHead} skipped, order cancelled in ERP`)
+      if (orderHorus.STATUS_PEDIDO_VENDA && isStatusSkip) {
+        let msgStatus = ''
+        switch (orderHorus.STATUS_PEDIDO_VENDA) {
+          case 'CAN':
+            msgStatus = 'cancelled'
+            break
+          case 'FAT':
+            msgStatus = 'invoiced'
+            break
+          case 'IMP':
+            msgStatus = 'printed'
+            break
+          default:
+            break
+        }
+        console.log(`${logHead} skipped, order ${msgStatus} in ERP`)
         throw new Error(skipCreate)
       }
 
