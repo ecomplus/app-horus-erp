@@ -31,16 +31,15 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
     }
 
     if (customer.name) {
-      const {
-        given_name: fristName,
-        middle_name: middleName,
-        family_name: lastName
-      } = customer.name
+      const fristName = customer.name?.given_name
+      const middleName = customer.name?.middle_name
+      const lastName = customer.name?.family_name
+
       const name = ((fristName ? `${fristName} ` : '') +
             (middleName ? `${middleName} ` : '') +
             (lastName ? `${lastName}` : '')).trim()
 
-      body.NOM_CLI = name
+      body.NOM_CLI = name.toUpperCase() // store 51504 use Upper Case
     }
 
     if (customer.birth_date) {
