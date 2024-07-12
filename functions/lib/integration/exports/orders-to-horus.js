@@ -183,6 +183,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           })
       }
 
+      console.log('>> Horus Status: ', orderHorus.STATUS_PEDIDO_VENDA)
+      console.log('>> Horus order: ', JSON.stringify(orderHorus))
+
       if (orderHorus.STATUS_PEDIDO_VENDA && orderHorus.STATUS_PEDIDO_VENDA === 'CAN') {
         console.log(`${logHead} skipped, order cancelled in ERP`)
         throw new Error(skipCreate)
