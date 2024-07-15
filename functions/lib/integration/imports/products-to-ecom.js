@@ -100,7 +100,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const body = {}
 
     if (priceHorus && updatePrice) {
-      // create a product without a price, but as unavailable if the value is available, 
+      // create a product without a price, but as unavailable if the value is available,
       // the product becomes available (used in the kit)
       if (!product.price) {
         body.price = priceHorus

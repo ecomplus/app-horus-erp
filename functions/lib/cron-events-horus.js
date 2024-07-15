@@ -87,8 +87,12 @@ const productsStocksEvents = async (horus, storeId, opts) => {
     // console.log('>> data ', data && JSON.stringify(data))
     dateInit = parseDate(new Date(lastUpdateResource), true)
   }
-  const companyCode = opts.appData.company_code || 1
-  const subsidiaryCode = opts.appData.subsidiary_code || 1
+  const companyCode = opts.appData?.company_code || 1
+  const subsidiaryCode = opts.appData?.subsidiary_code || 1
+  let stockCode = opts.appData?.stock_code
+  if (storeId === '51504' || storeId === 51504) {
+    stockCode = stockCode || 20
+  }
 
   const codCaract = opts?.appData?.code_characteristic || 5
   const codTpoCaract = opts?.appData?.code_type_characteristic || 3
@@ -97,7 +101,9 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
     `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
     `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
-    '&TIPO_SALDO=V'
+    `&TIPO_SALDO=V${stockCode ? `&COD_LOCAL_ESTOQUE=${stockCode}` : ''}`
+
+  console.log(' Query: ', query)
 
   let hasRepeat = true
   let offset = 0
