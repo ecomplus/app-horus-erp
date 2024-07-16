@@ -18,7 +18,7 @@ const releaseDate = '2024-04-01T00:00:00.000Z'
 const listStoreIds = async () => {
   const storeIds = []
   const date = new Date()
-  date.setHours(date.getHours() - 51) // 48 hours + 3 hours (cron update token)
+  date.setHours(date.getHours() - 48)
 
   // console.log('>> ', date.toISOString(), ' <<')
   const querySnapshot = await firestore()
