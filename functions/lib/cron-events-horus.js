@@ -113,6 +113,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   // const init = Date.now()
   const promisesSendTopics = []
   while (hasRepeat) {
+    console.log('>>offset', offset)
     // create Object Horus to request api Horus
     const endpoint = `/Estoque${query}&offset=${offset}&limit=${limit}`
     const products = await requestHorus(horus, endpoint, 'get', true)
