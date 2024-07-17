@@ -117,11 +117,11 @@ const productsStocksEvents = async (horus, storeId, opts) => {
     const endpoint = `/Estoque${query}&offset=${offset}&limit=${limit}`
     const products = await requestHorus(horus, endpoint, 'get', true)
       .catch((_err) => {
-        // if (_err.response) {
-        //   console.warn(JSON.stringify(_err.response))
-        // } else {
-        //   console.error(_err)
-        // }
+        if (_err.response) {
+          console.warn(JSON.stringify(_err.response))
+        } else {
+          console.error(_err)
+        }
         return null
       })
 
