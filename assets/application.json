@@ -144,6 +144,16 @@
       },
       "hide": true
     },
+    "stock_code": {
+      "schema": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 999999,
+        "title": "Código do Local do Estoque",
+        "description": "Código do Local do Estoque, caso não seja preenchido serão considerados no cálculo o somatório de todas os locais de estoques ativos."
+      },
+      "hide": true
+    },
     "products": {
       "schema": {
         "title": "Produtos",
