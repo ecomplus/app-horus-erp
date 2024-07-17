@@ -17,17 +17,17 @@ const getAppSdk = () => {
   })
 }
 
-const checkAndUpdateLastUpdateDate = async (isUpdateDate, lastUpdate, field, now, docRef) => {
-  if (isUpdateDate) {
-    const date = new Date(lastUpdate || Date.now())
-    const lastUpdateResource = now.getTime() > date.getTime()
-      ? now.toISOString()
-      : new Date(date.getTime() + 60 * 1000).toISOString()
-    const body = { [`${field}`]: lastUpdateResource, updated_at: now.toISOString() }
-    await docRef.set(body, { merge: true })
-      .catch(console.error)
-  }
-}
+// const checkAndUpdateLastUpdateDate = async (isUpdateDate, lastUpdate, field, now, docRef) => {
+//   if (isUpdateDate) {
+//     const date = new Date(lastUpdate || Date.now())
+//     const lastUpdateResource = now.getTime() > date.getTime()
+//       ? now.toISOString()
+//       : new Date(date.getTime() + 60 * 1000).toISOString()
+//     const body = { [`${field}`]: lastUpdateResource, updated_at: now.toISOString() }
+//     await docRef.set(body, { merge: true })
+//       .catch(console.error)
+//   }
+// }
 
 module.exports = async (
   {
@@ -43,13 +43,13 @@ module.exports = async (
     .replace('_stocks', '')
     .replace('_price', '')
 
-  let isUpdateDate = true
-  if (typeof opts.isUpdateDate === 'boolean') {
-    isUpdateDate = opts.isUpdateDate
-  }
+  // let isUpdateDate = true
+  // if (typeof opts.isUpdateDate === 'boolean') {
+  //   isUpdateDate = opts.isUpdateDate
+  // }
 
   const { eventId } = context
-  const { DAT_ULT_ATL: lastUpdate } = objectHorus
+  // const { DAT_ULT_ATL: lastUpdate } = objectHorus
   const logId = `${eventId}-s${storeId}`
   const docRef = firestore().doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
   console.log(`>> Exec Event #${logId} import: ${resource}`)
@@ -63,12 +63,11 @@ module.exports = async (
   }
 
   // const now = new Date(Date.now() - 3 * 60 * 60 * 1000) // UTC-3
-  const now = new Date()
+  // const now = new Date()
 
   return appSdk.getAuth(storeId)
     .then((auth) => {
       const appClient = { appSdk, storeId, auth }
-      // console.log('>> ', resourcePrefix, ' ', resource, ' ', lastUpdateDoc)
       if (objectHorus && lastUpdateDoc) {
         if (resource === 'products') {
           console.log('> try COD_ITEM: ', objectHorus?.COD_ITEM, ' ', resourcePrefix)
@@ -77,17 +76,13 @@ module.exports = async (
           .then(async (response) => {
             const _id = response?._id || 'not_update'
 
-            if (resourcePrefix.startsWith('products')) {
-              await checkAndUpdateLastUpdateDate(isUpdateDate, lastUpdate, field, now, docRef)
-            }
-
-            // if (opts.queueEntry) {
-            //   return updateApp(appClient, _id, opts)
+            // if (resourcePrefix.startsWith('products')) {
+            //   await checkAndUpdateLastUpdateDate(isUpdateDate, lastUpdate, field, now, docRef)
             // }
+
             return { _id }
           })
       }
-      // return updateApp(appClient, 'remove_queue_app', opts)
       return { _id: 'not_found' }
     })
     .then(async ({ _id }) => {

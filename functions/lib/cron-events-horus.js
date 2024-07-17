@@ -71,21 +71,19 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
 }
 
 const productsStocksEvents = async (horus, storeId, opts) => {
-  const resource = 'products'
-  const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
+  // const field = ''
   let dateInit = parseDate(new Date(releaseDate), true)
   const dateEnd = parseDate(new Date(), true)
-  const resourcePrefix = `${resource}_stocks`
+  const resourcePrefix = 'products_stocks'
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
 
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
     const data = docSnapshot.data()
-    const lastUpdateResource = data[field]
-    // console.log('>> ', resource, ' ', resourcePrefix, ' => ', field, ' ', lastUpdateResource)
-    // console.log('>> data ', data && JSON.stringify(data))
-    dateInit = parseDate(new Date(lastUpdateResource), true)
+    const lastUpdateProducts = data.lastUpdateProducts
+    //
+    dateInit = lastUpdateProducts ? parseDate(new Date(lastUpdateProducts), true) : dateInit
   }
   const companyCode = opts.appData?.company_code || 1
   const subsidiaryCode = opts.appData?.subsidiary_code || 1
@@ -112,49 +110,54 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   let total = 0
   // const init = Date.now()
   const promisesSendTopics = []
-  while (hasRepeat) {
-    // create Object Horus to request api Horus
-    const endpoint = `/Estoque${query}&offset=${offset}&limit=${limit}`
-    const products = await requestHorus(horus, endpoint, 'get', true)
-      .catch((_err) => {
-        if (_err.response) {
-          console.warn(JSON.stringify(_err.response))
-        } else {
-          console.error(_err)
-        }
-        return null
-      })
+  // while (hasRepeat) {
+  // create Object Horus to request api Horus
+  const endpoint = `/Estoque${query}&offset=${offset}&limit=${limit}`
+  const products = await requestHorus(horus, endpoint, 'get', true)
+    .catch((_err) => {
+      if (_err.response) {
+        console.warn(JSON.stringify(_err.response))
+      } else {
+        console.error(_err)
+      }
+      return null
+    })
 
-    console.log('>>offset', offset, products?.length)
-    if (products && products.length) {
-      total += products.length
-      products.forEach((productHorus, index) => {
-        promisesSendTopics.push(
-          sendMessageTopic(
-            topicResourceToEcom,
-            {
-              storeId,
-              resource: resourcePrefix,
-              objectHorus: productHorus,
-              opts
-            })
-        )
-      })
-      // const now = Date.now()
-      // const time = now - init
-      // if (time >= 50000) {
-      //   hasRepeat = false
-      // }
-    } else {
-      hasRepeat = false
-    }
+  console.log('>>offset', offset, products?.length)
+  hasRepeat = products?.length === limit
 
-    offset += limit
+  if (products?.length) {
+    total += products.length
+    products.forEach((productHorus, index) => {
+      promisesSendTopics.push(
+        sendMessageTopic(
+          topicResourceToEcom,
+          {
+            storeId,
+            resource: resourcePrefix,
+            objectHorus: productHorus,
+            opts
+          })
+      )
+    })
+    // const now = Date.now()
+    // const time = now - init
+    // if (time >= 50000) {
+    //   hasRepeat = false
+    // }
   }
+
+  offset += limit
+  // }
   console.log(`>>Cron STOCKS #${storeId} Updates: ${total}`)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
+      docRef.set({
+        offset,
+        hasRepeat,
+        updated_at: new Date().toISOString()
+      })
       console.log(`Finish Exec STOCKS in #${storeId}`)
     })
 }
