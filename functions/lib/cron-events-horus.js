@@ -113,7 +113,6 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   // const init = Date.now()
   const promisesSendTopics = []
   while (hasRepeat) {
-    console.log('>>offset', offset)
     // create Object Horus to request api Horus
     const endpoint = `/Estoque${query}&offset=${offset}&limit=${limit}`
     const products = await requestHorus(horus, endpoint, 'get', true)
@@ -126,7 +125,8 @@ const productsStocksEvents = async (horus, storeId, opts) => {
         return null
       })
 
-    if (products && Array.isArray(products)) {
+    console.log('>>offset', offset, products?.length)
+    if (products && products.length) {
       total += products.length
       products.forEach((productHorus, index) => {
         promisesSendTopics.push(
