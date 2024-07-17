@@ -72,8 +72,8 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
 
 const productsStocksEvents = async (horus, storeId, opts) => {
   // const field = ''
-  let dateInit = parseDate(new Date(releaseDate), true)
-  const dateEnd = parseDate(new Date(), true)
+  let dateInit = new Date(releaseDate)
+  const dateEnd = new Date()
   const resourcePrefix = 'products_stocks'
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
@@ -81,9 +81,9 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
     const data = docSnapshot.data()
-    const lastUpdateProducts = data.lastUpdateProducts
+    const lastUpdateProducts = data?.dateInit
     //
-    dateInit = lastUpdateProducts ? parseDate(new Date(lastUpdateProducts), true) : dateInit
+    dateInit = lastUpdateProducts ? new Date(lastUpdateProducts) : dateInit
   }
   const companyCode = opts.appData?.company_code || 1
   const subsidiaryCode = opts.appData?.subsidiary_code || 1
@@ -95,8 +95,10 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const codCaract = opts?.appData?.code_characteristic || 5
   const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
-  console.log(`>> Check STOCKS ${dateInit} at ${dateEnd}`)
-  const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
+  if (!dateEnd || !dateInit) return
+
+  console.log(`>> Check STOCKS ${parseDate(dateInit)} at ${parseDate(dateEnd)}`)
+  const query = `?DATA_INI=${parseDate(dateInit)}&DATA_FIM=${parseDate(dateEnd)}` +
     `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
     `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
     `&TIPO_SALDO=V${stockCode ? `&COD_LOCAL_ESTOQUE=${stockCode}` : ''}`
@@ -140,11 +142,6 @@ const productsStocksEvents = async (horus, storeId, opts) => {
           })
       )
     })
-    // const now = Date.now()
-    // const time = now - init
-    // if (time >= 50000) {
-    //   hasRepeat = false
-    // }
   }
 
   offset += limit
@@ -154,10 +151,12 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   return Promise.all(promisesSendTopics)
     .then(() => {
       docRef.set({
+        dateInit,
+        dateEnd,
         offset,
         hasRepeat,
         updated_at: new Date().toISOString()
-      })
+      }, { merge: true })
       console.log(`Finish Exec STOCKS in #${storeId}`)
     })
 }
