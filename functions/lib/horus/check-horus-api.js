@@ -12,16 +12,16 @@ const requestCheckHorus = (horus, isRetry) => new Promise((resolve, _reject) => 
         resolve(false)
       }
     })
-    .catch((err) => {
+    .catch((_err) => {
       if (!isRetry) {
         setTimeout(() => requestCheckHorus(horus, true), 700)
       }
 
-      if (err.response) {
-        console.log(err.response)
-      } else {
-        console.error(err)
-      }
+      // if (err.response) {
+      //   console.log(err.response)
+      // } else {
+      //   console.error(err)
+      // }
 
       resolve(false)
     })
