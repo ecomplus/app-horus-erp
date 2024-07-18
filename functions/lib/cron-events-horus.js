@@ -81,9 +81,12 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
     const data = docSnapshot.data()
-    const lastUpdateProducts = data?.dateInit
-    //
-    dateInit = lastUpdateProducts ? new Date(lastUpdateProducts) : dateInit
+    const dateInitDoc = data?.dateInit
+    const dateEndtDoc = data?.dateEnd
+    const offsetDoc = data?.offset
+    const hasRepeatDoc = data?.hasRepeat
+    console.log('>> doc ', dateEndtDoc, dateInitDoc, offsetDoc, hasRepeatDoc)
+    dateInit = dateInitDoc ? new Date(dateInitDoc) : dateInit
   }
   const companyCode = opts.appData?.company_code || 1
   const subsidiaryCode = opts.appData?.subsidiary_code || 1
