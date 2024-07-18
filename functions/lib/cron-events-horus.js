@@ -76,7 +76,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   let dateEnd = new Date()
 
   let offset = 0
-  const limit = 500
+  const limit = 50
 
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
