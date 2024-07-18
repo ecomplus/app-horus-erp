@@ -144,7 +144,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
     })
   }
 
-  offset += limit
+  offset = hasRepeat ? offset + limit : 0
   // }
   console.log(`>>Cron STOCKS #${storeId} Updates: ${total}`)
 
