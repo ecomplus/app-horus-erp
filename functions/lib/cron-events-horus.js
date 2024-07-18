@@ -89,8 +89,6 @@ const productsStocksEvents = async (horus, storeId, opts) => {
     const offsetDoc = data?.offset
     const hasRepeatDoc = data?.hasRepeat
 
-    console.log('>> doc ', dateEndtDoc, dateInitDoc, offsetDoc, hasRepeatDoc, ' ', typeof storeId)
-
     if (hasRepeatDoc) {
       dateInit = dateInitDoc ? new Date(dateInitDoc) : dateInit
       dateEnd = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
@@ -102,14 +100,14 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const companyCode = opts.appData?.company_code || 1
   const subsidiaryCode = opts.appData?.subsidiary_code || 1
   let stockCode = opts.appData?.stock_code
-  if (storeId === '51504' || storeId === 51504) {
+  if (storeId === 51504) {
     stockCode = stockCode || 20
   }
 
   const codCaract = opts?.appData?.code_characteristic || 5
   const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
-  console.log(`>> Check STOCKS ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)}`)
+  console.log(`>> Check STOCKS ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)} offset ${offset}`)
   const query = `?DATA_INI=${parseDate(dateInit, true)}&DATA_FIM=${parseDate(dateEnd, true)}` +
     `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
     `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
@@ -127,15 +125,14 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const endpoint = `/Estoque${query}&offset=${offset}&limit=${limit}`
   const products = await requestHorus(horus, endpoint, 'get', true)
     .catch((_err) => {
-      if (_err.response) {
-        console.warn(JSON.stringify(_err.response))
-      } else {
-        console.error(_err)
-      }
+      // if (_err.response) {
+      //   console.warn(JSON.stringify(_err.response))
+      // } else {
+      //   console.error(_err)
+      // }
       return null
     })
 
-  console.log('>>offset', offset, products?.length)
   hasRepeat = products?.length === limit
 
   if (products?.length) {
@@ -156,7 +153,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
   offset = hasRepeat ? offset + limit : 0
   // }
-  console.log(`>>Cron STOCKS #${storeId} Updates: ${total}`)
+  console.log(`>>Cron STOCKS #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
 
   return Promise.all(promisesSendTopics)
     .then(() => {
