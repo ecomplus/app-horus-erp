@@ -276,7 +276,7 @@ module.exports = async (appSdk) => {
         const opts = { appData }
         const isHorusApiOk = await checkHorusApi(horus)
         const promises = []
-        console.log('>> Horus API ok: ', isHorusApiOk)
+        console.log('>> Horus API ', isHorusApiOk ? 'OK' : 'OffLine')
         if (isHorusApiOk) {
           promises.push(productsStocksEvents(horus, storeId, opts))
           const now = new Date()
@@ -292,8 +292,6 @@ module.exports = async (appSdk) => {
             // run at 30 in 30min
             promises.push(checkProductsImports({ appSdk, storeId }, horus, opts))
           }
-        } else {
-          console.log('> Horus API Offline')
         }
 
         return Promise.all(promises)
