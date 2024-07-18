@@ -97,8 +97,8 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
   if (!dateEnd || !dateInit) return
 
-  console.log(`>> Check STOCKS ${parseDate(dateInit)} at ${parseDate(dateEnd)}`)
-  const query = `?DATA_INI=${parseDate(dateInit)}&DATA_FIM=${parseDate(dateEnd)}` +
+  console.log(`>> Check STOCKS ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)}`)
+  const query = `?DATA_INI=${parseDate(dateInit, true)}&DATA_FIM=${parseDate(dateEnd, true)}` +
     `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
     `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
     `&TIPO_SALDO=V${stockCode ? `&COD_LOCAL_ESTOQUE=${stockCode}` : ''}`
