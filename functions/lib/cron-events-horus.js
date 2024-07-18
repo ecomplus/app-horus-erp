@@ -71,10 +71,13 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
 }
 
 const productsStocksEvents = async (horus, storeId, opts) => {
-  // const field = ''
-  let dateInit = new Date(releaseDate)
-  const dateEnd = new Date()
   const resourcePrefix = 'products_stocks'
+  let dateInit = new Date(releaseDate)
+  let dateEnd = new Date()
+
+  let offset = 0
+  const limit = 50
+
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
 
@@ -85,8 +88,14 @@ const productsStocksEvents = async (horus, storeId, opts) => {
     const dateEndtDoc = data?.dateEnd
     const offsetDoc = data?.offset
     const hasRepeatDoc = data?.hasRepeat
+
     console.log('>> doc ', dateEndtDoc, dateInitDoc, offsetDoc, hasRepeatDoc)
-    dateInit = dateInitDoc ? new Date(dateInitDoc) : dateInit
+
+    if (hasRepeatDoc) {
+      dateInit = dateInitDoc ? new Date(dateInitDoc) : dateInit
+      dateEnd = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
+      offset = offsetDoc || 0
+    }
   }
   const companyCode = opts.appData?.company_code || 1
   const subsidiaryCode = opts.appData?.subsidiary_code || 1
@@ -109,8 +118,6 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   console.log(' Query: ', query)
 
   let hasRepeat = true
-  let offset = 0
-  const limit = 50
 
   let total = 0
   // const init = Date.now()
