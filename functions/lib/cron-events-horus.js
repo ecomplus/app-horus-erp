@@ -151,8 +151,8 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   return Promise.all(promisesSendTopics)
     .then(() => {
       docRef.set({
-        dateInit,
-        dateEnd,
+        dateInit: dateInit.toISOString(),
+        dateEnd: dateEnd.toISOString(),
         offset,
         hasRepeat,
         updated_at: new Date().toISOString()
