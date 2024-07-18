@@ -89,12 +89,14 @@ const productsStocksEvents = async (horus, storeId, opts) => {
     const offsetDoc = data?.offset
     const hasRepeatDoc = data?.hasRepeat
 
-    console.log('>> doc ', dateEndtDoc, dateInitDoc, offsetDoc, hasRepeatDoc)
+    console.log('>> doc ', dateEndtDoc, dateInitDoc, offsetDoc, hasRepeatDoc, ' ', typeof storeId)
 
     if (hasRepeatDoc) {
       dateInit = dateInitDoc ? new Date(dateInitDoc) : dateInit
       dateEnd = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
       offset = offsetDoc || 0
+    } else {
+      dateInit = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
     }
   }
   const companyCode = opts.appData?.company_code || 1
@@ -106,8 +108,6 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
   const codCaract = opts?.appData?.code_characteristic || 5
   const codTpoCaract = opts?.appData?.code_type_characteristic || 3
-
-  if (!dateEnd || !dateInit) return
 
   console.log(`>> Check STOCKS ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)}`)
   const query = `?DATA_INI=${parseDate(dateInit, true)}&DATA_FIM=${parseDate(dateEnd, true)}` +
