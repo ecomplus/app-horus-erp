@@ -156,24 +156,27 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   console.log(`>>Cron STOCKS #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
 
   return Promise.all(promisesSendTopics)
-    .then(() => {
-      docRef.set({
+    .then(async () => {
+      await docRef.set({
         dateInit: dateInit.toISOString(),
         dateEnd: dateEnd.toISOString(),
         offset,
         hasRepeat,
         updated_at: new Date().toISOString()
       }, { merge: true })
+        .catch(console.error)
       console.log(`Finish Exec STOCKS in #${storeId}`)
     })
 }
 
 const productsPriceEvents = async (horus, storeId, opts) => {
-  const resource = 'products'
-  const field = 'lastUpdate' + resource.charAt(0).toUpperCase() + resource.substring(1)
-  let dateInit = parseDate(new Date(releaseDate), true)
-  const dateEnd = parseDate(new Date(), true)
-  const resourcePrefix = `${resource}_price`
+  const resourcePrefix = 'products_price'
+  let dateInit = new Date(releaseDate)
+  let dateEnd = new Date()
+
+  let offset = 0
+  const limit = 50
+
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
 
@@ -181,67 +184,74 @@ const productsPriceEvents = async (horus, storeId, opts) => {
   const docSnapshot = await docRef.get()
   if (docSnapshot.exists) {
     const data = docSnapshot.data()
-    const lastUpdateResource = data[field]
-    // console.log('>> ', resource, ' ', resourcePrefix, ' => ', field, ' ', lastUpdateResource)
-    // console.log('>> data ', data && JSON.stringify(data))
-    dateInit = parseDate(new Date(lastUpdateResource), true)
+    const dateInitDoc = data?.dateInit
+    const dateEndtDoc = data?.dateEnd
+    const offsetDoc = data?.offset
+    const hasRepeatDoc = data?.hasRepeat
+
+    if (hasRepeatDoc) {
+      dateInit = dateInitDoc ? new Date(dateInitDoc) : dateInit
+      dateEnd = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
+      offset = offsetDoc || 0
+    } else {
+      dateInit = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
+    }
   }
   const codCaract = opts?.appData?.code_characteristic || 5
   const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
-  console.log(`>> Check PRICE ${dateInit} at ${dateEnd}`)
-  const query = `?DATA_INI=${dateInit}&DATA_FIM=${dateEnd}` +
+  console.log(`>> Check PRICE ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)}`)
+  const query = `?DATA_INI=${parseDate(dateInit, true)}&DATA_FIM=${parseDate(dateEnd, true)}` +
     `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}`
 
   let hasRepeat = true
-  let offset = 0
-  const limit = 50
 
   let total = 0
   // const init = Date.now()
   const promisesSendTopics = []
-  while (hasRepeat) {
-    // create Object Horus to request api Horus
-    const endpoint = `/Busca_preco_item${query}&offset=${offset}&limit=${limit}`
-    const products = await requestHorus(horus, endpoint, 'get', true)
-      .catch((_err) => {
-        // if (_err.response) {
-        //   console.warn(JSON.stringify(_err.response))
-        // } else {
-        //   console.error(_err)
-        // }
-        return null
-      })
-
-    if (products && Array.isArray(products)) {
-      total += products.length
-      products.forEach((productHorus, index) => {
-        promisesSendTopics.push(
-          sendMessageTopic(
-            topicResourceToEcom,
-            {
-              storeId,
-              resource: resourcePrefix,
-              objectHorus: productHorus,
-              opts
-            })
-        )
-      })
-      // const now = Date.now()
-      // const time = now - init
-      // if (time >= 50000) {
-      //   hasRepeat = false
+  // create Object Horus to request api Horus
+  const endpoint = `/Busca_preco_item${query}&offset=${offset}&limit=${limit}`
+  const products = await requestHorus(horus, endpoint, 'get', true)
+    .catch((_err) => {
+      // if (_err.response) {
+      //   console.warn(JSON.stringify(_err.response))
+      // } else {
+      //   console.error(_err)
       // }
-    } else {
-      hasRepeat = false
-    }
+      return null
+    })
 
-    offset += limit
+  hasRepeat = products?.length === limit
+
+  if (products?.length) {
+    total += products.length
+    products.forEach((productHorus, index) => {
+      promisesSendTopics.push(
+        sendMessageTopic(
+          topicResourceToEcom,
+          {
+            storeId,
+            resource: resourcePrefix,
+            objectHorus: productHorus,
+            opts
+          })
+      )
+    })
   }
-  console.log(`>>Cron PRICE #${storeId} Updates: ${total}`)
+
+  offset = hasRepeat ? offset + limit : 0
+  console.log(`>>Cron PRICE #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
 
   return Promise.all(promisesSendTopics)
-    .then(() => {
+    .then(async () => {
+      await docRef.set({
+        dateInit: dateInit.toISOString(),
+        dateEnd: dateEnd.toISOString(),
+        offset,
+        hasRepeat,
+        updated_at: new Date().toISOString()
+      }, { merge: true })
+        .catch(console.error)
       console.log(`Finish Exec PRICE in #${storeId}`)
     })
 }
