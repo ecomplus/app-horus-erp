@@ -39,12 +39,12 @@ const listStoreIds = async () => {
 const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
   console.log(`Exec Check New PRODUCT in #${storeId}`)
   const codigoItems = await getAllItemsHorusToImport(horus, storeId, opts)
-  console.log('> Codes ERP: ', codigoItems.length)
+  console.log('> Codes ERP: ', codigoItems.length, JSON.stringify(codigoItems))
   const newProducts = await ecomClient.search({
     storeId,
     url: '/items.json',
     data: {
-      size: codigoItems.length + 10
+      size: codigoItems.length + 10 // 10 for products heven't ERP
     }
   }).then(({ data }) => {
     const { hits: { hits } } = data
