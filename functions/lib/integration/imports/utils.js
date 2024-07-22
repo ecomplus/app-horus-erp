@@ -180,7 +180,7 @@ const getAllItemsHorusToImport = async (horus, storeId, opts) => {
   let offset = 0
   const limit = 50
 
-  const init = Date.now()
+  // const init = Date.now()
   const listItemsToImport = []
   const codCaract = opts?.appData?.code_characteristic || 5
   const codTpoCaract = opts?.appData?.code_type_characteristic || 3

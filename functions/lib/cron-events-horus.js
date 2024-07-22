@@ -44,7 +44,7 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
     storeId,
     url: '/items.json',
     data: {
-      // size: codigoItems.length + 10 // 10 for products heven't ERP
+      size: codigoItems.length + 50 // 50 for products heven't ERP
     }
   }).then(({ data }) => {
     const { hits: { hits } } = data
@@ -60,7 +60,7 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
   })
     .catch(() => [])
 
-  console.log('>> new ', JSON.stringify(newProducts), newProducts.length)
+  console.log('>> new ', newProducts.length)
   const productsQueue = opts?.appData?.importation.products || []
   const products = productsQueue.concat(newProducts || [])
   console.log('>> ', JSON.stringify(products))
