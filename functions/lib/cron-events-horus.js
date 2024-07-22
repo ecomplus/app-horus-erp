@@ -60,6 +60,7 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
   })
     .catch(() => [])
 
+  console.log('>> new ', JSON.stringify(newProducts), newProducts.length)
   const productsQueue = opts?.appData?.importation.products || []
   const products = productsQueue.concat(newProducts || [])
 
