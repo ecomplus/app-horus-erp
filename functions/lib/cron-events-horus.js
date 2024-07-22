@@ -39,7 +39,7 @@ const listStoreIds = async () => {
 const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
   console.log(`Exec Check New PRODUCT in #${storeId}`)
   const codigoItems = await getAllItemsHorusToImport(horus, storeId, opts)
-  console.log('> Codes ERP: ', codigoItems.length, JSON.stringify(codigoItems))
+  console.log('> Codes ERP: ', codigoItems.length)
   const newProducts = await ecomClient.search({
     storeId,
     url: '/items.json',
@@ -60,7 +60,6 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
   })
     .catch(() => [])
 
-  // console.log('>> new ', newProducts.length)
   const productsQueue = opts?.appData?.importation.products || []
   const products = productsQueue.reduce((acc, current) => {
     if (!acc.includes(current)) {
@@ -69,14 +68,12 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
     return acc
   }, newProducts || [])
     ?.sort()
-  console.log('>> ', JSON.stringify(products))
 
-  return null
-  // return updateAppData({ appSdk, storeId }, {
-  //   importation: { products }
-  // }).then(() => {
-  //   console.log(`Finish Exec Check New PRODUCT in #${storeId} add queue ${products.length}`)
-  // })
+  return updateAppData({ appSdk, storeId }, {
+    importation: { products }
+  }).then(() => {
+    console.log(`Finish Exec Check New PRODUCT in #${storeId} add queue ${products.length}`)
+  })
 }
 
 const productsStocksEvents = async (horus, storeId, opts) => {
