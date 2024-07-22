@@ -202,14 +202,16 @@ const getAllItemsHorusToImport = async (horus, storeId, opts) => {
         return null
       })
 
-    if (items && Array.isArray(items)) {
-      // total += items.length
+    if (items && items.length) {
+      hasRepeat = items?.length === limit
+
       items.forEach((productHorus, index) => {
         listItemsToImport.push(productHorus.COD_ITEM)
       })
       const now = Date.now()
       const time = now - init
       if (time >= 20000) {
+        console.log('>> time stop', offset)
         hasRepeat = false
       }
     } else {
