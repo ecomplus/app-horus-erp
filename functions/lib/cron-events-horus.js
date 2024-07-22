@@ -293,7 +293,7 @@ module.exports = async (appSdk) => {
             promises.push(productsPriceEvents(horus, storeId, opts))
           }
 
-          if (now.getMinutes() % 1 === 0) {
+          if (now.getMinutes() % 30 === 0) {
             // new Product
             // run at 30 in 30min
             promises.push(checkProductsImports({ appSdk, storeId }, horus, opts))
