@@ -60,16 +60,22 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
   })
     .catch(() => [])
 
-  console.log('>> new ', newProducts.length)
+  // console.log('>> new ', newProducts.length)
   const productsQueue = opts?.appData?.importation.products || []
-  const products = productsQueue.concat(newProducts || [])
+  const products = productsQueue.reduce((acc, current) => {
+    if (!acc.includes(current)) {
+      acc.push(current)
+    }
+    return acc
+  }, newProducts || [])
+    ?.sort()
   console.log('>> ', JSON.stringify(products))
-  return null
 
+  return null
   // return updateAppData({ appSdk, storeId }, {
   //   importation: { products }
   // }).then(() => {
-  //   console.log(`Finish Exec Check New PRODUCT in #${storeId}`)
+  //   console.log(`Finish Exec Check New PRODUCT in #${storeId} add queue ${products.length}`)
   // })
 }
 
