@@ -44,7 +44,7 @@ const checkProductsImports = async ({ appSdk, storeId }, horus, opts) => {
     storeId,
     url: '/items.json',
     data: {
-      size: codigoItems.length + 10 // 10 for products heven't ERP
+      // size: codigoItems.length + 10 // 10 for products heven't ERP
     }
   }).then(({ data }) => {
     const { hits: { hits } } = data
