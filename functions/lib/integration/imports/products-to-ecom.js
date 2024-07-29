@@ -74,7 +74,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   if (!COD_ITEM) {
     throw new Error(productHorus.Mensagem)
   }
-  console.log('> COD_ITEM => ', COD_ITEM)
   const priceHorus = parsePrice(VLR_CAPA)
   let quantity = 0
 
@@ -87,7 +86,14 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const isUpdatePriceOrStock = !opts.queueEntry?.mustUpdateAppQueue && (updatePrice || updateStock)
   const isUpdateStock = updateStock && (SALDO_DISPONIVEL >= 0 || SALDO >= 0)
 
-  console.log('>> isUpdatePriceOrStock ', isUpdatePriceOrStock, ' isUpdateStock: ', isUpdateStock)
+  console.log(
+    '> COD_ITEM => ', COD_ITEM,
+    productHorus && JSON.stringify(productHorus),
+    'isUpdatePriceOrStock:',
+    isUpdatePriceOrStock,
+    ' isUpdateStock:',
+    isUpdateStock
+  )
 
   if ((isUpdatePriceOrStock || (product && !updateProduct))) {
     // Update product in E-com

@@ -221,7 +221,6 @@ const getAllItemsHorusToImport = async (horus, storeId, opts) => {
     offset += limit
   }
 
-  console.log('>> offset ', offset)
   return listItemsToImport
 }
 
