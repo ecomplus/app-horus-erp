@@ -1,5 +1,7 @@
 const { firestore } = require('firebase-admin')
 const { setup } = require('@ecomplus/application-sdk')
+const Horus = require('../../horus/client')
+const checkHorusApi = require('../../horus/check-horus-api')
 const updateAppData = require('../../store-api/update-app-data')
 const getAppData = require('../../store-api/get-app-data')
 const handleExports = {
@@ -105,11 +107,19 @@ module.exports = async (
   return appSdk.getAuth(storeId)
     .then(async (auth) => {
       const appClient = { appSdk, storeId, auth }
+      const appData = opts?.appData || await getAppData(appClient, true)
+      const { username, password, baseURL } = appData
+      const horus = new Horus(username, password, baseURL)
+      const isHorusApiOk = await checkHorusApi(horus)
+
+      if (!isHorusApiOk) {
+        const err = new Error('Horus API OffLine')
+        err.apiHorusOk = false
+        throw err
+      }
+
       if (!opts || !Object.keys(opts).length || !opts.appData) {
-        const appData = await getAppData(appClient, true)
-        opts = {
-          appData
-        }
+        opts = { appData }
         if (resource === 'orders') {
           const queueEntry = { action: 'exportation', queue: resource, nextId: resourceId }
           Object.assign(opts, { queueEntry })
