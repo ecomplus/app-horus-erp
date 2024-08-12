@@ -45,7 +45,7 @@ const replayPubSub = async (_appSdk) => {
       await docRef.delete()
       return sendMessageTopic(eventName, json)
     }
-    console.log('>> Horus API ok: ', isHorusApiOk)
+    console.log('>> Horus API ok:', isHorusApiOk)
     if (isHorusApiOk) {
       promises.push(run())
     }

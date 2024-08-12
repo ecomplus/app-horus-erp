@@ -58,7 +58,7 @@ module.exports = async (appSdk) => {
               return checkHorusApi(horus)
             })
 
-          console.log('>> Horus API ', isHorusApiOk ? 'OK' : 'OffLine')
+          console.log('>> Horus API', isHorusApiOk ? 'OK' : 'OffLine')
           if (isHorusApiOk) {
             return runStore({ appSdk, storeId, auth })
           }
