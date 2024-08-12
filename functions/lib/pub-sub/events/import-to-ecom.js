@@ -94,6 +94,10 @@ module.exports = async (
       if (err.appWithoutAuth) {
         console.error(err)
       } else {
+        let countErr = opts.countErr || 0
+        countErr += 1
+        opts.countErr = countErr
+
         const json = {
           storeId,
           resource,

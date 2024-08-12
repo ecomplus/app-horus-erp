@@ -128,6 +128,10 @@ module.exports = async (
       return handleExports[resource](appClient, resourceId, opts)
         .then(async (responseId) => {
           if (!responseId) {
+            let countErr = opts.countErr || 0
+            countErr += 1
+            opts.countErr = countErr
+
             await docRef.set(
               {
                 resource,
