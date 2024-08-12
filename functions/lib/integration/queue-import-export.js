@@ -1,5 +1,7 @@
 const { firestore } = require('firebase-admin')
-// const { setup } = require('@ecomplus/application-sdk')
+const getAppData = require('../store-api/get-app-data')
+const Horus = require('../horus/client')
+const checkHorusApi = require('../horus/check-horus-api')
 const handle = {
   // Import To Ecom
   brand: require('./handles-queues/queue-brands'),
@@ -44,7 +46,24 @@ module.exports = async (appSdk) => {
     // console.log('>> Sync: ', storeId)
     promisesStore.push(
       appSdk.getAuth(storeId)
-        .then(async (auth) => runStore({ appSdk, storeId, auth }))
+        .then(async (auth) => {
+          const isHorusApiOk = await getAppData({ appSdk, storeId, auth }, true)
+            .then(appData => {
+              const {
+                username,
+                password,
+                baseURL
+              } = appData
+              const horus = new Horus(username, password, baseURL)
+              return checkHorusApi(horus)
+            })
+
+          console.log('>> Horus API ', isHorusApiOk ? 'OK' : 'OffLine')
+          if (isHorusApiOk) {
+            return runStore({ appSdk, storeId, auth })
+          }
+          return null
+        })
     )
     i += 1
   }
