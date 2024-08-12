@@ -113,7 +113,6 @@ module.exports = async (
       const isHorusApiOk = await checkHorusApi(horus)
 
       if (!isHorusApiOk) {
-        console.log('Horus API OffLine')
         const error = new Error('Horus API OffLine')
         error.apiHorusOk = false
         throw error
@@ -150,9 +149,6 @@ module.exports = async (
     })
     .catch(async (err) => {
       console.error(`>> Error Event #${logId} Export [${resource}: ${resourceId}] => Horus`)
-      if (err.appWithoutAuth) {
-        console.error(err)
-      }
       console.error(err)
       throw err
     })
