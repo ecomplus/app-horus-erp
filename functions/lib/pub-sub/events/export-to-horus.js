@@ -120,10 +120,10 @@ module.exports = async (
 
       if (!opts || !Object.keys(opts).length || !opts.appData) {
         opts = { appData }
-        if (resource === 'orders') {
-          const queueEntry = { action: 'exportation', queue: resource, nextId: resourceId }
-          Object.assign(opts, { queueEntry })
-        }
+        // if (resource === 'orders') {
+        //   const queueEntry = { action: 'exportation', queue: resource, nextId: resourceId }
+        //   Object.assign(opts, { queueEntry })
+        // }
       }
       return handleExports[resource](appClient, resourceId, opts)
         .then(async (responseId) => {

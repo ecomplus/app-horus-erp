@@ -22,16 +22,14 @@ const { topicExportToHorus } = require('../../utils-variables')
 const skipCreate = 'SKIP_CREATE'
 
 module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
-  const {
-    appData
-  } = opts
+  const { appData } = opts
   const logHead = `#${storeId} ${orderId}`
   const { username, password, baseURL, sale_code: saleCode } = appData
   const horus = new Horus(username, password, baseURL)
   const companyCode = appData.company_code || 1
   const subsidiaryCode = appData.subsidiary_code || 1
 
-  console.log('> Order => ', orderId)
+  console.log('> Order =>', orderId)
 
   return getOrderById({ appSdk, storeId, auth }, 'orders', orderId)
     .then(async (order) => {

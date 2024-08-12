@@ -17,18 +17,6 @@ const getAppSdk = () => {
   })
 }
 
-// const checkAndUpdateLastUpdateDate = async (isUpdateDate, lastUpdate, field, now, docRef) => {
-//   if (isUpdateDate) {
-//     const date = new Date(lastUpdate || Date.now())
-//     const lastUpdateResource = now.getTime() > date.getTime()
-//       ? now.toISOString()
-//       : new Date(date.getTime() + 60 * 1000).toISOString()
-//     const body = { [`${field}`]: lastUpdateResource, updated_at: now.toISOString() }
-//     await docRef.set(body, { merge: true })
-//       .catch(console.error)
-//   }
-// }
-
 module.exports = async (
   {
     storeId,

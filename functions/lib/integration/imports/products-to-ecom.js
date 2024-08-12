@@ -87,7 +87,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const isUpdateStock = updateStock && (SALDO_DISPONIVEL >= 0 || SALDO >= 0)
 
   console.log(
-    '> COD_ITEM => ', COD_ITEM,
+    '> COD_ITEM =>', COD_ITEM,
     productHorus && JSON.stringify(productHorus),
     'isUpdatePriceOrStock:',
     isUpdatePriceOrStock,
