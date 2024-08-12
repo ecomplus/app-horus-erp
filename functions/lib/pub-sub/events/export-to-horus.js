@@ -150,6 +150,9 @@ module.exports = async (
     .catch(async (err) => {
       console.error(`>> Error Event #${logId} Export [${resource}: ${resourceId}] => Horus`)
       console.error(err)
+      if (err.apiHorusOk === false) {
+        return null
+      }
       throw err
     })
 }
