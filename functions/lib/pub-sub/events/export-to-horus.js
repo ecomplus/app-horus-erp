@@ -113,9 +113,10 @@ module.exports = async (
       const isHorusApiOk = await checkHorusApi(horus)
 
       if (!isHorusApiOk) {
-        const err = new Error('Horus API OffLine')
-        err.apiHorusOk = false
-        throw err
+        console.log('Horus API OffLine')
+        const error = new Error('Horus API OffLine')
+        error.apiHorusOk = false
+        throw error
       }
 
       if (!opts || !Object.keys(opts).length || !opts.appData) {
