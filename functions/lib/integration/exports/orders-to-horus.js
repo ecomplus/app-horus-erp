@@ -28,6 +28,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   const horus = new Horus(username, password, baseURL)
   const companyCode = appData.company_code || 1
   const subsidiaryCode = appData.subsidiary_code || 1
+  let subtotal = 0
 
   console.log('> Order =>', orderId)
 
@@ -53,10 +54,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         console.log(`${logHead} skipped, customer not found`)
         return null
       }
-      const {
-        amount,
-        number
-      } = order
+      const { amount, number } = order
 
       const transaction = order.transactions && order.transactions.length && order.transactions[0]
       const paymentMethodCode = transaction && transaction.payment_method.code
@@ -255,15 +253,18 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             if (isImportItem) {
               const discountItem = discountForProduct ? (discountForProduct / item.quantity) : 0
               isAllImportedItems = false
-              body.VLR_LIQUIDO = parsePrice(vlrBruto - discountItem)
-              console.log('>> vlrBruto: ', vlrBruto, ' discount: ', discountItem, ' total: ', (vlrBruto - discountItem))
+
+              const vlrItem = parsePrice(vlrBruto - discountItem)
+              subtotal += vlrItem * (item.quantity || 1)
+              body.VLR_LIQUIDO = vlrItem
+              console.log(`>> vlrBruto: ${vlrBruto} discount: ${discountItem} total: ${vlrItem}`)
 
               const params = new url.URLSearchParams(body)
               const endpoint = `/InsItensPedidoVenda?${params.toString()}`
               promisesAddItemOrderHorus.push(
                 requestHorus(horus, endpoint)
                   .then(() => {
-                    console.log('>> Add Item in order: ', endpoint)
+                    console.log(`>> Add Item in order: ${endpoint}`)
                   })
                   .catch(() => {
                     errorAddItem.push(endpoint)
@@ -311,13 +312,14 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const { amount } = order
       const transaction = order.transactions && order.transactions.length && order.transactions[0]
       const paymentMethodCode = transaction && transaction.payment_method.code
+      subtotal += subtotal ? (amount.freight || 0) : 0
 
-      let vlr = amount.total
+      let vlr = subtotal || amount.total
       let qnt = 1
       if (transaction.installments) {
         const { number } = transaction.installments
         qnt = number
-        vlr = (amount.total) / number
+        vlr = (subtotal || amount.total) / number
       }
 
       const body = {
@@ -333,7 +335,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       const params = new url.URLSearchParams(body)
       const endpoint = `/InsVencPedidoVenda?${params.toString()}`
-      console.log('>> Installments: ', isNewOrder ? endpoint : 'skip')
+      console.log(`>> Installments: ${isNewOrder ? endpoint : 'skip'}`)
 
       if (isNewOrder) {
         await requestHorus(horus, endpoint, 'POST')
