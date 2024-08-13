@@ -286,8 +286,8 @@ module.exports = async (appSdk) => {
         if (isHorusApiOk) {
           promises.push(productsStocksEvents(horus, storeId, opts))
           const now = new Date()
-          console.log(`horas : ${now.getHours() - 6}`)
-          if ((now.getHours() - 6) === 12 && now.getMinutes() === 30) {
+          console.log(`horas : ${now.getHours() - 3}`)
+          if ((now.getHours() - 3) === 12 && now.getMinutes() % 5 === 0) {
           // if (now.getMinutes() % 10 === 0) {
             // run at 3 am (UTC -3) everyday
             promises.push(productsPriceEvents(horus, storeId, opts))
