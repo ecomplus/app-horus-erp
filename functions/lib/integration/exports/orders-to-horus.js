@@ -97,7 +97,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         getClientByCustomer(storeId, horus, customer)
       ])
 
-      console.log('>> Number: ', number, ' Order ERP: ', JSON.stringify(orderHorus))
+      console.log(`>> Number: ${number} Order ERP: ${JSON.stringify(orderHorus)} custumer: ${customerHorus && JSON.stringify(customerHorus)}`)
 
       if (!customerHorus) {
         const opts = {
