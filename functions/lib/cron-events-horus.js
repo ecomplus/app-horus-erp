@@ -198,7 +198,10 @@ const productsPriceEvents = async (horus, storeId, opts) => {
     const updatedAtDoc = data?.updated_at && new Date(data?.updated_at)
     const now = new Date()
 
-    isExec = Boolean(hasRepeatDoc || (now.getTime() >= (updatedAtDoc.getTime() + (5 * 60 * 1000))))
+    if (hasRepeatDoc || updatedAtDoc) {
+      isExec = Boolean(hasRepeatDoc || (now.getTime() >= (updatedAtDoc.getTime() + (24 * 60 * 60 * 1000))))
+    }
+
     if (hasRepeatDoc) {
       dateInit = dateInitDoc ? new Date(dateInitDoc) : dateInit
       dateEnd = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
@@ -206,10 +209,9 @@ const productsPriceEvents = async (horus, storeId, opts) => {
     } else {
       dateInit = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
     }
-
-    console.log(`isExec: ${isExec} upDoc: ${updatedAtDoc.toISOString()} now ${now.toISOString()}`)
   }
 
+  // Runs if there are repeats or every 24 hours
   if (isExec) {
     const codCaract = opts?.appData?.code_characteristic || 5
     const codTpoCaract = opts?.appData?.code_type_characteristic || 3
@@ -293,12 +295,8 @@ module.exports = async (appSdk) => {
         console.log('>> Horus API', isHorusApiOk ? 'OK' : 'OffLine')
         if (isHorusApiOk) {
           promises.push(productsStocksEvents(horus, storeId, opts))
-          // console.log(`horas : ${now.getHours() - 3}`)
-          // if ((now.getHours() - 3) === 12 && now.getMinutes() % 5 === 0) {
-          // if (now.getMinutes() % 10 === 0) {
-          // run at 3 am (UTC -3) everyday
+          // check in the function
           promises.push(productsPriceEvents(horus, storeId, opts))
-          // }
 
           const now = new Date()
           if (now.getMinutes() % 30 === 0) {
