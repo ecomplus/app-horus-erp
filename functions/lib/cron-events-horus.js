@@ -188,13 +188,17 @@ const productsPriceEvents = async (horus, storeId, opts) => {
 
   // console.log('>> ', resource, ' => ', field)
   const docSnapshot = await docRef.get()
+  let isExec = true
   if (docSnapshot.exists) {
     const data = docSnapshot.data()
     const dateInitDoc = data?.dateInit
     const dateEndtDoc = data?.dateEnd
     const offsetDoc = data?.offset
     const hasRepeatDoc = data?.hasRepeat
+    const updatedAtDoc = data?.updated_at && new Date(data?.updated_at)
+    const now = new Date()
 
+    isExec = Boolean(hasRepeatDoc || (now.getTime() >= (updatedAtDoc.getTime() + (5 * 60 * 1000))))
     if (hasRepeatDoc) {
       dateInit = dateInitDoc ? new Date(dateInitDoc) : dateInit
       dateEnd = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
@@ -202,64 +206,68 @@ const productsPriceEvents = async (horus, storeId, opts) => {
     } else {
       dateInit = dateEndtDoc ? new Date(dateEndtDoc) : dateEnd
     }
-  }
-  const codCaract = opts?.appData?.code_characteristic || 5
-  const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
-  console.log(`>> Check PRICE ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)}`)
-  const query = `?DATA_INI=${parseDate(dateInit, true)}&DATA_FIM=${parseDate(dateEnd, true)}` +
-    `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}`
-
-  let hasRepeat = true
-
-  let total = 0
-  // const init = Date.now()
-  const promisesSendTopics = []
-  // create Object Horus to request api Horus
-  const endpoint = `/Busca_preco_item${query}&offset=${offset}&limit=${limit}`
-  const products = await requestHorus(horus, endpoint, 'get', true)
-    .catch((_err) => {
-      // if (_err.response) {
-      //   console.warn(JSON.stringify(_err.response))
-      // } else {
-      //   console.error(_err)
-      // }
-      return null
-    })
-
-  hasRepeat = products?.length === limit
-
-  if (products?.length) {
-    total += products.length
-    products.forEach((productHorus, index) => {
-      promisesSendTopics.push(
-        sendMessageTopic(
-          topicResourceToEcom,
-          {
-            storeId,
-            resource: resourcePrefix,
-            objectHorus: productHorus,
-            opts
-          })
-      )
-    })
+    console.log(`isExec: ${isExec} upDoc: ${updatedAtDoc.toISOString()} now ${now.toISOString()}`)
   }
 
-  offset = hasRepeat ? offset + limit : 0
-  console.log(`>>Cron PRICE #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
+  if (isExec) {
+    const codCaract = opts?.appData?.code_characteristic || 5
+    const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
-  return Promise.all(promisesSendTopics)
-    .then(async () => {
-      await docRef.set({
-        dateInit: dateInit.toISOString(),
-        dateEnd: dateEnd.toISOString(),
-        offset,
-        hasRepeat,
-        updated_at: new Date().toISOString()
-      }, { merge: true })
-        .catch(console.error)
-      console.log(`Finish Exec PRICE in #${storeId}`)
-    })
+    console.log(`>> Check PRICE ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)}`)
+    const query = `?DATA_INI=${parseDate(dateInit, true)}&DATA_FIM=${parseDate(dateEnd, true)}` +
+      `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}`
+
+    let hasRepeat = true
+
+    let total = 0
+    const promisesSendTopics = []
+    // create Object Horus to request api Horus
+    const endpoint = `/Busca_preco_item${query}&offset=${offset}&limit=${limit}`
+    const products = await requestHorus(horus, endpoint, 'get', true)
+      .catch((_err) => {
+        // if (_err.response) {
+        //   console.warn(JSON.stringify(_err.response))
+        // } else {
+        //   console.error(_err)
+        // }
+        return null
+      })
+
+    hasRepeat = products?.length === limit
+
+    if (products?.length) {
+      total += products.length
+      products.forEach((productHorus, index) => {
+        promisesSendTopics.push(
+          sendMessageTopic(
+            topicResourceToEcom,
+            {
+              storeId,
+              resource: resourcePrefix,
+              objectHorus: productHorus,
+              opts
+            })
+        )
+      })
+    }
+
+    offset = hasRepeat ? offset + limit : 0
+    console.log(`>>Cron PRICE #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
+
+    return Promise.all(promisesSendTopics)
+      .then(async () => {
+        await docRef.set({
+          dateInit: dateInit.toISOString(),
+          dateEnd: dateEnd.toISOString(),
+          offset,
+          hasRepeat,
+          updated_at: new Date().toISOString()
+        }, { merge: true })
+          .catch(console.error)
+        console.log(`Finish Exec PRICE in #${storeId}`)
+      })
+  }
 }
 
 module.exports = async (appSdk) => {
