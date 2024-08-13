@@ -108,10 +108,6 @@ module.exports = async (
     .then(async (auth) => {
       const appClient = { appSdk, storeId, auth }
       const appData = opts?.appData || await getAppData(appClient, true)
-
-      if (appData.password) delete appData.password
-      if (appData.username) delete appData.username
-
       const { username, password, baseURL } = appData
       const horus = new Horus(username, password, baseURL)
       const isHorusApiOk = await checkHorusApi(horus)
