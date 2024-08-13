@@ -251,7 +251,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               isImportItem = true
             }
 
-            isAllImportedItems = item?.quantity > 0
+            // isAllImportedItems = item?.quantity > 0
             // console.log(`QTD_PEDIDA: ${body?.QTD_PEDIDA} itemHorus ${itemHorus?.QTD_PEDIDA} itemOrder: ${item?.quantity}`)
 
             if (isImportItem) {
@@ -290,6 +290,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
         if (!promisesAddItemOrderHorus.length && !errorAddItem.length && !isAllImportedItems) {
           console.log(`${logHead} skipped, products not imported from ERP`)
+          throw new Error(skipCreate)
+        }
+
+        if (order.amount && !order.amount.total) {
+          console.log(`${logHead} skipped, order without total`)
           throw new Error(skipCreate)
         }
 
