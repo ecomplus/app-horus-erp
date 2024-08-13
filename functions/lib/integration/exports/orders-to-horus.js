@@ -56,6 +56,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
       const { amount, number } = order
 
+      if (amount && !amount.total) {
+        console.log(`${logHead} skipped, order without total`)
+        throw new Error(skipCreate)
+      }
+
       const transaction = order.transactions && order.transactions.length && order.transactions[0]
       const paymentMethodCode = transaction && transaction.payment_method.code
       const shippingLine = order.shipping_lines && order.shipping_lines.length && order.shipping_lines[0]
@@ -290,11 +295,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
         if (!promisesAddItemOrderHorus.length && !errorAddItem.length && !isAllImportedItems) {
           console.log(`${logHead} skipped, products not imported from ERP`)
-          throw new Error(skipCreate)
-        }
-
-        if (order.amount && !order.amount.total) {
-          console.log(`${logHead} skipped, order without total`)
           throw new Error(skipCreate)
         }
 
