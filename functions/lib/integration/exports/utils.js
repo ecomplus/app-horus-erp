@@ -13,6 +13,7 @@ const getClientByCustomer = (storeId, horus, customer) => {
     return null
   }
   queryHorus += `?${documentType}=${documentNumber}&OFFSET=0&LIMIT=1`
+  console.log(`getCustomerHorus ${queryHorus}`)
 
   return requestHorus(horus, queryHorus)
     .then((data) => {
