@@ -108,6 +108,10 @@ module.exports = async (
     .then(async (auth) => {
       const appClient = { appSdk, storeId, auth }
       const appData = opts?.appData || await getAppData(appClient, true)
+
+      if (appData.password) delete appData.password
+      if (appData.username) delete appData.username
+
       const { username, password, baseURL } = appData
       const horus = new Horus(username, password, baseURL)
       const isHorusApiOk = await checkHorusApi(horus)
@@ -120,10 +124,11 @@ module.exports = async (
 
       if (!opts || !Object.keys(opts).length || !opts.appData) {
         opts = { appData }
-        // if (resource === 'orders') {
-        //   const queueEntry = { action: 'exportation', queue: resource, nextId: resourceId }
-        //   Object.assign(opts, { queueEntry })
-        // }
+        if (resource === 'orders') {
+          // to updateApp
+          const queueEntry = { action: 'exportation', queue: resource, nextId: resourceId }
+          Object.assign(opts, { queueEntry })
+        }
       }
       return handleExports[resource](appClient, resourceId, opts)
         .then(async (responseId) => {
