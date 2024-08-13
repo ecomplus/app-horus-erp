@@ -250,7 +250,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               body.QTD_PEDIDA = item.quantity - itemHorus.QTD_PEDIDA
               isImportItem = true
             }
-            console.log(`QTD_PEDIDA: ${body.QTD_PEDIDA} itemHorus ${itemHorus.QTD_PEDIDA} itemOrder: ${item.quantity}`)
+            console.log(`QTD_PEDIDA: ${body?.QTD_PEDIDA} itemHorus ${itemHorus?.QTD_PEDIDA} itemOrder: ${item?.quantity}`)
             if (isImportItem) {
               const discountItem = discountForProduct ? (discountForProduct / item.quantity) : 0
               isAllImportedItems = false
