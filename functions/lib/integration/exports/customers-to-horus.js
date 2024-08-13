@@ -100,7 +100,11 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
           }
           return customerId
         }
-        return null
+        if (method === 'PUT') {
+          console.log(`debug ${JSON.stringify(data)}`)
+        }
+
+        return method === 'PUT' ? customerId : null
       })
       .catch(err => {
         console.error(err)
