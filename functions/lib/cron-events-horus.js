@@ -293,14 +293,14 @@ module.exports = async (appSdk) => {
         console.log('>> Horus API', isHorusApiOk ? 'OK' : 'OffLine')
         if (isHorusApiOk) {
           promises.push(productsStocksEvents(horus, storeId, opts))
-          const now = new Date()
-          console.log(`horas : ${now.getHours() - 3}`)
-          if ((now.getHours() - 3) === 12 && now.getMinutes() % 5 === 0) {
+          // console.log(`horas : ${now.getHours() - 3}`)
+          // if ((now.getHours() - 3) === 12 && now.getMinutes() % 5 === 0) {
           // if (now.getMinutes() % 10 === 0) {
-            // run at 3 am (UTC -3) everyday
-            promises.push(productsPriceEvents(horus, storeId, opts))
-          }
+          // run at 3 am (UTC -3) everyday
+          promises.push(productsPriceEvents(horus, storeId, opts))
+          // }
 
+          const now = new Date()
           if (now.getMinutes() % 30 === 0) {
             // new Product
             // run at 30 in 30min
