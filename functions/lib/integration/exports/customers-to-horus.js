@@ -15,12 +15,16 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
     console.log(`> Customer #${customerId} not found`)
     return null
   }
-  const { username, password, baseURL } = appData
-  const horus = new Horus(username, password, baseURL)
-  const customerHorus = await getClientByCustomer(storeId, horus, customer)
-  console.log(`customer: ${customerHorus && JSON.stringify(customerHorus)}`)
-  if (isCreate) {
-  // create/update customer in HORUS
+  const documentType = customer.registry_type === 'p' ? 'CPF' : 'CNPJ'
+  const documentNumber = customer.doc_number
+  let customerHorus
+
+  if (isCreate && documentNumber && documentType) {
+    const { username, password, baseURL } = appData
+    const horus = new Horus(username, password, baseURL)
+    customerHorus = await getClientByCustomer(storeId, horus, customer)
+    // console.log(`customer: ${customerHorus && JSON.stringify(customerHorus)}`)
+    // create/update customer in HORUS
     const method = customerHorus && customerHorus?.COD_CLI ? 'PUT' : 'POST'
     const body = {
       COD_CLI: customerHorus?.COD_CLI || 'NOVO',
@@ -99,9 +103,6 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
               .catch(() => null)
           }
           return customerId
-        }
-        if (method === 'PUT') {
-          console.log(`debug ${JSON.stringify(data)}`)
         }
 
         return method === 'PUT' ? customerId : null
