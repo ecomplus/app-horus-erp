@@ -22,10 +22,12 @@ const runStore = async ({ appSdk, storeId, auth }, collectionName) => {
     // const docId = docFirestore.id
     const doc = await getDoc(docFirestore)
     const { resource, resourceId } = doc.data()
+    const opts = doc.data()?.opts
     const body = {
       storeId,
       resource,
-      resourceId
+      resourceId,
+      opts
     }
     promisesResources.push(
       sendMessageTopic(topicExportToHorus, body)

@@ -18,7 +18,7 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
   const { username, password, baseURL } = appData
   const horus = new Horus(username, password, baseURL)
   const customerHorus = await getClientByCustomer(storeId, horus, customer)
-  console.log(`customer: ${customer && JSON.stringify(customerHorus)}`)
+  console.log(`customer: ${customerHorus && JSON.stringify(customerHorus)}`)
   if (isCreate) {
   // create/update customer in HORUS
     const method = customerHorus && customerHorus?.COD_CLI ? 'PUT' : 'POST'
