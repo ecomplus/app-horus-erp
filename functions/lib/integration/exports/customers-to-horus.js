@@ -112,6 +112,9 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
         throw err
       })
   }
-  console.log(`> ${logHead} ignored with don't create or update client`)
-  return customerHorus ? customerId : null
+  console.log(`> ${logHead} ignored with don't create or update client ${JSON.stringify(customer)}`)
+
+  return customerHorus
+    ? customerId
+    : (!documentNumber ? 'skip' : null)
 }
