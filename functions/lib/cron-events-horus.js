@@ -7,9 +7,9 @@ const checkHorusApi = require('./horus/check-horus-api')
 const { getAllItemsHorusToImport } = require('../lib/integration/imports/utils')
 const ecomClient = require('@ecomplus/client')
 const {
-  // productsStocksEvents,
-  productsPriceEvents,
-  productsEvents
+  productsStocksEvents,
+  productsPriceEvents
+  // productsEvents
 } = require('./events/product-events')
 
 const listStoreIds = async () => {
@@ -94,8 +94,8 @@ module.exports = async (appSdk) => {
         const promises = []
         console.log('>> Horus API', isHorusApiOk ? 'OK' : 'OffLine')
         if (isHorusApiOk) {
-          // promises.push(productsStocksEvents(horus, storeId, opts))
-          promises.push(productsEvents({ appSdk, storeId }, horus, appData))
+          promises.push(productsStocksEvents(horus, storeId, opts))
+          // promises.push(productsEvents({ appSdk, storeId }, horus, appData))
 
           // check in the function
           promises.push(productsPriceEvents(horus, storeId, opts))

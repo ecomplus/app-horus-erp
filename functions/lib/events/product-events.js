@@ -202,6 +202,7 @@ const productsPriceEvents = async (horus, storeId, opts) => {
   }
 }
 
+/*
 const getQuery = (
   codItem,
   codTpoCaract,
@@ -215,7 +216,6 @@ const getQuery = (
   `&TIPO_SALDO=V${stockCode ? `&COD_LOCAL_ESTOQUE=${stockCode}` : ''}`
 
 const productsEvents = async ({ appSdk, storeId }, horus, appData) => {
-  console.time('test')
   const companyCode = appData?.company_code || 1
   const subsidiaryCode = appData?.subsidiary_code || 1
   const codCaract = appData?.code_characteristic || 5
@@ -243,11 +243,11 @@ const productsEvents = async ({ appSdk, storeId }, horus, appData) => {
         })
       }
     })
-  console.timeEnd('test')
 }
+// */
 
 module.exports = {
   productsStocksEvents,
-  productsEvents,
+  // productsEvents,
   productsPriceEvents
 }
