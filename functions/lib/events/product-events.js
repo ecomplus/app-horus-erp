@@ -54,11 +54,10 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   console.log(' Query: ', query)
 
   let hasRepeat = true
-
   let total = 0
-  // const init = Date.now()
+
   const promisesSendTopics = []
-  // while (hasRepeat) {
+
   // create Object Horus to request api Horus
   const endpoint = `/Estoque${query}&offset=${offset}&limit=${limit}`
   const products = await requestHorus(horus, endpoint, 'get', true)
@@ -90,7 +89,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   }
 
   offset = hasRepeat ? offset + limit : 0
-  // }
+
   console.log(`>>Cron STOCKS #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
 
   return Promise.all(promisesSendTopics)
@@ -118,7 +117,6 @@ const productsPriceEvents = async (horus, storeId, opts) => {
   const docRef = firestore()
     .doc(`${collectionHorusEvents}/${storeId}_${resourcePrefix}`)
 
-  // console.log('>> ', resource, ' => ', field)
   const docSnapshot = await docRef.get()
   let isExec = true
   if (docSnapshot.exists) {
@@ -217,6 +215,7 @@ const getQuery = (
   `&TIPO_SALDO=V${stockCode ? `&COD_LOCAL_ESTOQUE=${stockCode}` : ''}`
 
 const productsEvents = async ({ appSdk, storeId }, horus, appData) => {
+  console.time('test')
   const companyCode = appData?.company_code || 1
   const subsidiaryCode = appData?.subsidiary_code || 1
   const codCaract = appData?.code_characteristic || 5
@@ -244,6 +243,7 @@ const productsEvents = async ({ appSdk, storeId }, horus, appData) => {
         })
       }
     })
+  console.timeEnd('test')
 }
 
 module.exports = {
