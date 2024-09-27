@@ -238,7 +238,7 @@ const productsEvents = async ({ appSdk, storeId }, horus, appData) => {
             const query = getQuery(codItem, codTpoCaract, codCaract, companyCode, subsidiaryCode, stockCode)
             const endpoint = `/Estoque${query}&offset=0&limit=1`
 
-            console.log(`${codItem} => ${endpoint}`)
+            // console.log(`${codItem} => ${endpoint}`)
           }
         })
       }
