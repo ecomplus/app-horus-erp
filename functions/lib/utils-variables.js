@@ -1,3 +1,5 @@
+const { logger } = require('firebase-functions')
+
 // Firestore collections names
 const collectionHorusEvents = 'horusEvents'
 
@@ -14,9 +16,23 @@ const removeAccents = str => str.trim()
   .replace(/[çÇ]/gi, 'c')
   .replace(/[-.]/gi, '')
 
+const debugAxiosError = error => {
+  const err = new Error(error.message)
+  if (error.response) {
+    err.status = error.response.status
+    err.response = error.response.data
+  }
+  err.request = error.config
+  logger.error(err, {
+    request: error.config,
+    response: error.response?.data
+  })
+}
+
 module.exports = {
   removeAccents,
   collectionHorusEvents,
   topicExportToHorus,
-  topicResourceToEcom
+  topicResourceToEcom,
+  debugAxiosError
 }

@@ -1,7 +1,9 @@
 const { firestore } = require('firebase-admin')
+const { logger } = require('firebase-functions')
 const {
   collectionHorusEvents,
-  topicResourceToEcom
+  topicResourceToEcom,
+  debugAxiosError
 } = require('../utils-variables')
 const requestHorus = require('../horus/request')
 const { parseDate } = require('../parsers/parse-to-horus')
@@ -12,6 +14,11 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   const resourcePrefix = 'products_stocks'
   let dateInit = new Date(releaseDate)
   let dateEnd = new Date()
+  dateEnd.setMinutes(dateEnd.getMinutes() - 1)
+  const timezoneDiff = 180 - dateEnd.getTimezoneOffset()
+  if (timezoneDiff !== 0) {
+    dateEnd.setMinutes(dateEnd.getMinutes() - timezoneDiff)
+  }
 
   let offset = 0
   const limit = 50
@@ -44,34 +51,32 @@ const productsStocksEvents = async (horus, storeId, opts) => {
 
   const codCaract = opts?.appData?.code_characteristic || 5
   const codTpoCaract = opts?.appData?.code_type_characteristic || 3
-
-  console.log(`>> Check STOCKS ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)} offset ${offset}`)
-  const query = `?DATA_INI=${parseDate(dateInit, true)}&DATA_FIM=${parseDate(dateEnd, true)}` +
+  const startFmtDate = parseDate(dateInit, true)
+  const endFmtDate = parseDate(dateEnd, true)
+  const query = `?DATA_INI=${startFmtDate}&DATA_FIM=${endFmtDate}` +
     `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
     `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
     `&TIPO_SALDO=V${stockCode ? `&COD_LOCAL_ESTOQUE=${stockCode}` : ''}`
-
-  console.log(' Query: ', query)
-
-  let hasRepeat = true
-  let total = 0
-
-  const promisesSendTopics = []
-
-  // create Object Horus to request api Horus
   const endpoint = `/Estoque${query}&offset=${offset}&limit=${limit}`
+  logger.info(`Stock query at ${dateInit}`, {
+    startFmtDate,
+    endFmtDate,
+    endpoint
+  })
+
   const products = await requestHorus(horus, endpoint, 'get', true)
-    .catch((_err) => {
-      // if (_err.response) {
-      //   console.warn(JSON.stringify(_err.response))
-      // } else {
-      //   console.error(_err)
-      // }
+    .catch((err) => {
+      if (err.response) {
+        debugAxiosError(err.response)
+      } else {
+        logger.error(err, { endpoint })
+      }
       return null
     })
 
-  hasRepeat = products?.length === limit
-
+  const hasRepeat = products?.length === limit
+  let total = 0
+  const promisesSendTopics = []
   if (products?.length) {
     total += products.length
     products.forEach((productHorus, index) => {
@@ -89,8 +94,7 @@ const productsStocksEvents = async (horus, storeId, opts) => {
   }
 
   offset = hasRepeat ? offset + limit : 0
-
-  console.log(`>>Cron STOCKS #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
+  logger.info(`>>Cron STOCKS #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
 
   return Promise.all(promisesSendTopics)
     .then(async () => {
@@ -101,8 +105,8 @@ const productsStocksEvents = async (horus, storeId, opts) => {
         hasRepeat,
         updated_at: new Date().toISOString()
       }, { merge: true })
-        .catch(console.error)
-      console.log(`Finish Exec STOCKS in #${storeId}`)
+        .catch(logger.error)
+      logger.info(`Finish Exec STOCKS in #${storeId}`)
     })
 }
 
@@ -110,6 +114,11 @@ const productsPriceEvents = async (horus, storeId, opts) => {
   const resourcePrefix = 'products_price'
   let dateInit = new Date(releaseDate)
   let dateEnd = new Date()
+  dateEnd.setMinutes(dateEnd.getMinutes() - 1)
+  const timezoneDiff = 180 - dateEnd.getTimezoneOffset()
+  if (timezoneDiff !== 0) {
+    dateEnd.setMinutes(dateEnd.getMinutes() - timezoneDiff)
+  }
 
   let offset = 0
   const limit = 50
@@ -146,7 +155,7 @@ const productsPriceEvents = async (horus, storeId, opts) => {
     const codCaract = opts?.appData?.code_characteristic || 5
     const codTpoCaract = opts?.appData?.code_type_characteristic || 3
 
-    console.log(`>> Check PRICE ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)}`)
+    logger.log(`>> Check PRICE ${parseDate(dateInit, true)} at ${parseDate(dateEnd, true)}`)
     const query = `?DATA_INI=${parseDate(dateInit, true)}&DATA_FIM=${parseDate(dateEnd, true)}` +
       `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}`
 
@@ -159,9 +168,9 @@ const productsPriceEvents = async (horus, storeId, opts) => {
     const products = await requestHorus(horus, endpoint, 'get', true)
       .catch((_err) => {
         // if (_err.response) {
-        //   console.warn(JSON.stringify(_err.response))
+        //   logger.warn(JSON.stringify(_err.response))
         // } else {
-        //   console.error(_err)
+        //   logger.error(_err)
         // }
         return null
       })
@@ -185,7 +194,7 @@ const productsPriceEvents = async (horus, storeId, opts) => {
     }
 
     offset = hasRepeat ? offset + limit : 0
-    console.log(`>>Cron PRICE #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
+    logger.log(`>>Cron PRICE #${storeId} Updates: ${total} Repeat ${hasRepeat}`)
 
     return Promise.all(promisesSendTopics)
       .then(async () => {
@@ -196,55 +205,11 @@ const productsPriceEvents = async (horus, storeId, opts) => {
           hasRepeat,
           updated_at: new Date().toISOString()
         }, { merge: true })
-          .catch(console.error)
-        console.log(`Finish Exec PRICE in #${storeId}`)
+          .catch(logger.error)
+        logger.log(`Finish Exec PRICE in #${storeId}`)
       })
   }
 }
-
-/*
-const getQuery = (
-  codItem,
-  codTpoCaract,
-  codCaract,
-  companyCode,
-  subsidiaryCode,
-  stockCode
-) => `?COD_ITEM_INI=${codItem}&COD_ITEM_FIM=${codItem}` +
-  `&COD_TPO_CARACT=${codTpoCaract}&COD_CARACT=${codCaract}` +
-  `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}` +
-  `&TIPO_SALDO=V${stockCode ? `&COD_LOCAL_ESTOQUE=${stockCode}` : ''}`
-
-const productsEvents = async ({ appSdk, storeId }, horus, appData) => {
-  const companyCode = appData?.company_code || 1
-  const subsidiaryCode = appData?.subsidiary_code || 1
-  const codCaract = appData?.code_characteristic || 5
-  const codTpoCaract = appData?.code_type_characteristic || 3
-
-  let stockCode = appData?.stock_code
-  if (storeId === 51504) {
-    stockCode = stockCode || 20
-  }
-
-  await appSdk.apiRequest(storeId, '/products', 'GET', null)
-    .then(({ response }) => {
-      const result = response.data.result
-      if (result && result.length) {
-        console.log(`> ${result.length}`)
-
-        result.forEach(product => {
-          if (product.sku.startsWith('COD_ITEM')) {
-            const codItem = product.sku.replace('COD_ITEM', '')
-            const query = getQuery(codItem, codTpoCaract, codCaract, companyCode, subsidiaryCode, stockCode)
-            const endpoint = `/Estoque${query}&offset=0&limit=1`
-
-            // console.log(`${codItem} => ${endpoint}`)
-          }
-        })
-      }
-    })
-}
-// */
 
 module.exports = {
   productsStocksEvents,
