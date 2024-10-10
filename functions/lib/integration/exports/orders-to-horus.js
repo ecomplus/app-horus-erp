@@ -66,10 +66,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const shippingLine = order.shipping_lines && order.shipping_lines.length && order.shipping_lines[0]
       const shippingApp = shippingLine && shippingLine.app
 
-      const isBillingAddress = transaction?.billing_address?.zip
-      const customerAddress = isBillingAddress
-        ? transaction?.billing_address
-        : shippingLine?.to
+      const isShippingAddress = shippingLine?.to?.zip
+      const customerAddress = isShippingAddress
+        ? shippingLine?.to
+        : transaction?.billing_address
 
       if (!order.financial_status) {
         console.log(`${logHead} skipped with no financial status`)
