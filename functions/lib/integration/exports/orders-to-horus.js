@@ -336,7 +336,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         COD_PED_VENDA: saleCodeHorus,
         COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction),
         VLR_PARCELA: parsePrice(vlr),
-        QTD_PARCELAS: qnt,
+        QTD_PARCELAS: 0,
         DATA_VENCIMENTO: parseDate(new Date(order.created_at))
       }
 
