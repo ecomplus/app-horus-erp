@@ -12,7 +12,7 @@ const parsePhone = (phone) => {
   return number.substring(start, number.length)
 }
 
-module.exports = async (horus, customerCodeHorus, customerAddress, isBillingAddress) => {
+module.exports = async (horus, customerCodeHorus, customerAddress) => {
   const zipCode = parseZipCode(customerAddress.zip) || 0
   console.log('> Address Customer => CLI: ', customerCodeHorus, ' ZipCode: ', zipCode)
 

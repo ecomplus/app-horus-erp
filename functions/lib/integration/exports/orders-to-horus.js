@@ -64,12 +64,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const transaction = order.transactions && order.transactions.length && order.transactions[0]
       const paymentMethodCode = transaction && transaction.payment_method.code
       const shippingLine = order.shipping_lines && order.shipping_lines.length && order.shipping_lines[0]
-      const shippingApp = shippingLine && shippingLine.app
-
-      const isBillingAddress = transaction?.billing_address?.zip
-      const customerAddress = isBillingAddress
-        ? transaction?.billing_address
-        : shippingLine?.to
+      const shippingApp = shippingLine?.app
+      const customerAddress = shippingLine?.to?.zip
+        ? shippingLine.to
+        : transaction?.billing_address
 
       if (!order.financial_status) {
         console.log(`${logHead} skipped with no financial status`)
@@ -127,7 +125,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const zipCode = parseZipCode(customerAddress.zip)
       let addressCustomerHorus = await getClientAddressByZipCode(horus, customerCodeHorus, zipCode)
       if (!addressCustomerHorus) {
-        addressCustomerHorus = await createAddress(horus, customerCodeHorus, customerAddress, isBillingAddress)
+        addressCustomerHorus = await createAddress(horus, customerCodeHorus, customerAddress)
       }
 
       if (!orderHorus) {
