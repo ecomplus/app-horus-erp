@@ -321,6 +321,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const paymentMethodCode = transaction && transaction.payment_method.code
       subtotal += subtotal ? (amount.freight || 0) : 0
 
+      /*
       let vlr = subtotal || amount.total
       let qnt = 1
       if (transaction.installments) {
@@ -328,15 +329,15 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         qnt = number
         vlr = (subtotal || amount.total) / number
       }
-
+      */
       const body = {
         COD_EMPRESA: companyCode,
         COD_FILIAL: subsidiaryCode,
         COD_CLI: customerCodeHorus,
         COD_PED_VENDA: saleCodeHorus,
         COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction),
-        VLR_PARCELA: parsePrice(vlr),
-        QTD_PARCELAS: qnt,
+        VLR_PARCELA: parsePrice(subtotal || amount.total),
+        QTD_PARCELAS: 0,
         DATA_VENCIMENTO: parseDate(new Date(order.created_at))
       }
 
