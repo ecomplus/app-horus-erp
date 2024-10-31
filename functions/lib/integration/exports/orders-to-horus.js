@@ -130,10 +130,12 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       if (!orderHorus) {
         console.log('> amount: ', JSON.stringify(amount))
-        let obsOrder = ''
-        // Requirement requested by store 51504 (ministerio ler)
-        if (customer.corporate_name && storeId === 51504) {
-          obsOrder = `| ${customer.corporate_name}`
+        const obs = ['']
+        if (customer.corporate_name) {
+          obs.push(customer.corporate_name)
+        }
+        if (order.extra_discount?.discount_coupon) {
+          obs.push(`CUPOM: ${order.extra_discount.discount_coupon}`)
         }
 
         const body = {
@@ -142,7 +144,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_FILIAL: subsidiaryCode,
           TIPO_PEDIDO_V_T_D: 'V', // Informar o tipo do pedido, neste caso usar a letra V para VENDA,
           COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
-          OBS_PEDIDO: `Pedido #${number} id: ${orderId} ${obsOrder}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
+          OBS_PEDIDO: `Pedido #${number} id: ${orderId}${obs.join(' | ')}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
           COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
           COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
