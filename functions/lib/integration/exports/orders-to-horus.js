@@ -237,7 +237,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         const queryHorus = `/Busca_ItensPedidosVenda?COD_PED_VENDA=${saleCodeHorus}` +
           `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}&OFFSET=0&LIMIT=${order.items.length}`
         const itemsHorus = await requestHorus(horus, queryHorus)
-          .catch(() => null)
+          .catch((err) => {
+            if (isNewOrder) return null
+            throw err
+          })
         let isAllImportedItems = true
         const discount = order.amount?.discount || 0
         const discountForProduct = discount ? (discount / order.items.length) : 0
