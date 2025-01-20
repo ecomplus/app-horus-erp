@@ -1,3 +1,5 @@
+const { logger } = require('firebase-functions')
+const { firestore } = require('firebase-admin')
 const getCategories = require('./categories-to-ecom')
 const getBrands = require('./brands-to-ecom')
 const {
@@ -7,7 +9,6 @@ const {
 } = require('./utils')
 const { removeAccents } = require('../../utils-variables')
 const { parsePrice } = require('../../parsers/parse-to-ecom')
-const { firestore } = require('firebase-admin')
 
 const saveFirestore = (idDoc, body) => firestore()
   .doc(idDoc)
@@ -86,14 +87,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const isUpdatePriceOrStock = !opts.queueEntry?.mustUpdateAppQueue && (updatePrice || updateStock)
   const isUpdateStock = updateStock && (SALDO_DISPONIVEL >= 0 || SALDO >= 0)
 
-  console.log(
-    '> COD_ITEM =>', COD_ITEM,
-    productHorus && JSON.stringify(productHorus),
-    'isUpdatePriceOrStock:',
+  logger.info(`COD_ITEM ${COD_ITEM}`, {
+    productHorus,
     isUpdatePriceOrStock,
-    ' isUpdateStock:',
     isUpdateStock
-  )
+  })
 
   if ((isUpdatePriceOrStock || (product && !updateProduct))) {
     // Update product in E-com
@@ -127,7 +125,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     }
 
     if (Object.keys(body).length) {
-      console.log('>> Update Product ', endpoint, JSON.stringify(body))
       return appSdk.apiRequest(storeId, endpoint, 'PATCH', body, auth)
         .then(() => product)
         .catch(err => {
