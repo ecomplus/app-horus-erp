@@ -242,8 +242,8 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             throw err
           })
         let isAllImportedItems = true
-        const discount = order.amount?.discount || 0
-        const discountForProduct = discount ? (discount / order.items.length) : 0
+        const amountDiscount = order.amount?.discount || 0
+        const amountSubtotal = order.amount?.subtotal
         order.items?.forEach((item) => {
           if (item.sku.startsWith('COD_ITEM')) {
             const codItem = item.sku.replace('COD_ITEM', '')
@@ -263,13 +263,12 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             // console.log(`QTD_PEDIDA: ${body?.QTD_PEDIDA} itemHorus ${itemHorus?.QTD_PEDIDA} itemOrder: ${item?.quantity}`)
 
             if (isImportItem) {
-              const discountItem = discountForProduct ? (discountForProduct / item.quantity) : 0
+              const itemDiscount = amountSubtotal > 0 ? vlrBruto * amountDiscount / amountSubtotal : 0
               isAllImportedItems = false
-
-              const vlrItem = parsePrice(vlrBruto - discountItem)
-              subtotal += vlrItem * (item.quantity || 1)
+              const vlrItem = parsePrice(vlrBruto - itemDiscount)
+              subtotal += (vlrItem * (item.quantity || 1))
               body.VLR_LIQUIDO = vlrItem
-              console.log(`>> vlrBruto: ${vlrBruto} discount: ${discountItem} total: ${vlrItem}`)
+              console.log(`>> vlrBruto: ${vlrBruto} discount: ${itemDiscount} total: ${vlrItem}`)
 
               const params = new url.URLSearchParams(body)
               const endpoint = `/InsItensPedidoVenda?${params.toString()}`
@@ -326,15 +325,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const paymentMethodCode = transaction && transaction.payment_method.code
       subtotal += subtotal ? (amount.freight || 0) : 0
 
-      /*
-      let vlr = subtotal || amount.total
-      let qnt = 1
-      if (transaction.installments) {
-        const { number } = transaction.installments
-        qnt = number
-        vlr = (subtotal || amount.total) / number
-      }
-      */
       const body = {
         COD_EMPRESA: companyCode,
         COD_FILIAL: subsidiaryCode,
