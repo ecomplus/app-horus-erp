@@ -155,7 +155,12 @@ exports.pubsubResourceToEcomEvent = require('./lib/pub-sub/utils')
 
 const handleExportToHorusEvent = require('./lib/pub-sub/events/export-to-horus')
 exports.pusubExportToHorusEvent = require('./lib/pub-sub/utils')
-  .createEventsFunction(topicExportToHorus, handleExportToHorusEvent)
+  .createEventsFunction(
+    topicExportToHorus,
+    handleExportToHorusEvent,
+    58000,
+    { maxInstances: 1 }
+  )
 
 // cron jobs
 const handleEventsHorus = require('./lib/cron-events-horus')

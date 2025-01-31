@@ -15,10 +15,11 @@ const getPubSubTopic = (eventName) => {
 const createPubSubFunction = (
   pubSubTopic,
   fn,
-  eventMaxAgeMs = 60000
+  eventMaxAgeMs = 60000,
+  execOptions = {}
 ) => {
   return functions
-    .runWith({ failurePolicy: true })
+    .runWith({ failurePolicy: true, ...execOptions })
     .pubsub.topic(pubSubTopic).onPublish((message, context) => {
       const eventAgeMs = Date.now() - Date.parse(context.timestamp)
       if (eventAgeMs > eventMaxAgeMs) {
@@ -32,10 +33,11 @@ const createPubSubFunction = (
 const createEventsFunction = (
   eventName,
   fn,
-  eventMaxAgeMs = 58000
+  eventMaxAgeMs = 58000,
+  execOptions
 ) => {
   const topicName = getPubSubTopic(eventName)
-  return createPubSubFunction(topicName, fn, eventMaxAgeMs)
+  return createPubSubFunction(topicName, fn, eventMaxAgeMs, execOptions)
 }
 
 const sendMessageTopic = async (eventName, json) => {
