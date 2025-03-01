@@ -17,11 +17,11 @@
     "@ecomplus/utils": "^1.4.1",
     "@google-cloud/firestore": "^7.11.0",
     "@google-cloud/pubsub": "^3.7.5",
-    "axios": "^1.7.9",
+    "axios": "^1.8.1",
     "express": "^4.21.2",
     "firebase-admin": "^11.11.1",
     "firebase-functions": "^4.9.0",
-    "form-data": "^3.0.2",
+    "form-data": "^3.0.3",
     "js2xmlparser": "^4.0.2",
     "querystring": "^0.2.1"
   },
