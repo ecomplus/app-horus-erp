@@ -12,7 +12,7 @@ const parsePhone = (phone) => {
   return number.substring(start, number.length)
 }
 
-module.exports = async (horus, customerCodeHorus, customerAddress) => {
+module.exports = async (horus, customerCodeHorus, customerAddress, customer) => {
   const zipCode = parseZipCode(customerAddress.zip) || 0
   console.log('> Address Customer => CLI: ', customerCodeHorus, ' ZipCode: ', zipCode)
 
@@ -34,14 +34,18 @@ module.exports = async (horus, customerCodeHorus, customerAddress) => {
     NUM_END: customerAddress.number || 's/n', // Número do imóvel no endereço do cliente - Parâmetro obrigatório.
     COM_ENDERECO: customerAddress.complement, // Complemento do Endereço do cliente - Parâmetro opcional.
     CEP: zipCode, // CEP do endereço do cliente - Parâmetro obrigatório. Caso o endereço não possua CEP informar zero para Nacional ou "99999999" para estrangeiros.
-    // CEL_ENDERECO // Telefone celular do cliente - Parâmetro opcional
     // FAX_ENDERECO // fax do cliente - Parâmetro opcional
     STA_DEFAULT: 'S' // Parâmetro obrigatório - Informar se o endereço será definido como default para o cliente usando a letra S ou N
     // STA_VALIDO // Parâmetro opcional - Informar se o endereço é válido usando a letra S ou N
   }
 
   if (customerAddress.phone) {
-    body.TEL_ENDERECO = parsePhone(customerAddress.phone) // Telefone do cliente - Parâmetro opcional
+    body.CEL_ENDERECO = parsePhone(customerAddress.phone) // Telefone do cliente - Parâmetro opcional
+  } else if (customer?.phones?.length) {
+    body.CEL_ENDERECO = parsePhone(customer.phones[0])
+    if (customer.phones[1]) {
+      body.TEL_ENDERECO = parsePhone(customer.phones[1])
+    }
   }
 
   if (customerAddress.name) {

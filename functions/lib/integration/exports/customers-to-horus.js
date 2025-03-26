@@ -98,7 +98,7 @@ module.exports = async ({ appSdk, storeId, auth }, customerId, opts = {}) => {
             })
 
           if (address) {
-            return createAddress(horus, customerCodeHorus, address, true)
+            return createAddress(horus, customerCodeHorus, address, customer)
               .then(() => customerId)
               .catch(() => null)
           }

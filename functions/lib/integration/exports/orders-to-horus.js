@@ -125,7 +125,12 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       const zipCode = parseZipCode(customerAddress.zip)
       let addressCustomerHorus = await getClientAddressByZipCode(horus, customerCodeHorus, zipCode)
       if (!addressCustomerHorus) {
-        addressCustomerHorus = await createAddress(horus, customerCodeHorus, customerAddress)
+        addressCustomerHorus = await createAddress(
+          horus,
+          customerCodeHorus,
+          customerAddress,
+          customer
+        )
       }
 
       if (!orderHorus) {
