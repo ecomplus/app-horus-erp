@@ -83,6 +83,10 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   } else if (SALDO) {
     quantity = SALDO
   }
+  if (quantity > 0) {
+    // Force stock gap -2
+    quantity = Math.max(0, quantity - 2)
+  }
   const product = await getProductByCodItem({ appSdk, storeId, auth }, COD_ITEM)
   const isUpdatePriceOrStock = !opts.queueEntry?.mustUpdateAppQueue && (updatePrice || updateStock)
   const isUpdateStock = updateStock && (SALDO_DISPONIVEL >= 0 || SALDO >= 0)
