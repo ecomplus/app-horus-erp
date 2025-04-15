@@ -97,13 +97,12 @@ module.exports = async (appSdk) => {
           promises.push(productsStocksEvents(horus, storeId, opts))
           // promises.push(productsEvents({ appSdk, storeId }, horus, appData))
 
-          // check in the function
-          promises.push(productsPriceEvents(horus, storeId, opts))
-
           const now = new Date()
-          if (now.getMinutes() % 30 === 0) {
-            // new Product
-            // run at 30 in 30min
+          if (now.getMinutes() % 5 === 0) {
+            promises.push(productsPriceEvents(horus, storeId, opts))
+          }
+          if (now.getMinutes() % 45 === 0) {
+            // new products
             promises.push(checkProductsImports({ appSdk, storeId }, horus, opts))
           }
         }

@@ -123,7 +123,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     }
 
-    console.log(`${product.quantity} ${quantity} ${isUpdateStock}`)
     if (quantity !== product.quantity && isUpdateStock) {
       body.quantity = quantity
     }

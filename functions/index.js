@@ -166,8 +166,8 @@ exports.pusubExportToHorusEvent = require('./lib/pub-sub/utils')
 const handleEventsHorus = require('./lib/cron-events-horus')
 const handleSyncEcomHorus = require('./lib/integration/queue-import-export')
 const handleQueuePubSub = require('./lib/pub-sub/queue-retry-pub-sub')
-const eventsCron = '*/1 * * * *'
 
+const eventsCron = '*/1 * * * *'
 exports.horusEvents = functions
   .runWith({ memory: '512MB' })
   .pubsub.schedule(eventsCron)
@@ -179,7 +179,7 @@ exports.horusEvents = functions
 
 console.log(`-- Check Events ERP'${eventsCron}'`)
 
-const syncCron = '*/5 * * * *'
+const syncCron = '*/3 * * * *'
 exports.syncQueueEcomHorus = functions.pubsub.schedule(syncCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {
