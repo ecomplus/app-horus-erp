@@ -93,7 +93,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const isUpdatePriceOrStock = !opts.queueEntry?.mustUpdateAppQueue && (updatePrice || updateStock)
   const isUpdateStock = updateStock && (SALDO_DISPONIVEL >= 0 || SALDO >= 0)
 
-  let inventory
+  const inventory = {}
   if (quantity !== product?.quantity && isUpdateStock) {
     const { stocks_url: stocksUrl, stocks_token: stocksToken } = opts.appData
     if (stocksUrl && stocksToken) {
@@ -114,7 +114,6 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         })
       })
       if (res?.data?.produtos?.itensEstoque?.length > 1) {
-        inventory = {}
         quantity = 0
         res.data.produtos.itensEstoque.forEach(({ codigoestoque, saldo }) => {
           const qnt = parseInt(saldo, 10)
@@ -159,7 +158,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     }
 
-    if ((quantity !== product.quantity || inventory) && isUpdateStock) {
+    if ((quantity !== product.quantity || Object.keys(inventory).length) && isUpdateStock) {
       body.quantity = quantity
       body.inventory = inventory
     }
