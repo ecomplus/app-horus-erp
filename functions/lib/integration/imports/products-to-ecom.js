@@ -1,5 +1,7 @@
 const { logger } = require('firebase-functions')
 const { firestore } = require('firebase-admin')
+const https = require('https')
+const axios = require('axios')
 const getCategories = require('./categories-to-ecom')
 const getBrands = require('./brands-to-ecom')
 const {
@@ -91,10 +93,44 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const isUpdatePriceOrStock = !opts.queueEntry?.mustUpdateAppQueue && (updatePrice || updateStock)
   const isUpdateStock = updateStock && (SALDO_DISPONIVEL >= 0 || SALDO >= 0)
 
+  let inventory
+  if (quantity !== product?.quantity && isUpdateStock) {
+    const { stocks_url: stocksUrl, stocks_token: stocksToken } = opts.appData
+    if (stocksUrl && stocksToken) {
+      const res = await axios.get(`${stocksUrl}?cod_item=${COD_ITEM}`, {
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false
+        }),
+        headers: {
+          Authorization: `Bearer ${stocksToken}`
+        }
+      }).catch((err) => {
+        logger.warn(`Failed fetching stocks URL for ${COD_ITEM}`, {
+          url: err.config?.url,
+          response: {
+            status: err.response?.status,
+            data: err.response?.data
+          }
+        })
+      })
+      if (res?.data?.produtos?.itensEstoque?.length > 1) {
+        inventory = {}
+        quantity = 0
+        res.data.produtos.itensEstoque.forEach(({ codigoestoque, saldo }) => {
+          const qnt = parseInt(saldo, 10)
+          quantity += qnt
+          inventory[`${codigoestoque}`] = qnt
+        })
+      }
+    }
+  }
+
   logger.info(`COD_ITEM ${COD_ITEM}`, {
     productHorus,
     isUpdatePriceOrStock,
-    isUpdateStock
+    isUpdateStock,
+    quantity,
+    inventory
   })
 
   if ((isUpdatePriceOrStock || (product && !updateProduct))) {
@@ -123,8 +159,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
       }
     }
 
-    if (quantity !== product.quantity && isUpdateStock) {
+    if ((quantity !== product.quantity || inventory) && isUpdateStock) {
       body.quantity = quantity
+      body.inventory = inventory
     }
 
     if (Object.keys(body).length) {
@@ -145,8 +182,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         .replace(/[^a-z0-9-_./]/gi, '-'),
       status: STATUS_ITEM,
       quantity,
+      inventory,
       dimensions: {
-
         width: {
           value: LARGURA_ITEM || 5,
           unit: 'cm'

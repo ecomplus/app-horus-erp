@@ -140,14 +140,14 @@ const app = {
   admin_settings: {
     /**
      * JSON schema based fields to be configured by merchant and saved to app `data` / `hidden_data`, such as:
-**/
+     **/
     base_url: {
       schema: {
         type: 'string',
         maxLength: 255,
         format: 'uri',
-        title: 'Url base para endpoint de conexão (seu local)',
-        description: 'Solicite ao suporte do erp por base url'
+        title: 'URL base para API',
+        description: 'Solicite ao suporte do ERP por base URL (seu local)'
       },
       hide: true
     },
@@ -231,6 +231,25 @@ const app = {
         maximum: 999999,
         title: 'Código do Local do Estoque',
         description: 'Código do Local do Estoque, caso não seja preenchido serão considerados no cálculo o somatório de todas os locais de estoques ativos.'
+      },
+      hide: true
+    },
+    stocks_url: {
+      schema: {
+        type: 'string',
+        maxLength: 255,
+        format: 'uri',
+        title: 'URL para consulta de estoques',
+        description: 'Endpoint separado (opcional) para saldos multi-CD'
+      },
+      hide: true
+    },
+    stocks_token: {
+      schema: {
+        type: 'string',
+        maxLength: 255,
+        title: 'Token para estoques',
+        description: 'Autenticação no endpoint de estoques, se houver'
       },
       hide: true
     },
