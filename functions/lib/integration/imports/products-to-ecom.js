@@ -117,7 +117,9 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
         quantity = 0
         res.data.produtos.itensEstoque.forEach(({ codigoestoque, saldo }) => {
           const qnt = parseInt(saldo, 10)
-          quantity += qnt
+          if (qnt > quantity) {
+            quantity = qnt
+          }
           inventory[`${codigoestoque}`] = qnt
         })
       }
