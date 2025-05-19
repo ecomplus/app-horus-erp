@@ -45,6 +45,6 @@
     "@commitlint/config-conventional": "^18.6.3",
     "husky": "^8.0.3",
     "standard": "^17.1.2",
-    "standard-version": "^9.3.2"
+    "commit-and-tag-version": "^9.5.0"
   }
 }
