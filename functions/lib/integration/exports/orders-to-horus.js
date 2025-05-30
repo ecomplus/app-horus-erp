@@ -28,6 +28,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   const horus = new Horus(username, password, baseURL)
   const companyCode = appData.company_code || 1
   const subsidiaryCode = appData.subsidiary_code || 1
+  let customCd = null
   let subtotal = 0
 
   console.log('> Order =>', orderId)
@@ -55,6 +56,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         return null
       }
       const { amount, number } = order
+      customCd = order.domain === 'lojaclassica.com.br' && customer.group
 
       if (amount && !amount.total) {
         console.log(`${logHead} skipped, order without total`)
@@ -376,7 +378,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       body.STA_PEDIDO = order.status === 'cancelled'
         ? 'CAN'
-        : parseFinancialStatus(order.financial_status?.current)
+        : customCd && order.financial_status?.current === 'paid'
+          ? 'LFT'
+          : parseFinancialStatus(order.financial_status?.current)
 
       const params = new url.URLSearchParams(body)
       const endpoint = `/AltStatus_Pedido?${params.toString()}`
