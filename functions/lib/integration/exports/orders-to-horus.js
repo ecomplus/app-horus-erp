@@ -1,5 +1,6 @@
 const url = require('url')
 const { firestore } = require('firebase-admin')
+const { logger } = require('firebase-functions')
 const requestHorus = require('../../horus/request')
 const Horus = require('../../horus/client')
 const {
@@ -31,35 +32,35 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
   let customCd = null
   let subtotal = 0
 
-  console.log('> Order =>', orderId)
+  logger.info(`> Order ${orderId}`)
 
   return getOrderById({ appSdk, storeId, auth }, 'orders', orderId)
     .then(async (order) => {
       if (!order) {
-        console.log(`${logHead} skipped, order not found`)
+        logger.info(`${logHead} skipped, order not found`)
         throw new Error(skipCreate)
       }
       if (appData?.orders?.approved_order_only) {
         if (order.status !== 'cancelled') {
           if (order.financial_status?.current !== 'paid') {
-            console.log(`${logHead} skipped, setting approved_order_only activate and financial_status unpaid`)
+            logger.info(`${logHead} skipped, setting approved_order_only activate and financial_status unpaid`)
             throw new Error(skipCreate)
           }
         } else {
-          console.log(`${logHead} skipped, order cancelled`)
+          logger.info(`${logHead} skipped, order cancelled`)
           throw new Error(skipCreate)
         }
       }
       const customer = order.buyers && order.buyers?.length && order.buyers[0]
       if (!customer) {
-        console.log(`${logHead} skipped, customer not found`)
+        logger.info(`${logHead} skipped, customer not found`)
         return null
       }
       const { amount, number } = order
       customCd = order.domain === 'lojaclassica.com.br' && customer.group
 
       if (amount && !amount.total) {
-        console.log(`${logHead} skipped, order without total`)
+        logger.info(`${logHead} skipped, order without total`)
         throw new Error(skipCreate)
       }
 
@@ -72,7 +73,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         : transaction?.billing_address
 
       if (!order.financial_status) {
-        console.log(`${logHead} skipped with no financial status`)
+        logger.info(`${logHead} skipped with no financial status`)
         return null
       }
       const queryHorus = `/Busca_PedidosVenda?COD_PEDIDO_ORIGEM=${orderId}&OFFSET=0&LIMIT=1` +
@@ -88,16 +89,16 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           })
           .catch((err) => {
             if (err.response) {
-              console.warn(JSON.stringify(err.response?.data))
+              logger.warn(JSON.stringify(err.response?.data))
             } else {
-              console.error(err)
+              logger.error(err)
             }
             return null
           }),
         getClientByCustomer(storeId, horus, customer)
       ])
 
-      console.log(`>> Number: ${number} Order ERP: ${JSON.stringify(orderHorus)}`)
+      logger.info(`>> Number: ${number} Order ERP: ${JSON.stringify(orderHorus)}`)
 
       if (!customerHorus) {
         const opts = {
@@ -118,7 +119,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             bodyDoc.opts.appData = appData
             return sendMessageTopic(topicExportToHorus, bodyDoc)
           })
-          .catch(console.error)
+          .catch(logger.error)
         return null
       }
 
@@ -136,7 +137,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
 
       if (!orderHorus) {
-        console.log('> amount: ', JSON.stringify(amount))
+        logger.info('> amount: ', JSON.stringify(amount))
         const obs = ['']
         if (customer.corporate_name) {
           obs.push(customer.corporate_name)
@@ -167,20 +168,20 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
         }
 
-        console.log('>> body ', JSON.stringify(body))
+        logger.info('>> body ', JSON.stringify(body))
 
         if (order.status === 'cancelled') {
-          console.log(`${logHead} skipped, order cancelled`)
+          logger.info(`${logHead} skipped, order cancelled`)
           throw new Error(skipCreate)
         }
 
         const params = new url.URLSearchParams(body)
         const endpoint = `/InsPedidoVenda?${params.toString()}`
-        console.log('>> Insert Order', endpoint)
+        logger.info('>> Insert Order', endpoint)
         return requestHorus(horus, endpoint, 'POST')
           .then(response => {
             if (response && response.length) {
-              console.log('>> COD_PED_VENDA', response[0].COD_PED_VENDA)
+              logger.info('>> COD_PED_VENDA', response[0].COD_PED_VENDA)
               return {
                 order,
                 saleCodeHorus: response[0].COD_PED_VENDA,
@@ -191,11 +192,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           })
       }
 
-      // console.log('>> Horus order: ', JSON.stringify(orderHorus))
+      // logger.info('>> Horus order: ', JSON.stringify(orderHorus))
       const statusSkip = ['CAN', 'FAT', 'IMP']
       const isStatusSkip = orderHorus.STATUS_PEDIDO_VENDA && statusSkip.includes(orderHorus.STATUS_PEDIDO_VENDA)
 
-      console.log('>> Horus status: ', orderHorus.STATUS_PEDIDO_VENDA, ' skip: ', isStatusSkip)
+      logger.info('>> Horus status: ', orderHorus.STATUS_PEDIDO_VENDA, ' skip: ', isStatusSkip)
 
       if (orderHorus.STATUS_PEDIDO_VENDA && isStatusSkip) {
         let msgStatus = ''
@@ -212,7 +213,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           default:
             break
         }
-        console.log(`${logHead} skipped, order ${msgStatus} in ERP`)
+        logger.info(`${logHead} skipped, order ${msgStatus} in ERP`)
         throw new Error(skipCreate)
       }
 
@@ -267,7 +268,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             }
 
             // isAllImportedItems = item?.quantity > 0
-            // console.log(`QTD_PEDIDA: ${body?.QTD_PEDIDA} itemHorus ${itemHorus?.QTD_PEDIDA} itemOrder: ${item?.quantity}`)
+            // logger.info(`QTD_PEDIDA: ${body?.QTD_PEDIDA} itemHorus ${itemHorus?.QTD_PEDIDA} itemOrder: ${item?.quantity}`)
 
             if (isImportItem) {
               const itemDiscount = amountSubtotal > 0 ? vlrBruto * amountDiscount / amountSubtotal : 0
@@ -275,14 +276,14 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               const vlrItem = parsePrice(vlrBruto - itemDiscount)
               subtotal += (vlrItem * (item.quantity || 1))
               body.VLR_LIQUIDO = vlrItem
-              console.log(`>> vlrBruto: ${vlrBruto} discount: ${itemDiscount} total: ${vlrItem}`)
+              logger.info(`>> vlrBruto: ${vlrBruto} discount: ${itemDiscount} total: ${vlrItem}`)
 
               const params = new url.URLSearchParams(body)
               const endpoint = `/InsItensPedidoVenda?${params.toString()}`
               promisesAddItemOrderHorus.push(
                 requestHorus(horus, endpoint)
                   .then(() => {
-                    console.log(`>> Add Item in order: ${endpoint}`)
+                    logger.info(`>> Add Item in order: ${endpoint}`)
                   })
                   .catch(() => {
                     errorAddItem.push(endpoint)
@@ -290,7 +291,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               )
             }
           } else {
-            console.warn(`> orderId #${orderId} -> sku: ${item.sku} product not imported from ERP`)
+            logger.warn(`> orderId #${orderId} -> sku: ${item.sku} product not imported from ERP`)
           }
         })
 
@@ -303,7 +304,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         }
 
         if (!promisesAddItemOrderHorus.length && !errorAddItem.length && !isAllImportedItems) {
-          console.log(`${logHead} skipped, products not imported from ERP`)
+          logger.info(`${logHead} skipped, products not imported from ERP`)
           throw new Error(skipCreate)
         }
 
@@ -345,11 +346,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       const params = new url.URLSearchParams(body)
       const endpoint = `/InsVencPedidoVenda?${params.toString()}`
-      console.log(`>> Installments: ${isNewOrder ? endpoint : 'skip'}`)
+      logger.info(`>> Installments: ${isNewOrder ? endpoint : 'skip'}`)
 
       if (isNewOrder) {
         await requestHorus(horus, endpoint, 'POST')
-          .catch(console.error)
+          .catch(logger.error)
       }
 
       return {
@@ -384,11 +385,24 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
 
       const params = new url.URLSearchParams(body)
       const endpoint = `/AltStatus_Pedido?${params.toString()}`
-      console.log('>> Update Status Order', endpoint)
+      logger.info('>> Update Status Order', endpoint)
 
       return requestHorus(horus, endpoint, 'POST')
         .then(response => {
           if (response && response.length) {
+            if (body.STA_PEDIDO === 'LFT' && customCd) {
+              const expQuery = '/Pular_expedicao' +
+                `?COD_EMPRESA=${companyCode}` +
+                `&COD_FILIAL=${subsidiaryCode}` +
+                `&COD_CLI=${customerCodeHorus}` +
+                `&COD_PED_VENDA=${saleCodeHorus}` +
+                `&COD_LOCAL=${customCd}`
+              requestHorus(horus, expQuery)
+                .catch((err) => {
+                  logger.warn(`Failed custom CD expedition ${expQuery}`, { orderId })
+                  logger.error(err)
+                })
+            }
             return orderId
           }
           return null
@@ -400,9 +414,9 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
       }
 
       if (err.response) {
-        console.warn(JSON.stringify(err.response?.data))
+        logger.warn(JSON.stringify(err.response?.data))
       } else {
-        console.error(err)
+        logger.error(err)
       }
       throw err
     })
