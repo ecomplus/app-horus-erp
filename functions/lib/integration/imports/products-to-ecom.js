@@ -97,7 +97,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   if (quantity !== product?.quantity && isUpdateStock) {
     const { stocks_url: stocksUrl, stocks_token: stocksToken } = opts.appData
     if (stocksUrl && stocksToken) {
-      const res = await axios.get(`${stocksUrl}?cod_item=${COD_ITEM}`, {
+      const url = `${stocksUrl}?cod_item=${COD_ITEM}`
+      const res = await axios.get(url, {
         httpsAgent: new https.Agent({
           rejectUnauthorized: false
         }),
@@ -121,6 +122,14 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
             quantity = qnt
           }
           inventory[`${codigoestoque}`] = qnt
+        })
+      } else {
+        logger.warn(`Unexpected stocks response for ${COD_ITEM}`, {
+          url,
+          response: {
+            status: res?.status,
+            data: res?.data
+          }
         })
       }
     }
