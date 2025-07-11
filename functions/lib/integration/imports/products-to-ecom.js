@@ -94,8 +94,8 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   const isUpdateStock = updateStock && (SALDO_DISPONIVEL >= 0 || SALDO >= 0)
 
   const inventory = {}
+  const { stocks_url: stocksUrl, stocks_token: stocksToken } = opts.appData
   if (quantity !== product?.quantity && isUpdateStock) {
-    const { stocks_url: stocksUrl, stocks_token: stocksToken } = opts.appData
     if (stocksUrl && stocksToken) {
       const url = `${stocksUrl}?cod_item=${COD_ITEM}`
       logger.info(`Fetching full stock for ${COD_ITEM}`, { url })
@@ -137,9 +137,11 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
   }
 
   logger.info(`COD_ITEM ${COD_ITEM}`, {
+    stocksUrl,
     productHorus,
     isUpdatePriceOrStock,
     isUpdateStock,
+    currentProductQuantity: product?.quantity,
     quantity,
     inventory
   })
