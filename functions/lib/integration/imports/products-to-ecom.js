@@ -98,6 +98,7 @@ module.exports = async ({ appSdk, storeId, auth }, productHorus, opts) => {
     const { stocks_url: stocksUrl, stocks_token: stocksToken } = opts.appData
     if (stocksUrl && stocksToken) {
       const url = `${stocksUrl}?cod_item=${COD_ITEM}`
+      logger.info(`Fetching full stock for ${COD_ITEM}`, { url })
       const res = await axios.get(url, {
         httpsAgent: new https.Agent({
           rejectUnauthorized: false
