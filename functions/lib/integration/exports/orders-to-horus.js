@@ -271,9 +271,11 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             // logger.info(`QTD_PEDIDA: ${body?.QTD_PEDIDA} itemHorus ${itemHorus?.QTD_PEDIDA} itemOrder: ${item?.quantity}`)
 
             if (isImportItem) {
-              const itemDiscount = amountSubtotal > 0 ? vlrBruto * amountDiscount / amountSubtotal : 0
+              const totalItemValue = vlrBruto * item.quantity
+              const itemDiscount = amountSubtotal > 0 ? totalItemValue * amountDiscount / amountSubtotal : 0
+              const discountPerUnit = itemDiscount / item.quantity
               isAllImportedItems = false
-              const vlrItem = parsePrice(vlrBruto - itemDiscount)
+              const vlrItem = parsePrice(vlrBruto - discountPerUnit)
               subtotal += (vlrItem * (item.quantity || 1))
               body.VLR_LIQUIDO = vlrItem
               logger.info(`>> vlrBruto: ${vlrBruto} discount: ${itemDiscount} total: ${vlrItem}`)
