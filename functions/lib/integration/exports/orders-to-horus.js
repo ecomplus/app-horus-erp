@@ -57,7 +57,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         return null
       }
       const { amount, number } = order
-      customCd = order.domain === 'lojaclassica.com.br' && customer.group
+      customCd = (order.domain?.includes('lojaclassica.com.br') && customer.group) || null
 
       if (amount && !amount.total) {
         logger.info(`${logHead} skipped, order without total`)
@@ -98,7 +98,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         getClientByCustomer(storeId, horus, customer)
       ])
 
-      logger.info(`>> Number: ${number} Order ERP: ${JSON.stringify(orderHorus)}`)
+      logger.info(`>> Number: ${number} Order ERP`, { orderHorus })
 
       if (!customerHorus) {
         const opts = {
@@ -154,7 +154,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           COD_CLI: customerCodeHorus, // Código do Cliente - Parâmetro obrigatório!
           OBS_PEDIDO: `Pedido #${number} id: ${orderId}${obs.join(' | ')}`, // Observações do pedido, texto usado para conteúdo variável e livre - Parâmetro opcional!
           COD_TRANSP: getCodeDelivery(shippingApp, appData.delivery), // Código da Transportadora responsável pela entrega do pedido - Parâmetro obrigatório!
-          COD_METODO: saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
+          COD_METODO: customCd ? 49 : saleCode, // Código do Método de Venda usado neste pedido para classificação no ERP HORUS - Parâmetro obrigatório.
           COD_TPO_END: addressCustomerHorus.COD_TPO_END, // Código do Tipo de endereço do cliente, usado para entrega da mercadoria - Parâmetro obrigatório!
           FRETE_EMIT_DEST: 1, // Informar o código 1 quando o Frete for por conta do Emitente e o código 2 quando o frete for por conta do Destinatário - Parâmetro Obrigatório
           COD_FORMA: getCodePayment(paymentMethodCode, appData.payments, transaction), // Informar o código da forma de pagamento - Parâmetro Obrigatório
@@ -168,7 +168,7 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
           NOM_RESP: appData.orders?.responsible?.name || 'ecomplus'
         }
 
-        logger.info('>> body ', JSON.stringify(body))
+        logger.info(`New Horus order for ${orderId}`, { body, order })
 
         if (order.status === 'cancelled') {
           logger.info(`${logHead} skipped, order cancelled`)
