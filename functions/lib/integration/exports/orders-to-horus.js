@@ -239,8 +239,6 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
         COD_CLI: customerCodeHorus,
         COD_PED_VENDA: saleCodeHorus
       }
-      const promisesAddItemOrderHorus = []
-      const errorAddItem = []
       if (order.items && order.items.length) {
         const queryHorus = `/Busca_ItensPedidosVenda?COD_PED_VENDA=${saleCodeHorus}` +
           `&COD_EMPRESA=${companyCode}&COD_FILIAL=${subsidiaryCode}&OFFSET=0&LIMIT=${order.items.length}`
@@ -249,10 +247,10 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
             if (isNewOrder) return null
             throw err
           })
-        let isAllImportedItems = true
         const amountDiscount = order.amount?.discount || 0
         const amountSubtotal = order.amount?.subtotal
-        order.items?.forEach((item) => {
+        for (let i = 0; i < order.items.length; i++) {
+          const item = order.items[i]
           if (item.sku.startsWith('COD_ITEM')) {
             const codItem = item.sku.replace('COD_ITEM', '')
             body.COD_ITEM = codItem
@@ -267,47 +265,32 @@ module.exports = async ({ appSdk, storeId, auth }, orderId, opts = {}) => {
               isImportItem = true
             }
 
-            // isAllImportedItems = item?.quantity > 0
-            // logger.info(`QTD_PEDIDA: ${body?.QTD_PEDIDA} itemHorus ${itemHorus?.QTD_PEDIDA} itemOrder: ${item?.quantity}`)
-
             if (isImportItem) {
               const totalItemValue = vlrBruto * item.quantity
               const itemDiscount = amountSubtotal > 0 ? totalItemValue * amountDiscount / amountSubtotal : 0
               const discountPerUnit = itemDiscount / item.quantity
-              isAllImportedItems = false
               const vlrItem = parsePrice(vlrBruto - discountPerUnit)
               subtotal += (vlrItem * (item.quantity || 1))
               body.VLR_LIQUIDO = vlrItem
-              logger.info(`>> vlrBruto: ${vlrBruto} discount: ${itemDiscount} total: ${vlrItem}`)
+              logger.info(`Item ${codItem} to ${orderId}`, {
+                vlrBruto,
+                itemDiscount,
+                vlrItem
+              })
 
               const params = new url.URLSearchParams(body)
               const endpoint = `/InsItensPedidoVenda?${params.toString()}`
-              promisesAddItemOrderHorus.push(
-                requestHorus(horus, endpoint)
-                  .then(() => {
-                    logger.info(`>> Add Item in order: ${endpoint}`)
-                  })
-                  .catch(() => {
-                    errorAddItem.push(endpoint)
-                  })
-              )
+              try {
+                await requestHorus(horus, endpoint)
+              } catch (err) {
+                logger.warn(`Failed adding ${codItem} with ${endpoint}`, { orderId })
+                logger.error(err)
+              }
+              logger.info(`Item ${codItem} to ${orderId} -> ${endpoint}`)
             }
           } else {
             logger.warn(`> orderId #${orderId} -> sku: ${item.sku} product not imported from ERP`)
           }
-        })
-
-        if (promisesAddItemOrderHorus.length) {
-          await Promise.all(promisesAddItemOrderHorus)
-        }
-
-        if (errorAddItem.length) {
-          return null
-        }
-
-        if (!promisesAddItemOrderHorus.length && !errorAddItem.length && !isAllImportedItems) {
-          logger.info(`${logHead} skipped, products not imported from ERP`)
-          throw new Error(skipCreate)
         }
 
         return {

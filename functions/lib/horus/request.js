@@ -12,7 +12,7 @@ const requestHorus = (horus, endpoint, method = 'get', isRetry) => new Promise((
       resolve(null)
     })
     .catch((err) => {
-      if (!isRetry) {
+      if (!isRetry && !endpoint.includes('InsItensPedidoVenda')) {
         setTimeout(() => requestHorus(horus, endpoint, method, true), 700)
       }
       reject(err)

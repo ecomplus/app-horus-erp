@@ -180,7 +180,9 @@ exports.horusEvents = functions
 console.log(`-- Check Events ERP'${eventsCron}'`)
 
 const syncCron = '*/3 * * * *'
-exports.syncQueueEcomHorus = functions.pubsub.schedule(syncCron)
+exports.syncQueueEcomHorus = functions
+  .runWith({ timeoutSeconds: 240 })
+  .pubsub.schedule(syncCron)
   .onRun(() => {
     return prepareAppSdk().then(appSdk => {
       return handleSyncEcomHorus(appSdk)
