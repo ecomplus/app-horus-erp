@@ -22,7 +22,7 @@
     "firebase-admin": "^11.11.1",
     "firebase-functions": "^4.9.0",
     "form-data": "^3.0.4",
-    "js2xmlparser": "^4.0.2",
+    "js2xmlparser": "^5.0.0",
     "querystring": "^0.2.1"
   },
   "private": true
